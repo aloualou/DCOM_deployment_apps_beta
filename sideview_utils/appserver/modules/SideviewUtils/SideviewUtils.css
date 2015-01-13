@@ -1,0 +1,21 @@
+.CufonFontRenderer,
+.CustomBehavior,
+.Multiplexer,
+.PostProcess,
+.Redirector,
+.ResultsValueSetter,
+.Search,
+.SavedSearch,
+.SideviewUtils,
+.URLLoader,
+.ValueSetter {
+    padding:0px !important;
+    height:0px;
+    display:none;
+}
+.viewHeader .TimeRangePicker,
+.mainSearchControls .TimeRangePicker,
+.resultsArea .TimeRangePicker,
+.dashboardContent .TimeRangePicker{
+    min-height:27px;
+}

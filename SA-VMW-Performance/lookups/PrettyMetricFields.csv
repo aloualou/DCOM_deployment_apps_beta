@@ -1,0 +1,11 @@
+perftype, prettyName
+cpu, CPU
+net, Network
+disk, Disk
+sys, System
+mAgent, mAgent
+sPath, sPath
+mem, Memory
+resCpu, resCpu
+power, Power
+vDisk, vDisk

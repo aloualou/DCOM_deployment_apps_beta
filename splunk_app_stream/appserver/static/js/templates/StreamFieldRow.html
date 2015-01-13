@@ -1,0 +1,18 @@
+<script id="select-term-template" type="text/template">
+    <tr data-name="<%= field.name %>" data-desc="<%= field.desc %>" data-agg-type="<%= field.aggType %>" data-term="<%= field.term %>"
+            data-enabled="<%= field.enabled %>">
+        <td><%= field.name %></td>
+        <td><%= field.desc %></td>
+        <td class="conditional has-select"><select>
+            <% if (terms.get(field.term).get('category') == 'numeric') { %>
+                <option value="sum"<% if (field.aggType == 'sum') { %> selected<% } %>>sum</option>
+            <% } %>
+            <option value="key"<% if(field.aggType == 'key') { %> selected<% } %>>key</option>
+            <option value="value"<% if(field.aggType == 'value') { %> selected<% } %>>value</option>
+        </select></td>
+        <td><%= field.term %></td>
+        <td><input type="checkbox" id="<%= field.name %>" <% if (field.enabled) { %> checked="checked" <% } %>"></td>
+        <td><button class="btn delete-field">Delete</button></td>
+        <td><button class="btn add-to-filters">Add</button></td>
+    </tr>
+</script>

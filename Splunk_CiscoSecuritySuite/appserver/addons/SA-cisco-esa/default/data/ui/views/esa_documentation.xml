@@ -1,0 +1,115 @@
+<dashboard stylesheet="help.css">
+	<label>Cisco ESA Configuration</label>
+
+	<row>
+		<html>
+<h2>Steps to Configuring Cisco Security Suite for Cisco Email Security Appliance</h2>
+
+<p>
+Splunk for Cisco ESA allows a Splunk administrator to collect Cisco ESA system logs. Once ingested, 
+the log data can be analyzed directly or used as a contextual data source to correlate with other communication and authentication 
+data in Splunk.
+</p>
+
+<h3 style="color:#29688A;font-weight:bold; padding-top:15px">Installation of the add-on to the search head</h3>
+<p>
+The Splunk_TA_cisco-esa add-on needs to be installed on your Splunk search head to allow a user to use the search-time knowledge provided within the add-on. <br />
+To install the add-on, do the following:
+
+<ol>
+<li>Download the app from <a href="http://apps.splunk.com/app/1761/">http://apps.splunk.com/app/1761/</a>.</li>
+<li>From the Splunk web interface, click on App -> Manage Apps to open the Apps Management page in Manager.</li>
+<li>Click the "Install app from file" button, locate the downloaded file and click "Upload".</li>
+<li>Verify (if necessary) that the app is installed.  It should be listed in the list of apps installed within the Manager and can be found on the server at $SPLUNK_HOME/etc/apps/Splunk_TA_cisco-esa.</li>
+</ol>
+</p>
+
+<h3 style="color:#29688A;font-weight:bold; padding-top:15px">Receiving data from ESA on the Splunk Server</h3>
+
+<p>
+<pre>
+=======       =================
+| ESA |  ——>  | Splunk Server |
+=======       =================
+</pre>
+</p>
+
+<p>
+Note: It is preferred to have a separate forwarder machine as explained below in order to to receive data from ESA
+and then forward data to the Splunk server to minimize resource utilization on the Splunk server.
+</p>
+
+<p>
+If you do decide to receive ESA data directly on your Splunk server, create the following directory on your Splunk server: <br />
+
+<pre>
+    $SPLUNK_HOME/etc/apps/Splunk_TA_cisco-esa/local
+</pre>
+</p>
+
+<p>
+To complete the setup, follow the directions below for <u>Receiving data from ESA on a Splunk Universal Forwarder (preferred)</u>.
+Create the inputs.conf file within the "local" directory you created.
+</p>
+
+
+<h3 style="color:#29688A;font-weight:bold; padding-top:15px">Receiving data from ESA on a Splunk Universal Forwarder (preferred)</h3>
+
+<p>
+<pre>
+=======       ==============================       =================
+| ESA |  ——>  | Splunk Universal Forwarder |  ——>  | Splunk Server |
+=======       ==============================       =================
+</pre>
+</p>
+
+<p>
+You must configure a forwarder to collect the data from the Cisco ESA appliance.  In many cases, this will be a dedicated Linux
+system that is being used as an ftp or scp repository.  Install the Universal Forwarder on this host and configure the forwarder
+to forward all logs to your indexer.
+</p>
+
+<p>
+To collect the data using FTP or SCP, use the following inputs.conf stanzas: <br />
+
+<pre>
+
+	[monitor:///var/log/cisco-esa]
+	source = cisco:esa
+	sourcetype = cisco:esa
+	host = 
+</pre>
+</p>
+
+<p>
+To collect the data using UDP, use the following inputs.conf stanza: <br />
+
+<pre>
+	[udp://esa-appliance-ip:port]
+	source = cisco_syslog
+	sourcetype = cisco:esa
+	host = esa-appliance-name
+	connection_host = none
+	acceptFrom = esa-appliance-ip
+	disabled = false
+</pre>
+</p>
+
+<p>
+Repeat for each ESA appliance.  The port should be the syslog port that is configured on the Cisco ESA appliance.  If you are utilizing
+a FTP or SCP copy mechanism (which is preferred), use a [monitor://] stanza instead.
+</p>
+
+<p>
+Restart the indexer.
+</p>
+
+<h3 style="color:#29688A;font-weight:bold; padding-top:15px">Configure ESA to forward data</h3>
+
+<p>
+System Administration -> Log Subscriptions
+</p>
+
+		</html>
+	</row>
+</dashboard>

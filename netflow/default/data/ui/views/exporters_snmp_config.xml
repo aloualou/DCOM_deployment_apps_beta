@@ -1,0 +1,7 @@
+<dashboard onunloadCancelJobs="True" script="exporters_snmp_config.js" stylesheet="exporters_snmp_config.css">
+    <label>Devices and SNMP polling</label>
+    <row>
+        <html src="exporters_snmp_config.html"></html>
+    </row>
+</dashboard>
+

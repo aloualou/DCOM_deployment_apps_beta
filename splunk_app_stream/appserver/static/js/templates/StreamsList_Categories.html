@@ -1,0 +1,39 @@
+<script id="streams-list-categories-template" type="text/template">
+
+    <div id="inner-categories-container">
+
+    <!-- === -->
+    <!-- All -->
+    <!-- === -->
+
+        <div class="span12 left-column-item-wrapper">
+            <span class="left-column-item">
+                <!-- <span class="indicator-dot">●</span> -->
+                <span class="category-value">all</span>
+                <i class="icon-chevron-right"></i>
+            </span>
+        </div>
+
+
+    <!-- ==== -->
+    <!-- List -->
+    <!-- ==== -->
+
+    <% for (var i = 0; i < categoryItems.length; i++) { %>
+
+        <div class="span12 left-column-item-wrapper">
+            <span class="left-column-item">
+                <!-- <span class="indicator-dot">●</span> -->
+                <span class="category-value"><%= categoryItems[i] %></span>
+                <i class="icon-chevron-right"></i>
+            </span>
+        </div>
+
+    <% } %>
+
+    </div> <!-- end inner categoreis container -->
+
+</script>
+
+
+

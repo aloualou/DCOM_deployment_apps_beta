@@ -1,0 +1,41 @@
+<script type="text/template">
+    <div id="edit-filters-dialog" class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Filters</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="search field-search-control">
+                        <input type="text" class="input-medium search-query" placeholder="Filter"/>
+                        <a class="clear"><i class="icon-x-circle"></i></a>
+                    </div>
+                    <!--<button class="btn btn-primary add-comparison">Add Comparison</button>-->
+                    <!--<div class="xyz"><input type="checkbox" class="match-all-comp" <% if (filters.matchAllComparisons) { %> checked="checked" <% } %> >Match All Comparisons</div>-->
+                    <div class="float-right">
+                        <span>Match Filters:</span>
+                        <% if (stream.get('app') && stream.get('app') === 'Stream') { %>
+                            <div class="btn-group btn-group-radio btn-toggle match-all-comparisons-group">
+                                <button type="button" id="match-all-enabled" class="btn btn-lg <% if (filters.matchAllComparisons) { %> active <% } %>">All</button>
+                                <button type="button" id="match-all-disabled" class="btn btn-lg <% if (!filters.matchAllComparisons) { %> active <% } %>">Any</button>
+                            </div>
+                        <% } else { %>
+                            <% if (filters.matchAllComparisons) {%>
+                                All
+                            <% } else { %>
+                                Any
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+                <span class="select-visible-filter-placeholder"></span>
+                <table class="comparisons-table"/>
+            </div>
+            <div class="modal-footer">
+                <a href="#" data-dismiss="modal" aria-hidden="true" class="btn cancel">Cancel</a>
+                <a href="#" class="btn btn-primary save">OK</a>
+            </div>
+            <div id="modal2" class="modal fade" role="dialog" aria-labelledby="myLargeModalLabel"></div>
+        </div>
+    </div>
+</script>

@@ -1,0 +1,187 @@
+<form>
+	<label>ESX/i Log Browser</label>
+	<description>Simple interface for browsing the ESX/i logs.</description>
+	<fieldset autoRun="false" submitButton="true">
+		<input type="time" searchWhenChanged="true">
+			<default>
+				<earliestTime>-60m@m</earliestTime>
+				<latestTime>now</latestTime>
+			</default>
+		</input>
+		<input type="dropdown" token="esxhost">
+			<label>ESX/i:</label>
+			<choice value="*">All</choice>
+			<populatingSearch fieldForValue="host" fieldForLabel="host" earliest="-60m" latest="$latest$">| metasearch sourcetype=vmware:esxlog:* | dedup host | table host</populatingSearch>
+			<default>*</default>
+		</input>
+		<input type="dropdown" token="esxlogterm">
+			<label>Common Terms:</label>
+			<choice value="*">Any</choice>
+			<choice value="HTTP">HTTP</choice>
+			<choice value="event">event</choice>
+			<choice value="failover">failover</choice>
+			<choice value="host">host</choice>
+			<choice value="internal">internal</choice>
+			<choice value="license">license</choice>
+			<choice value="module">module</choice>
+			<choice value="resource">resource</choice>
+			<choice value="session">session</choice>
+			<choice value="task">task</choice>
+			<default>*</default>
+		</input>
+		<input type="dropdown" token="esxlogfv">
+			<label>Field/Value:</label>
+			<choice value="*">Any</choice>
+			<choice value="App">App</choice>
+			<choice value="Default">Default</choice>
+			<choice value="Locale">Locale</choice>
+			<choice value="debug">debug</choice>
+			<choice value="error">error</choice>
+			<choice value="info">info</choice>
+			<choice value="opID">opID</choice>
+			<default>*</default>
+		</input>
+		<input type="dropdown" token="esxlogvmodl">
+			<label>Error/Fault:</label>
+			<choice value="*">Any</choice>
+			<choice value="vmodl.fault.*">Any vmodl fault type</choice>
+			<choice value="vmodl.fault.HostCommunication">HostCommunication</choice>
+			<choice value="vmodl.fault.HostNotReachable">HostNotReachable</choice>
+			<choice value="vmodl.fault.InvalidArgument">InvalidArgument</choice>
+			<choice value="vmodl.fault.InvalidRequest">InvalidRequest</choice>
+			<choice value="vmodl.fault.InvalidType">InvalidType</choice>
+			<choice value="vmodl.fault.ManagedObjectNotFound">ManagedObjectNotFound</choice>
+			<choice value="vmodl.MethodFault">MethodFault</choice>
+			<choice value="vmodl.fault.MethodNotFound">MethodNotFound</choice>
+			<choice value="vmodl.fault.NotEnoughLicenses">NotEnoughLicenses</choice>
+			<choice value="vmodl.fault.NotSupported">NotSupported</choice>
+			<choice value="vmodl.fault.RequestCanceled">RequestCanceled</choice>
+			<choice value="vmodl.fault.SecurityError">SecurityError</choice>
+			<choice value="vmodl.fault.SystemError">SystemError</choice>
+			<choice value="error2203">internal error 2203</choice>
+			<choice value="error25030">internal error 25030</choice>
+			<choice value="error2753">internal error 2753</choice>
+			<choice value="error28014">internal error 28014</choice>
+			<default>*</default>
+		</input>
+		<input type="dropdown" token="esxlogmo">
+			<label>Managed Objects:</label>
+			<choice value="*">All</choice>
+			<choice value="ClusterComputeResource">ClusterComputeResource</choice>
+			<choice value="ComputeResource">ComputeResource</choice>
+			<choice value="Datacenter">Datacenter</choice>
+			<choice value="DatastoreBrowser">DatastoreBrowser</choice>
+			<choice value="DistributedVirtualPortgroup">DistributedVirtualPortgroup</choice>
+			<choice value="DistributedVirtualSwitch">DistributedVirtualSwitch</choice>
+			<choice value="Extension">Extension</choice>
+			<choice value="FaultTolerance">FaultTolerance</choice>
+			<choice value="HostSystem">HostSystem</choice>
+			<choice value="IpPool">IpPool</choice>
+			<choice value="LicenseAssignment">LicenseAssignment</choice>
+			<choice value="Network">Network</choice>
+			<choice value="Portgroup">Portgroup</choice>
+			<choice value="ResourcePool">ResourcePool</choice>
+			<choice value="StorageSystem">StorageSystem</choice>
+			<choice value="TransitionalEVC">TransitionalEVC</choice>
+			<choice value="VirtualApp">VirtualApp</choice>
+			<choice value="VirtualDisk">VirtualDisk</choice>
+			<choice value="VirtualMachine">VirtualMachine</choice>
+			<default>*</default>
+		</input>
+		<input type="dropdown" token="esxlogapi">
+			<label>API Related:</label>
+			<choice value="*">All</choice>
+			<choice value="GetDatastore">GetDatastore</choice>
+			<choice value="IdentifierType">IdentifierType</choice>
+			<choice value="SystemIdentificationInfo">SystemIdentificationInfo</choice>
+			<choice value="propertyCollector">propertyCollector</choice>
+			<choice value="propertyProvider">propertyProvider</choice>
+			<default>*</default>
+		</input>
+		<input type="dropdown" token="esxlogcompt">
+			<label>Component:</label>
+			<choice value="*">All</choice>
+			<choice value="dvs">dvs</choice>
+			<choice value="lpfc">plfc</choice>
+			<choice value="qla">qla</choice>
+			<choice value="vmdk">vmdk</choice>
+			<choice value="vmhba">vmhba</choice>
+			<choice value="vmomi">vmomi</choice>
+			<choice value="vpxaService">vpxaService</choice>
+			<choice value="vpxapi">vpxapi</choice>
+			<default>*</default>
+		</input>
+		<input type="dropdown" token="esxlogsublogger">
+			<label>Sublogger:</label>
+			<choice value="vmware:esxlog:*">All</choice>
+			<choice value="vmware:esxlog:syslog">syslog</choice>
+			<choice value="vmware:esxlog:vmksummary">vmksummary</choice>
+			<choice value="vmware:esxlog:vmkernel">vmkernel</choice>
+			<choice value="vmware:esxlog:auth">auth</choice>
+			<choice value="vmware:esxlog:vmkeventd">vmkeventd</choice>
+			<choice value="vmware:esxlog:vmkwarning">vmkwarning</choice>
+			<choice value="vmware:esxlog:vmauthd">vmauthd</choice>
+			<choice value="vmware:esxlog:shell">shell</choice>
+			<choice value="vmware:esxlog:rhttpproxy">rhttpproxy</choice>
+			<choice value="vmware:esxlog:vmamqpd">vmamqpd</choice>
+			<choice value="vmware:esxlog:lacp">lacp</choice>
+			<choice value="vmware:esxlog:dhclient">dhclient</choice>
+			<choice value="vmware:esxlog:usb">usb</choice>
+			<choice value="vmware:esxlog:hostprofiletrace">hostprofiletrace</choice>
+			<choice value="vmware:esxlog:vprobed">vprobed</choice>
+			<choice value="vmware:esxlog:hostd-probe">hostd-probe</choice>
+			<choice value="vmware:esxlog:vobd">vobd</choice>
+			<choice value="vmware:esxlog:storagerm">storagerm</choice>
+			<choice value="vmware:esxlog:esxupdate">esxupdate</choice>
+			<choice value="vmware:esxlog:Xorg">Xorg</choice>
+			<choice value="vmware:esxlog:fdm">fdm</choice>
+			<choice value="vmware:esxlog:iscsid">iscsid</choice>
+			<default>vmware:esxlog:*</default>
+		</input>
+		<input type="text" token="esxloglookfor">
+			<label>Look For:</label>
+			<default/>
+		</input>
+		<input type="text" token="esxloglevel">
+			<label>Level:</label>
+			<default>error</default>
+		</input>
+	</fieldset>
+	<row>
+		<table>
+			<title>Vpxa: The ESX/i host's agent for handling vCenter requests (Limited to first 10,000 Messages in Time Range)</title>
+			<searchString>sourcetype="vmware:esxlog:Vpxa" $esxhost$ $esxloglevel$ $esxloglookfor$ $esxlogfv$ $esxlogterm$ $esxlogvmodl$ $esxlogmo$ $esxlogapi$ $esxlogcompt$ | head 10000 | eval Time=_time | convert ctime(Time) | table Time, host, Offset, Level, Object, Message</searchString>
+			<earliestTime>$earliest$</earliestTime>
+			<latestTime>$latest$</latestTime>
+			<option name="wrap">true</option>
+			<option name="rowNumbers">false</option>
+			<option name="dataOverlayMode">none</option>
+			<option name="drilldown">cell</option>
+		</table>
+	</row>
+	<row>
+		<table>
+			<title>Syslog: ESX/i services log (Limited to first 10,000 Messages in Time Range)</title>
+			<searchString>(sourcetype=$esxlogsublogger$ NOT (sourcetype="vmware:esxlog:Hostd" OR sourcetype="vmware:esxlog:Vpxa")) $esxhost$ $esxloglookfor$ $esxlogfv$ $esxlogterm$ $esxlogvmodl$ $esxlogmo$ $esxlogapi$ $esxlogcompt$ | head 10000 | rex field=sourcetype "^vmware:esxlog:(?&lt;sublogger&gt;.+)$" | eval Time=_time | convert ctime(Time) | table Time, host, sublogger, Message</searchString>
+			<earliestTime>$earliest$</earliestTime>
+			<latestTime>$latest$</latestTime>
+			<option name="wrap">true</option>
+			<option name="rowNumbers">false</option>
+			<option name="dataOverlayMode">none</option>
+			<option name="drilldown">cell</option>
+			<option name="count">10</option>
+		</table>
+	</row>
+	<row>
+		<table>
+			<title>Hostd: ESX/i host management agent log (Limited to first 10,000 Messages in Time Range)</title>
+			<searchString>sourcetype="vmware:esxlog:Hostd" $esxhost$ $esxloglevel$ $esxloglookfor$ $esxlogfv$ $esxlogterm$ $esxlogvmodl$ $esxlogmo$ $esxlogapi$ $esxlogcompt$ | eval Time=_time | convert ctime(Time) | table Time, host, Offset, Level, Object, Message</searchString>
+			<earliestTime>$earliest$</earliestTime>
+			<latestTime>$latest$</latestTime>
+			<option name="wrap">true</option>
+			<option name="rowNumbers">false</option>
+			<option name="dataOverlayMode">none</option>
+			<option name="drilldown">cell</option>
+		</table>
+	</row>
+</form>

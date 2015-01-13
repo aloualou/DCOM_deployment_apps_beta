@@ -1,0 +1,1116 @@
+{
+	"description": "Performance Data Model for VMware Virtual Machine", 
+	"displayName": "VirtualMachinePerformance", 
+	"objects": [
+		{
+			"calculations": [], 
+			"displayName": "VMPerformance", 
+			"objectName": "vmperformance", 
+			"constraints": [
+				{
+					"search": "index=vmware-perf source=\"VMPerf:VirtualMachine\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "BaseEvent", 
+			"fields": [
+				{
+					"hidden": false, 
+					"owner": "BaseEvent", 
+					"multivalue": false, 
+					"fieldName": "_time", 
+					"required": true, 
+					"displayName": "_time", 
+					"type": "timestamp", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"owner": "BaseEvent", 
+					"multivalue": false, 
+					"fieldName": "host", 
+					"required": true, 
+					"displayName": "host", 
+					"type": "string", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "moid", 
+					"required": false, 
+					"fieldName": "moid", 
+					"type": "string", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "instance", 
+					"required": false, 
+					"fieldName": "instance", 
+					"type": "string", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "CPU", 
+			"objectName": "cpu", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:cpu\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_coreUtilization_percent", 
+					"required": false, 
+					"fieldName": "p_average_cpu_coreUtilization_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_demand_megaHertz", 
+					"required": false, 
+					"fieldName": "p_average_cpu_demand_megaHertz", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_latency_percent", 
+					"required": false, 
+					"fieldName": "p_average_cpu_latency_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_reservedCapacity_megaHertz", 
+					"required": false, 
+					"fieldName": "p_average_cpu_reservedCapacity_megaHertz", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_totalCapacity_megaHertz", 
+					"required": false, 
+					"fieldName": "p_average_cpu_totalCapacity_megaHertz", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_usage_percent", 
+					"required": false, 
+					"fieldName": "p_average_cpu_usage_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_usagemhz_megaHertz", 
+					"required": false, 
+					"fieldName": "p_average_cpu_usagemhz_megaHertz", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_cpu_utilization_percent", 
+					"required": false, 
+					"fieldName": "p_average_cpu_utilization_percent", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_cpu_entitlement_megaHertz", 
+					"required": false, 
+					"fieldName": "p_latest_cpu_entitlement_megaHertz", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_costop_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_costop_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_idle_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_idle_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_maxlimited_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_maxlimited_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_overlap_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_overlap_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_ready_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_ready_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_run_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_run_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_swapwait_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_swapwait_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_system_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_system_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_used_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_used_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_cpu_wait_millisecond", 
+					"required": false, 
+					"fieldName": "p_summation_cpu_wait_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "Memory", 
+			"objectName": "memory", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:mem\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_active_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_active_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_activewrite_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_activewrite_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_compressed_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_compressed_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_compressionRate_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_mem_compressionRate_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_consumed_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_consumed_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_decompressionRate_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_mem_decompressionRate_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_entitlement_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_entitlement_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_granted_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_granted_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_heap_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_heap_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_heapfree_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_heapfree_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_latency_percent", 
+					"required": false, 
+					"fieldName": "p_average_mem_latency_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_llSwapIn_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_llSwapIn_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_llSwapInRate_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_mem_llSwapInRate_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_llSwapOut_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_llSwapOut_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_llSwapOutRate_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_mem_llSwapOutRate_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_llSwapUsed_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_llSwapUsed_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_lowfreethreshold_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_lowfreethreshold_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_overhead_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_overhead_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_overheadMax_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_overheadMax_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_overheadTouched_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_overheadTouched_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_reservedCapacity_megaBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_reservedCapacity_megaBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_shared_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_shared_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_sharedcommon_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_sharedcommon_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_swapin_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_swapin_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_swapinRate_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_mem_swapinRate_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_swapout_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_swapout_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_swapoutRate_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_mem_swapoutRate_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_swapped_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_swapped_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_swaptarget_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_swaptarget_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_swapused_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_swapused_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_sysUsage_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_sysUsage_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_totalCapacity_megaBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_totalCapacity_megaBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_unreserved_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_unreserved_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_usage_percent", 
+					"required": false, 
+					"fieldName": "p_average_mem_usage_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_vmmemctl_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_vmmemctl_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_vmmemctltarget_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_vmmemctltarget_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_mem_zero_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_average_mem_zero_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_mem_state_number", 
+					"required": false, 
+					"fieldName": "p_latest_mem_state_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_mem_zipped_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_latest_mem_zipped_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_mem_zipSaved_kiloBytes", 
+					"required": false, 
+					"fieldName": "p_latest_mem_zipSaved_kiloBytes", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "Disk", 
+			"objectName": "disk", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:disk\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_disk_read_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_disk_read_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_disk_usage_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_disk_usage_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_disk_write_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_disk_write_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_disk_maxTotalLatency_millisecond", 
+					"required": false, 
+					"fieldName": "p_latest_disk_maxTotalLatency_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "Datastore", 
+			"objectName": "datastore", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:datastore\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_datastore_maxTotalLatency_millisecond", 
+					"required": false, 
+					"fieldName": "p_latest_datastore_maxTotalLatency_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "Power", 
+			"objectName": "power", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:power\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_power_power_watt", 
+					"required": false, 
+					"fieldName": "p_average_power_power_watt", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_power_powerCap_watt", 
+					"required": false, 
+					"fieldName": "p_average_power_powerCap_watt", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_power_energy_joule", 
+					"required": false, 
+					"fieldName": "p_summation_power_energy_joule", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "Net", 
+			"objectName": "net", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:net\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_net_bytesRx_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_net_bytesRx_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_net_bytesTx_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_net_bytesTx_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_net_received_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_net_received_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_net_transmitted_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_net_transmitted_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_net_usage_kiloBytesPerSecond", 
+					"required": false, 
+					"fieldName": "p_average_net_usage_kiloBytesPerSecond", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_broadcastRx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_broadcastRx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_broadcastTx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_broadcastTx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_droppedRx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_droppedRx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_droppedTx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_droppedTx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_errorsRx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_errorsRx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_errorsTx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_errorsTx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_multicastRx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_multicastRx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_multicastTx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_multicastTx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_packetsRx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_packetsRx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_packetsTx_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_packetsTx_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_net_unknownProtos_number", 
+					"required": false, 
+					"fieldName": "p_summation_net_unknownProtos_number", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "thruput", 
+					"required": false, 
+					"fieldName": "thruput", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "Rescpu", 
+			"objectName": "rescpu", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:rescpu\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_actav15_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_actav15_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_actav1_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_actav1_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_actav5_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_actav5_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_actpk15_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_actpk15_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_actpk1_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_actpk1_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_actpk5_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_actpk5_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_maxLimited15_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_maxLimited15_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_maxLimited1_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_maxLimited1_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_maxLimited5_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_maxLimited5_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_runav15_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_runav15_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_runav1_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_runav1_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_runav5_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_runav5_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_runpk15_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_runpk15_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_runpk1_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_runpk1_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_runpk5_percent", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_runpk5_percent", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_sampleCount_number", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_sampleCount_number", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_rescpu_samplePeriod_millisecond", 
+					"required": false, 
+					"fieldName": "p_latest_rescpu_samplePeriod_millisecond", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}, 
+		{
+			"calculations": [], 
+			"displayName": "Sys", 
+			"objectName": "sys", 
+			"constraints": [
+				{
+					"search": "sourcetype=\"vmware:perf:sys\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "vmperformance", 
+			"fields": [
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_sys_osUptime_second", 
+					"required": false, 
+					"fieldName": "p_latest_sys_osUptime_second", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_sys_uptime_second", 
+					"required": false, 
+					"fieldName": "p_latest_sys_uptime_second", 
+					"type": "number", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "summation_sys_heartbeat_number", 
+					"required": false, 
+					"fieldName": "p_summation_sys_heartbeat_number", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "uptime", 
+					"required": false, 
+					"fieldName": "uptime", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}
+	], 
+	"modelName": "VirtualMachinePerformance"
+}

@@ -1,0 +1,116 @@
+<form onunloadCancelJobs="True" script="search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Palo Alto Networks Overview</label>
+    <fieldset autoRun="True">
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row>
+        <chart>
+            <title>Top Bandwidth Consumers (NFI Rule 10030/20093)</title>
+            <searchTemplate>
+                `netflow_search_rule_20030` 
+                | eval bytes=`formatbytes(bytes)` 
+                | timechart sum(bytes) by user 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mb</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <chart>
+            <title>Top Destinations (NFI Rule 10031/20093)</title>
+            <searchTemplate>
+                `netflow_search_rule_20031` 
+                | eval bytes=`formatbytes(bytes)` 
+                | timechart sum(bytes) by dest_ip 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mb</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+    </row>
+    <row>
+        <chart>
+            <title>Top Violators (NFI Rule 10032/20093)</title>
+            <searchTemplate>
+                `netflow_search_rule_20032` 
+                | timechart sum(denied_count) by user 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Count</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <chart>
+            <title>Top Connectors (NFI Rule 10033/20093)</title>
+            <searchTemplate>
+                `netflow_search_rule_20033` 
+                | timechart sum(created_count) by user 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Count</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+    </row>
+    <row>
+        <chart>
+            <title>Top Applications (NFI Rule 10034/20093)</title>
+            <searchTemplate>
+                `netflow_search_rule_20034` 
+                | eval bytes=`formatbytes(bytes)` 
+                | timechart sum(bytes) by app 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mb</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <chart>
+            <title>Top Applications and Users (NFI Rule 10035/20093)</title>
+            <searchTemplate>
+                `netflow_search_rule_20035` 
+                | eval bytes=`formatbytes(bytes)` 
+                | strcat app "/" user appuser 
+                | timechart sum(bytes) by appuser 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mb</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+    </row>
+</form>

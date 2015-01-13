@@ -1,0 +1,119 @@
+<form onunloadCancelJobs="True" script="search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Traffic by Host Pairs</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="text" token="dest_ip" searchWhenChanged="False">
+            <label>Server IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="src_ip" searchWhenChanged="False">
+            <label>Client IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="protocol_name" searchWhenChanged="False">
+            <label>Protocol</label>
+            <default>*</default>
+        </input>
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2">
+        <chart>
+            <title>Top 10 Host Pairs</title>
+            <searchTemplate>
+                `netflow_search_rule_20064` 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                         (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                         (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `sampling(bytes)`
+                | `format_ip_column(src_ip,src_ip,src_host)`
+                | `format_ip_column(dest_ip,dest_ip,dest_host)`
+                | strcat src_ip " - " dest_ip host_pair 
+                | `per_second_chart(megabits, bytes*8/1000000, sum(megabits) by host_pair)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table>
+            <searchTemplate>
+                `netflow_search_rule_20064` 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                         (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                         (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `format_ip_column(src_ip,src_ip,src_host)` 
+                | `format_ip_column(dest_ip,dest_ip,dest_host)` 
+                | `sampling(bytes_in)` 
+                | `sampling(bytes_out)` 
+                | `sampling(bytes)` 
+                | `sampling(packets_in)` 
+                | `sampling(packets_out)` 
+                | `sampling(flow_count)` 
+                | eval srv_port = if(isnull(dest_port), "undefined", dest_port) 
+                | `format_port_column(server_port, srv_port)` 
+                | stats sum(bytes) AS TrafficAmount 
+                        sum(bytes_in) AS TrafficAmountIn 
+                        sum(packets_in) AS PacketsAmountIn 
+                        sum(bytes_out) AS TrafficAmountOut 
+                        sum(packets_out) AS PacketsAmountOut 
+                        sum(flow_count) AS Connections 
+                            by exp_ip src_ip server_port dest_ip 
+                | `average_speed(TrafficSpeedIn, TrafficAmountIn*8)` 
+                | `average_speed(TrafficSpeedOut, TrafficAmountOut*8)` 
+                | `average_speed(PacketsSpeedIn, PacketsAmountIn)` 
+                | `average_speed(PacketsSpeedOut, PacketsAmountOut)` 
+                | sort 0 - TrafficAmount 
+                | head 100 
+                | `format_traffic_column(TrafficIn, TrafficAmountIn, TrafficSpeedIn)`
+                | `format_traffic_column(TrafficOut, TrafficAmountOut, TrafficSpeedOut)`
+                | `format_packets_column(PacketsIn, PacketsAmountIn, PacketsSpeedIn)`
+                | `format_packets_column(PacketsOut, PacketsAmountOut, PacketsSpeedOut)`
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name dest_ip server_port src_ip TrafficIn TrafficOut PacketsIn PacketsOut Connections
+                | rename exp_ip_name as "Device" 
+                | rename dest_ip as "Server" 
+                | rename src_ip as "Client" 
+                | rename server_port as "Server port" 
+                | rename TrafficIn as "Average Traffic Rate (Total Traffic) Inbound"
+                | rename TrafficOut as "Average Traffic Rate (Total Traffic) Outbound"
+                | rename PacketsIn as "Average Packet Rate (Total Packets) Inbound"
+                | rename PacketsOut as "Average Packet Rate (Total Packets) Outbound"
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

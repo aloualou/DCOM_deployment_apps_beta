@@ -1,0 +1,13 @@
+# Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.
+[macros]
+access = read : [ * ], write : [ admin ]
+owner = admin
+export = system
+
+[savedsearches]
+access = read : [ * ], write : [ admin ]
+owner = admin
+export = none
+
+[governance]
+access = read : [ * ], write : [ * ] 

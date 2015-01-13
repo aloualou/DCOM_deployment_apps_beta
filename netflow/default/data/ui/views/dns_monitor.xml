@@ -1,0 +1,107 @@
+<form onunloadCancelJobs="True" script="search_rerun.js" stylesheet="inputs_layout.css">
+    <label>DNS Security</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2,2">
+        <chart>
+            <title>Average Response Time by DNS Server</title>
+            <searchTemplate>
+                `netflow_search_rule_20004` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | timechart avg(avg_time) by dest_ip useother="f" 
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Response Time, msec</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table>
+            <searchTemplate>
+                `netflow_search_rule_20004` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes_in)` 
+                | `sampling(bytes_out)` 
+                | stats sum(bytes_in) AS TrafficAmountIn sum(bytes_out) AS TrafficAmountOut avg(avg_time) AS AvgTime by exp_ip dest_ip
+                | `average_speed(TrafficSpeedIn, TrafficAmountIn*8)` 
+                | `average_speed(TrafficSpeedOut, TrafficAmountOut*8)` 
+                | sort - AvgTime 
+                | head 100
+                | eval AvgTime = `formatmsec(AvgTime)` 
+                | `format_traffic_column(TrafficIn, TrafficAmountIn, TrafficSpeedIn)` 
+                | `format_traffic_column(TrafficOut, TrafficAmountOut, TrafficSpeedOut)` 
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name dest_ip AvgTime TrafficIn TrafficOut
+                | rename exp_ip_name as "Device"
+                | rename dest_ip as "DNS Server" 
+                | rename AvgTime as "Average Resp. Time"
+                | rename TrafficIn as "Average Traffic Rate (Total Traffic) received"
+                | rename TrafficOut as "Average Traffic Rate (Total Traffic) sent"
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+        <chart>
+            <title>Top 10 DNS Users</title>
+            <searchTemplate>
+                `netflow_search_rule_20005` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(flow_count)`
+                | chart sum(flow_count) by src_ip
+                | sort - sum(flow_count)
+                | head 10
+            </searchTemplate>
+            <option name="charting.chart">bar</option>
+            <option name="charting.axisTitleX.text">Users</option>
+            <option name="charting.axisTitleY.text">Connections</option>
+            <option name="charting.legend.placement">none</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table>
+            <searchTemplate>
+                `netflow_search_rule_20005` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(flow_count)`
+                | stats sum(flow_count) AS Connections by exp_ip src_ip
+                | sort - Connections 
+                | head 100
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name src_ip Connections
+                | rename exp_ip_name as "Device"
+                | rename src_ip as "DNS user" 
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

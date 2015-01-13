@@ -1,0 +1,149 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>home</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Welcome to Sideview Utils 1.3.5</h1>
+    ]]></param>
+  </module>
+
+
+  <module name="HTML" layoutPanel="panel_row1_col1">
+    <param name="html"><![CDATA[
+
+      <div id="bumpContent">
+        <p>
+          <b><span style="color:#f00;">NOTE: If you are upgrading from a previous version</span>, you should immediately click the 'bump version' button below.  Until you do this, you and your end-users may experience cacheing problems. This seems to be caused by a bug in SplunkWeb where the 'build' key in app.conf is ignored. Hopefully the underlying issue will be fixed soon.</b>
+        </p>
+        <iframe src="/en-US/_bump" style="border:0px;width:200px;height:75px;overflow:hidden;"></iframe>
+        <p>
+          Alternatively, you can go to the <a href="/en-US/_bump">bump page</a> yourself and click the button there. 
+        </p>
+      </div>
+
+      <p>
+        <b>NOTE: This is NOT the most current version of Sideview Utils.</b>  As of this writing the latest version is 2.0.9 and it is available from the <a href="http://sideviewapps.com">Sideview site</a>.  Note that the licensing on Sideview Utils 2.0 is different from what you are used to in the 1.3 versions.   Whereas 1.X was available for free under the Lesser Gnu Public License,  Sideview Utils 2.0.9 is available for free under the "Sideview Internal Use License Agreement".  To upgrade the app, go to the following URL <a href="http://sideviewapps.com/apps/sideview-utils/">http://sideviewapps.com/apps/sideview-utils/</a> and click "Download Full Version (Internal Use Only)".  After you accept the license agreement you'll be emailed a single-use link to download a tar.gz of the app. 
+      </p>
+      <p>
+        Note of course that if you cannot accept the restrictions in the Sideview Internal Use License Agreement then you cannot download the app.  If that's the case though, all is not lost. <a href="http://sideviewapps.com/contact">Contact us to get details about our OEM agreement</a> which is designed to give leeway in key areas of Splunk app development and app distribution. 
+      </p>
+
+      <h2>If you don't want to upgrade to the <a href="http://sideviewapps.com/apps/sideview-utils/">Sideview Utils 2.0</a> (then you're crazy), but OK lets work with what you have here. Read on.</h2>
+
+
+    ]]></param>
+    <param name="customBehavior">displayBumpOnlyForOlderSplunkVersions</param>
+  </module>
+
+  <module name="HTML" layoutPanel="panel_row2_col1">
+    <param name="html"><![CDATA[
+
+
+      
+
+      <p>
+        This app introduces many new modules and techniques developed by <a href="http://sideviewapps.com">Sideview, LLC</a> that make it easier to build, extend and maintain Splunk views and dashboards.   Some things are entirely new but many are just better ways of doing something familiar.   This app also contains examples and documentation for how to use all of this in your other Splunk apps.
+      </p>
+      <p>
+        If you dont know what a Splunk module, view, or an app is, then you may be in over your head. I'd start with the <a href="http://www.splunk.com/base/Documentation/latest/Developer/AdvancedIntro">Splunk documentation</a>. 
+      </p>
+      <p>
+        These new modules are compatible with Splunk's user interface module framework, and as such you can combine these modules with the 100 or so core modules that are provided with the Splunk software. 
+      </p>
+      <p>
+        The modules and techniques here do not represent a replacement for the Splunk User Interface, but rather an augmentation of it.
+      </p>
+      <p>
+        One more thing, these modules can not be used from Splunk's Simplified XML.  You can only use them from the Advanced XML.
+      </p>
+      <p>
+        <a href="http://sideviewapps.com/contact">if you have more questions just ask them.</a>  
+      </p>
+
+
+    ]]></param>
+    
+
+  </module>
+  
+
+
+  
+  <module name="HTML" layoutPanel="panel_row3_col1">
+    <param name="html"><![CDATA[
+
+
+      <h2>OK, skip to the exciting parts</h2>
+
+      <ol class="notesList">
+        <li>
+          <a href="search1_intro">Are you spending a lot of time debugging intentions?</a>.  With the new modules and techniques here you have the option of never using them again.  Spend your time on something else besides looking for closing &lt;/param&gt; tags.
+        </li>
+        <li>
+          <a href="linking">Did you give up trying to wire up dynamic links from your dashboards to custom form search views?</a>  Try again with the techniques here. It can be done now.
+        </li>
+        <li>
+          <a href="html1_static">Do you wish there was a better module that allowed you to just type HTML?</a>   Would you want it to incorporate dynamic values sometimes?  Are you getting frustrated with the SingleValue module?  Well there is an extremely useful new module that comes with this app, called <b>HTML</b>. 
+        </li>
+        <li>
+          <a href="post_process1_static">Do you wish that you could put dynamic $$foo$$ tokens into postProcess searches?</a>  Well now you can. 
+        </li>
+        <li>
+          Have you been nervous about applying a lot of custom Javascript behavior from application.js?   The <b>CustomBehavior</b> module included here offers a much cleaner way for custom behavior to be inserted into a specific point in the hierarchy from application.js.  Leave the brittleness of hardcoded moduleId's behind.
+        </li>
+        <li>
+          There are a lot of other new modules in here as well as patches to core modules, but I'll leave it at that for now.  If however you really want to see a deeper dive on what the improvements are,  <a href="comparison1_overview">read this page</a>
+        </li>
+      </ol>
+    ]]></param>
+  </module>
+  <module name="HTML" layoutPanel="panel_row3_col2">
+    <param name="html"><![CDATA[
+
+      <h2>OK I get it. How do I use it?</h2>
+
+      <ol class="notesList"> 
+        
+        <li>
+          First, if you have not yet downloaded and read through all of the example views in Splunk's "UI Examples for 4.1" app,  do that now and come back here when you're done.  A reasonably good understanding of Advanced XML configurations is a prerequisite for success with these modules, and reading through the UI Examples app is the quickest path.  (App > Launcher > Browse Other Apps > UI Examples for 4.1 > Install)
+        </li>
+
+        <li>
+          Install this app in your splunk instance.  This will make all of its modules available for use by all of your apps. Since you're reading this, chances are you've already gotten this far.  Note that if you merely install the app and stop there, no functionality in any other app should be affected.
+        </li>
+
+        <li>
+          In any view where you want to use a Sideview module, you MUST include the SideviewUtils module.  The SideviewUtils module is necessary because it brings in some common utilities and functionality that all the other Sideview modules need. It's invisible and takes up no space so you can put it anywhere you like. However i recommend hiding it at the top next to the AccountBar so it's out of the way.
+        </li>
+        
+        <li>
+          Away you go, studying, copying and pasting config from the examples contained in this app.
+        </li>
+
+        <li>
+          Make sure to read through all the example pages here carefully.  For a quicker understanding I recommend having the XML itself open in another browser window so you can follow along (Manager &gt; User Interface &gt; Views &gt; &lt;view name here&gt;).   <br>
+          Or better yet,  pull down a copy of the app locally and browse through the XML files in a text editor that does syntax highlighting.
+        </li>
+
+        
+      </ol>
+
+    ]]></param>
+  </module>
+  
+  
+
+
+
+</view>

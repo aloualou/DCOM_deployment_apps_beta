@@ -1,0 +1,35 @@
+
+.Pulldown {
+    min-height:27px;
+}
+
+.Pulldown select {
+    margin-top: 0px;
+    margin-bottom:0px;
+    padding:2px 2px 2px 5px;
+    height:23px;
+    vertical-align: middle;
+}
+.Pulldown label {
+    vertical-align: middle;
+}
+/* 
+IE doesnt do a good job with vertical-align unless 
+we put it on both the select and the label.
+*/
+.Pulldown .multipleSelect select {
+    vertical-align: top;
+    height:auto;
+    width:auto;
+}
+.Pulldown div.multipleSelect label {
+    padding-top:3px;
+}
+
+
+.Pulldown .progressTop {
+    position:absolute;
+    height:2px;
+    width:0px;
+    background-color:#73A550;
+}

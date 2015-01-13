@@ -1,0 +1,98 @@
+<dashboard stylesheet="application.css">
+	<label>Cisco ASA Configuration</label>
+
+	<row>
+		<html>
+<h2>Steps to Configuring Cisco Security Suite for Cisco Firewalls</h2>
+
+<p>Cisco Firewalls includes the Cisco ASA, PIX and FWSM devices.  Configuration of the Cisco Security 
+Suite is a multi-step process:</p>
+
+<ol>
+<li>Decide on a Log Reception Methodology</li>
+<li>Set up a Log Receiver Host</li>
+<li>Configure the Logging Settings in your Cisco Firewalls</li>
+<li>Configure Splunk for your Environment</li>
+</ol>
+
+<p>Please walk through the instructions below in order to properly configured the Cisco Firewall reporting.  These
+instructions assume you have basic knowledge of how to commit configuration changes to your Cisco firewalls.
+If you do not know how to do that, then please refer to your Cisco.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Decide on a Log Reception Methodology</h3>
+
+<p>The Cisco Security Suite Network Security section primarily deals with the firewall accept/deny logs.  These 
+logs are generally transmitted via TCP or UDP syslog to a receiver - in this case, a Splunk Universal Forwarder.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Set up a Log Receiver Host</h3>
+
+<p>Ideally, you should set up an independent host that can act as a syslog receiver. You can either set up an
+independent syslog receiver that sends syslog to a file, or you can accept syslog directly with the Universal
+Forwarder.  This host can run any operating system.  If you are running an independent syslog receiver, then you
+will find that a Linux variant is easier to handle.  Configuring an indepdenent syslog receiver is beyond the
+scope of these instructions.</p>
+
+<p>Splunk does NOT recommend using one of the Splunk indexer or search head hosts except in Proof of Concept or 
+extremely low load scenarios.  The device may be virtualized, however.</p>
+
+<p>Once you have a log receiver host, ensure you install the latest Splunk 6 Universal Forwarder on that host.
+In addition, you will need to configure a log reader in inputs.conf for the host.  If you have configured an
+independent syslog receiver, then you will use a monitor statement. For example, if you had arranged for your 
+logs to be delivered to a host-specific directory under /var/log/cisco-fw (so that the logs are actually stored 
+as /var/log/cisco-fw/HOST/*.log), then you might use the following:</p>
+
+<pre>
+[monitor:///var/log/cisco-fw/*/*.log]
+host_segment = 4
+source = cisco:asa
+sourcetype = cisco:asa
+disabled = false
+</pre>
+
+<p>If you are using PIX firewalls, then the source and sourcetype should be cisco:pix.  If you are using the FWSM
+firewall services module, then the source and sourcetype should be cisco:fwsm.</p>
+
+<p>If you are utilizing TCP-based syslog directly to the Universal Forwarder, then you might use the following 
+(where A.B.C.D is the IP address of your Cisco ASA appliance and HOST is the hostname to assign to the Cisco 
+ASA appliance):</p>
+
+<pre>
+[tcp://A.B.C.D:514]
+host = HOST
+source = cisco:asa
+sourcetype = cisco:asa
+disabled = false
+</pre>
+
+<p>Please make note of the TCP port that you utilize (in this case, 514) and ensure no software-based 
+firewalls are blocking connections.  We don't recommend using UDP-based syslog - in high-load scenarios,
+messages will be lost.  As with the monitor statement, use cisco:pix or cisco:fwsm if you have those
+appliances.</p>
+
+<p>It is possible to accept syslog from many devices by using a [tcp://:514] stanza - in this case, you
+will need to use a transform to configure the source and sourcetype at index time.  You will need to place
+the Splunk_TA_cisco-asa on the indexing tier as well as the universal forwarder and search heads.</p>
+
+<p>If you wish the logs to go to an index other than main, add an index parameter to the inputs.conf
+stanza.  Ensure the index is created on your indexing tier before you continue.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Configuring Logging on your Cisco Firewall</h3>
+
+<p>To configure logging on your Cisco Firewall, use the following command in config mode:</p>
+
+<pre>logging host &lt;int&gt; &lt;ipaddr&gt; tcp/514</pre>
+
+<p>The &lt;int&gt; field is the interface that the syslog data will be sent out of.  The &lt;ipaddr&gt; 
+field is the IP address of your syslog collector.  If you configured a different TCP port from the standard
+514, then use that in this command instead.  Remember to commit the changes.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Configure Splunk for your Environment</h3>
+
+<p>If you have configured Splunk to store the access logs in an alternate index, then you will need to ensure
+that users can find the logs by default.  To do this, you must create a new role. For more information on this
+subject, please see the <a href="http://docs.splunk.com/Documentation/Splunk/6.0.1/Security/SetupuserauthenticationwithSplunk">Splunk 
+Security Manual</a>.</p>
+
+		</html>
+	</row>
+</dashboard>

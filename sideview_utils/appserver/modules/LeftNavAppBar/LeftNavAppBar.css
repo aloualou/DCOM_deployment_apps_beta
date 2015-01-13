@@ -1,0 +1,14 @@
+/* Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved.  */
+
+.LeftNavAppBar {
+    padding-left:0px;
+}
+
+
+/*
+a fair bit of other CSS is required for this module to function 
+optimally, however that CSS has to be packaged at the app level 
+along with any images that it refers to.
+
+*/
+

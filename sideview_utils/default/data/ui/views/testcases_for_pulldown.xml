@@ -1,0 +1,118 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="False" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Testcases for Pulldown</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Testcases for Pulldown</h1>
+    ]]></param>
+  </module>
+
+  <module name="URLLoader" layoutPanel="panel_row1_col1" autoRun="True">
+    <param name="keepURLUpdated">True</param>
+    
+    <module name="Pulldown" group="static config">
+      <param name="name">test1</param>
+      <param name="label">test1</param>
+
+      <param name="staticFieldsToDisplay">
+        <list>
+          <param name="label">fooLabel</param>
+          <param name="value">fooValue</param>
+        </list>
+        <list>
+          <param name="label">barLabel</param>
+          <param name="value">barValue</param>
+        </list>
+        <list>
+          <param name="label">bazLabel</param>
+          <param name="value">bazValue</param>
+        </list>
+      </param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         
+         <p>
+         selected value is:<br>
+          $test1$
+         </p>
+         
+        ]]></param>
+      </module>
+    </module>
+
+
+    <module name="Search" layoutPanel="panel_row1_col2" group="dynamic config, even length">
+      <param name="search"><![CDATA[
+        | stats count | eval name="foo,bar,baz" | fields - count | eval name=split(name,",") | mvexpand name | eval label=name+"Label" | eval value=name+"Value" | fields - name
+      ]]></param>
+      <module name="Pulldown">
+        <param name="name">test2</param>
+        <param name="label">test2</param>
+
+        <param name="searchFieldsToDisplay">
+          <list>
+            <param name="label">label</param>
+            <param name="value">value</param>
+          </list>
+        </param>
+        <module name="HTML">
+          <param name="html"><![CDATA[
+           
+           <p>
+           selected value is:<br>
+            $test2$
+           </p>
+           
+          ]]></param>
+        </module>
+      </module>
+    </module>
+
+
+    <module name="Search" layoutPanel="panel_row2_col1" group="dynamic config, ragged length">
+      <param name="search"><![CDATA[
+        | stats count | eval name="foo,bar,baz,bat,cux,foo,bar,baz,bat,cux,foo,bar,baz,bat,cux,foo,bar,baz,bat,cux,foo,bar,baz,bat,cux,somethingLonger,foo,bar,baz,bat,cux" | fields - count | eval name=split(name,",") | mvexpand name | eval label=name+"Label" | eval value=name+"Value" | fields - name
+      ]]></param>
+      <module name="Pulldown">
+        <param name="name">test3</param>
+        <param name="label">test3</param>
+
+        <param name="searchFieldsToDisplay">
+          <list>
+            <param name="label">label</param>
+            <param name="value">value</param>
+          </list>
+        </param>
+        <module name="HTML">
+          <param name="html"><![CDATA[
+           
+           <p>
+           selected value is:<br>
+            $test3$
+           </p>
+           
+          ]]></param>
+        </module>
+      </module>
+    </module>
+
+    
+    
+    
+  </module>
+  
+        
+
+</view>

@@ -1,0 +1,51 @@
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<nav color="#9bacc1">
+	<view name="home_proactive_monitoring" default="true"/>
+	<view name="flashtimeline"/>
+	<collection label="Knowledge Objects">
+		<view name="reports"/>
+		<view name="dashboards"/>
+	</collection>
+	<collection label="Proactive Monitoring">
+		<a href="/app/splunk_for_vmware/proactive_monitoring">Proactive Monitoring</a>
+		<collection label="Entity Views">
+			<view name="vm_detail"/>
+			<view name="host_detail"/>
+			<view name="cluster_detail"/>
+			<view name="datastore_detail"/>
+		</collection>
+	</collection>
+	<collection label="Performance and Capacity Planning">
+		<view name="host_vm_perf"/>
+		<view name="capacity_planning_hosts"/>
+		<view name="capacity_planning_clusters"/>
+		<view name="capacity_planning_clusters_cpu_headroom"/>
+		<view name="capacity_planning_clusters_mem_headroom"/>
+		<view name="capacity_forecasting"/>
+		<view name="vm_snapshots"/>
+	</collection>
+	<collection label="Troubleshooting and Security">
+		<view name="vmware_log_error_host"/>
+		<view name="vmware_log_error_vc"/>
+		<view name="vmware_tasks_on_host"/>
+		<view name="vmware_task_event_details"/>
+		<view name="vmware_security"/>
+		<collection label="Useful Saved Searches">
+			<a href="/manager/splunk_for_vmware/saved/searches">Manage Saved Searches</a>
+			<saved name="vProb errors in logs" view="flashtimeline"/>
+			<saved name="vmfs volume locked" view="flashtimeline"/>
+			<saved name="All paths are dead" view="flashtimeline"/>
+			<saved name="SCSI reservation error - i/o failed" view="flashtimeline"/>
+			<saved name="Lost connectivity" view="flashtimeline"/>
+			<saved name="vCenter starts" view="flashtimeline"/>
+			<saved name="Duplicate IPs" view="flashtimeline"/>
+		</collection>
+	</collection>
+	<collection label="Settings">
+		<view name="config"/>
+		<view name="collection_config"/>
+		<view name="install_health"/>
+		<view name="license_status"/>
+		<view name="vmware_license_health"/>
+	</collection>
+</nav>

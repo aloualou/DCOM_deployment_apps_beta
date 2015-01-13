@@ -1,0 +1,169 @@
+/*________________________________________________
+
+Author: Andrew Wurster
+
+Version: 0.1
+Detail: Modified for Cisco Security Suite to match
+general Cisco look-n-feel.
+
+________________________________________________*/
+
+
+
+/* Branding
+_________________________________*/
+
+
+.app-title {
+    background-image: none;
+    background-image: -moz-linear-gradient(top, #FF9A12, #CA7400);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FF9A12), to(#CA7400));
+    background-image: -webkit-linear-gradient(top, #FF9A12, #CA7400);
+    background-image: -o-linear-gradient(top, #FF9A12, #CA7400);
+    background-image: linear-gradient(to bottom, #FF9A12, #CA7400);
+    background-color: #EE8800;
+    border: 1px solid #BE6D00;
+    border-top-color: 1px solid #E28100;
+    border-bottom-color: 1px solid #9B5800;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF9A12', endColorstr='#CA7400', GradientType=0);
+}
+
+.wiki-anchor {
+
+}
+code span.no {
+
+}
+
+/* default page color */
+body {
+    background-color: #EEEEEE;
+
+}
+
+body, td {
+    font-family: "Roboto", "Droid", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size:11px;
+    color: #333;
+}
+
+input, textarea, select, optgroup {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size:12px;
+    color: #111;
+}
+
+h1 {
+    font-size: 18px;
+    font-weight: normal;
+    color: #29688A;
+}
+h2 {
+    font-size: 12px;
+    font-weight:bold;
+    color: #29688A;
+}
+h3 {
+    font-size: 14px;
+    color: #FFFFFF;
+}
+h4 {
+    font-size: 11px;
+    font-weight: bold;
+    color: #29688A;
+}
+
+.appHeaderWrapper h1 {
+    color: #29688A;
+    line-height: 43px;
+}
+
+
+/* UI Page Components
+---------------------------------*/
+
+.app-title, .app-bar {
+    color: #ffffff;
+    background-color: rgb(83, 121, 175);
+    background-image: linear-gradient(rgb(47,93,127), rgb(70,140,191));
+}
+
+.dashboard-panel {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+}
+
+.dashboard-row .dashboard-panel .panel-head h3 {
+    text-shadow: none;
+    color: #ffffff;
+    background-color: #29688A;
+    border-bottom: 2px solid rgba(224, 224, 224, .5);
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+}
+
+.dashboard-row .dashboard-panel .refresh-time-indicator {
+    color: #CCCCCC;
+}
+
+.dashboards-panelcontrols, .shared-vizcontrols {
+    background-color: rgba(228, 228, 228, 0.65);
+}
+
+.app-nav, .app-bar .shared-appbar, .app-title .group, .app-nav .group, .app-nav .app-title {
+    background-color: rgb(83, 121, 175);
+    background-image: linear-gradient(rgb(47,93,127), rgb(70,140,191));
+}
+
+.app-title .group .app-Splunk_CiscoSecuritySuite .draghandle {
+    background-color: rgb(83, 121, 175);
+    background-image: linear-gradient(rgb(47,93,127), rgb(70,140,191));
+}
+
+#search, .search-bar-wrapper .shared-searchbar, .search-bar-primary .search-field-background {
+    background-color: #387EA4;
+    background-image: -moz-linear-gradient(top, #B4D4FF, #0B4566);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#B4D4FF), to(#0B4566));
+    background-image: -webkit-linear-gradient(top, #B4D4FF, #0B4566);
+    background-image: -o-linear-gradient(top, #B4D4FF, #0B4566);
+    background-image: linear-gradient(to bottom, #B4D4FF, #0B4566);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffB4D4FF', endColorstr='#ff0B4566', GradientType=0);
+    border-color: #0B4566;
+/* 
+    border-top-color: #4e802a;
+    border-bottom-color: #32521b;
+ */
+}
+
+/* Single Value Chart Styling
+---------------------------------*/
+
+.single-trend {
+    position: relative;
+    top: -15px;
+    text-align: center;
+    font-size: 18px;
+    color: #888;
+}
+.single-trend i {
+    font-size: 28px;
+    vertical-align: text-bottom;
+}
+.single-trend.nochange, .single-trend.nochange i {
+    font-size: 14px;
+}
+.single-trend.increase {
+    color: #65A637;
+}
+.single-trend.decrease {
+    color: #d85d3c;
+}
+
+
+/* Results Table Styling
+---------------------------------*/
+
+.shared-resultstable-resultstablemaster .heat-value {
+    border-left-color: #D76034;
+}

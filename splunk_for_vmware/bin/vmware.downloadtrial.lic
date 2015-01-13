@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<license>
+  <signature>CBTpYN9M/WD8lJ45CSjiEDl7KWRrf1ninyROfRh8KW7FLyEsGfY54TCb+zJi7l6Ww8iccvTe72n0QRA2t8/mpyWWncQwjFRDlAsyFRRMClWIVzhWjDekkIC+317CSYINFZMZPmfwV8dCdvFaSEszYtRvcxvApk8B6G59NAMXaKX83O7uEhQYp1KZY3w4L6XS22qzfCx8a9VOqo7Cug8mc3m+1qnWHpAtICU4A/cYlJqKyGi60pIO+w7oT3IgxjYsE30uVwHgDCKBn21fm1zh1P5kEUJu7Uox0+30+0nxUVp72U9nDXLuLRPNyfC9e79ofLLt3k4/aMjMVhyYe81Jrw==</signature>
+  <payload>
+    <type>enterprise</type>
+    <group_id>Enterprise</group_id>
+    <quota>1</quota>
+    <max_violations>5</max_violations>
+    <window_period>30</window_period>
+    <creation_time>1411974000</creation_time>
+    <label>App-VMWare Download Trial</label>
+    <relative_expiration_interval>5184000</relative_expiration_interval>
+    <absolute_expiration_time>1506582000</absolute_expiration_time>
+    <features>
+      <feature>Alerting</feature>
+      <feature>Auth</feature>
+      <feature>FwdData</feature>
+      <feature>LocalSearch</feature>
+      <feature>ScheduledSearch</feature>
+      <feature>SplunkWeb</feature>
+    </features>
+    <add_ons>
+      <add_on name="vmware" type="app">
+        <parameter key="size" value="2"/>
+      </add_on>
+    </add_ons>
+    <sourcetypes/>
+    <guid>66252711-0216-449A-B401-5EF17B8D0D1B</guid>
+  </payload>
+</license>

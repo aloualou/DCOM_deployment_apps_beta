@@ -1,0 +1,38 @@
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<div style="overflow:hidden; margin: 5px; min-width: 850px; margin-bottom:0px;">
+	<div style="float:right; padding:15px; margin: 5px; background-color:#EEEEEE; border: 1px solid #A9A9A9; width: 250px; -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius:5px;">
+		<h2>Have a question, bug report, or feedback <br />about this app?</h2>
+		<p style="margin-top:10px; margin-bottom:13px; padding-bottom:10px;">
+		${_('Ask a question on <strong><a href="%s">Splunk Answers</a></strong>.') % ( make_url('http://answers.splunk.com/questions/ask?tags=app-vmware-splunk') ) }
+		</p>
+		
+		<!--
+		 <h2>Configure this app</h2>
+		 <p style="margin-top:10px; margin-bottom:5px; padding:0">
+		 ${_('Change app configuration using <strong><a href="%s%s">App Setup</a></strong>') % ( make_url(['manager', APP['id'], 'apps/local', APP['id']]), '/setup?action=edit' ) }
+		 </p>
+		 -->
+		<!--
+		 <p style="margin-top:20px; margin-bottom:0px; padding:10px; background-color:#F5F6C3; border:solid 2px #FF0000; display:none;" id="newVersionNotice">
+		 ${_('<strong>A new version of this app is available!</strong><br /><strong><a href="%s" target="_blank">Download Now</a></strong>') % ( 'http://www.splunkbase.com/apps/Splunk+for+Vmware' ) }
+		 </p>
+		 -->
+	</div>
+		<div style="float: left; margin-right: 20px; width: 600px;"> 
+			The VMware Virtual Center Server Log Data Health view helps administrators verify that their data is looking healthy and usable.<br/>
+			The guidance provided assumes default logging settings for vCenter with regards to rotation and logging level.
+			<br>
+			Checklist:<br/>
+			<ol style="margin-bottom:0px;">
+				<li>Source and sourcetype counts over all time: These values count the total number of log sources and sourcetypes from vCenter Server machines with the VC Add-on installed. Each source represents a distinct log file indexed and each sourcetype represents a distinct type of VC log indexed. The data are independent of the time range selected and are over "All time"</li>
+				<li>VC Forwarding Status: this table shows each vCenter (vCenter running the Splunk Add-on for vCenter) the index has received data from in the last 30 minutes.</li>
+				<li>Number of events over time: these are counts of events in the said log files
+					<ul style="margin-bottom:0px; padding-bottom:0px;">
+						<li>vpxd logs: the time range is fixed at 10min and you should see 500 to 10,000 events per minute per VC</li>
+						<li>cim-diag logs: you should see 100 to 150 events per hour per VC</li>
+						<li>vpxd-profiler logs: you should see 15,000 to 25,000 events per 10 minutes per VC</li>
+					</ul>
+				</li>
+			</ol>
+		</div>
+</div>

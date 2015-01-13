@@ -1,0 +1,99 @@
+<%inherit file="base.html"/>
+<div class="preload">
+    <div class="header">
+        <div id="placeholder-splunk-bar">
+            <a href="{{SPLUNKWEB_URL_PREFIX}}/app/launcher/home" class="brand" title="splunk &gt; listen to your data">splunk<strong>&gt;</strong></a>
+        </div>
+        <div id="placeholder-app-bar"></div>
+    </div>
+    <div id="app-main-layout">
+        <!--<div id="placeholder-main-section-body">${_('Loading...')}</div>-->
+        <div>
+            <div class="dashboard-body container-fluid main-section-body" data-role="main">
+                <div class="row">
+                    <div class="span12 dashboard-header clearfix">
+                        <h2>Network Interface Metrics</h2>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: 10px;">
+                    <div class="span2" id="time-range"></div>
+                    <div class="span2 host-label">Select a host:</div>
+                    <div class="span3" id="hosts-drop-down"></div>
+                    <div id="interfaces-panel">
+                        <div class="span2 interface-label">Select an interface:</div>
+                        <div class="span3" id="interfaces-drop-down"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Bandwidth Chart(in Mbps)</h3>
+                                </div>
+                                <div id="bandwidth-chart" class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Events Chart</h3>
+                                </div>
+                                <div id="total-events-chart" class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Total Packets</h3>
+                                </div>
+                                <div id="total-packets-chart" class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Interface Dropped Packet count</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div id="if-dropped-packets-view" class="splunk-view"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="footer"></div>
+</div>
+
+
+<script src="${make_url('/static/js/contrib/require.js')}"></script>
+<script>
+    // IE9 and IE10 fix
+    if(!window.console) {
+        var console = {
+            log : function(){},
+            warn : function(){},
+            error : function(){}
+        }
+        // window.console=console;
+    }
+</script>
+

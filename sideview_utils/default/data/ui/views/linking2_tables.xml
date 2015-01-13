@@ -1,0 +1,188 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>linking to other views from tables</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Linking - Tables</h1>
+    ]]></param>
+  </module>
+
+
+  <module name="HTML" layoutPanel="panel_row1_col1" group="one pulldown, one table">
+    <param name="html"><![CDATA[
+      <p>
+        Here we exchange the second pulldown for a standard 
+        Pager+SimpleResultsTable pattern.
+      </p>
+      <p>
+        When you use these modules, you get an
+        improvement to the SimpleResultsTable module.  Specifically, new keys are provided
+        that for the first time make it possible to refer to any field value 
+        in the clicked-upon row. Click a row and read what appears on the right side. 
+      ]]></param>
+  </module>
+
+  <module name="Pulldown" layoutPanel="panel_row2_col1" autoRun="True">
+    <param name="name">group</param>
+    <param name="label">Type</param>
+    <param name="staticFieldsToDisplay">
+      <list>
+        <param name="label">Sourcetype</param>
+        <param name="value">per_sourcetype_thruput</param>
+      </list>
+      <list>
+        <param name="label">Source</param>
+        <param name="value">per_source_thruput</param>
+      </list>
+      <list>
+        <param name="label">Host</param>
+        <param name="value">per_host_thruput</param>
+      </list>
+      <list>
+        <param name="label">Index</param>
+        <param name="value">per_index_thruput</param>
+      </list>
+    </param>
+
+    <module name="Search">
+      <param name="search">index=_internal source="*metrics.log" metrics group="$group$" | top series limit=100 showperc=f</param>
+      <param name="earliest">-2h</param>
+      
+      <module name="JobProgressIndicator"></module>
+
+      <module name="Pager">
+        <param name="entityName">results</param>
+
+        <module name="SimpleResultsTable">
+          <param name="entityName">results</param>
+          <param name="drilldown">row</param>
+
+          <module name="HTML" layoutPanel="panel_row2_col2">
+            <param name="html"><![CDATA[
+              <b>Legacy values</b><br>
+              click.name   = $click.name$<br>
+              click.value  = $click.value$<br>
+              click.name2  = $click.name2$<br>
+              click.value2 = $click.value2$<br>
+
+              <br>
+              <b>Newer values from Sideview customization</b><br>
+              click.fields.series = $click.fields.series$<br>
+              click.fields.count  = $click.fields.count$<br>
+              <br>
+              <b>And for when you just need numbered values</b><br>
+              click.cell0.name  = $click.cell0.name$<br>
+              click.cell0.value = $click.cell0.value$<br>
+              click.cell1.name  = $click.cell1.name$<br>
+              click.cell1.value = $click.cell1.value$<br>
+
+              
+              
+              
+              
+              
+              ]]></param>
+          </module>
+
+          
+          <module name="Button">  
+            <param name="label">OK, redirect me</param>
+            <module name="Redirector">
+              <param name="url">target_view3</param>
+              <param name="arg.group">$group$</param>
+              <param name="arg.series">$click.value$</param>
+              <param name="arg.title">Showing report for $group.label$=$click.value$</param>
+              <param name="arg.report">timechart min(eps) avg(eps) max(eps)</param>
+            </module>
+          </module>
+          
+        </module>
+        <module name="Pager">
+          <param name="entityName">results</param>
+        </module>
+
+      </module>
+
+
+
+    </module>
+  </module>
+  <module name="Pulldown" layoutPanel="panel_row3_col1" group="Same example, but without the Button" autoRun="True">
+    <param name="name">group</param>
+    <param name="label">Type</param>
+    <param name="staticFieldsToDisplay">
+      <list>
+        <param name="label">Sourcetype</param>
+        <param name="value">per_sourcetype_thruput</param>
+      </list>
+      <list>
+        <param name="label">Source</param>
+        <param name="value">per_source_thruput</param>
+      </list>
+      <list>
+        <param name="label">Host</param>
+        <param name="value">per_host_thruput</param>
+      </list>
+      <list>
+        <param name="label">Index</param>
+        <param name="value">per_index_thruput</param>
+      </list>
+    </param>
+
+    <module name="Search">
+      <param name="search">index=_internal source="*metrics.log" metrics group="$group$" | top series limit=100 showperc=f</param>
+      <param name="earliest">-2h</param>
+      
+      <module name="JobProgressIndicator"></module>
+
+
+      <module name="Pager">
+        <param name="entityName">results</param>
+
+        <module name="SimpleResultsTable">
+          <param name="entityName">results</param>
+          <param name="drilldown">row</param>
+          <module name="Redirector">
+            <param name="url">target_view3</param>
+            <param name="arg.group">$group$</param>
+            <param name="arg.series">$click.value$</param>
+            <param name="arg.title">Showing report for $group.label$=$click.value$</param>
+            <param name="arg.report">timechart min(eps) avg(eps) max(eps)</param>
+          </module>
+        </module>
+        <module name="Pager">
+          <param name="entityName">results</param>
+        </module>
+      </module>
+    </module>
+  </module>
+
+  <module name="HTML" layoutPanel="panel_row2_col2">
+    <param name="html"><![CDATA[
+      Notes:
+      <ol class="notesList">
+        <li>
+          Assuming you are familiar with the extensive drilldown examples in the "UI Examples for 4.1" app, this will also seem quite familiar.   These improvements should dovetail in quite well with what you learned in that app.  
+        </li>
+        <li>
+          If on the other hand you are not familiar with the drilldown examples from that app, then I suggest you go spend some time reading them now.   (App > Launcher > Browse more apps > UI Examples for 4.1 > Install,   and then follow the links to restart)
+        </li>
+        <li>
+          We inserted a Button module in between the SimpleResultsTable and the Redirector module.  YOU WOULD NOT NORMALLY DO THIS.  We only did it here because it allows us to break the click and the redirection down into two separate steps, and that's how you're able to see the dynamic values printed out above.  When you use this configuration just take out that Button module, which will leave the Redirector module nested right inside the SimpleResultsTable.
+        </li>
+        
+        
+      </ol>
+      ]]></param>
+  </module>
+</view>

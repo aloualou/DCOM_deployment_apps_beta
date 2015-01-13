@@ -1,0 +1,86 @@
+{
+	"description": "Performance Data Model for VMware Cluster Compute Resource", 
+	"displayName": "ClusterComputeResourcePerformance", 
+	"objects": [
+		{
+			"calculations": [], 
+			"displayName": "ClusterPerformance", 
+			"objectName": "clusterperformance", 
+			"constraints": [
+				{
+					"search": "index=vmware-perf source=\"VMPerf:ClusterComputeResource\""
+				}
+			], 
+			"comment": "", 
+			"parentName": "BaseEvent", 
+			"fields": [
+				{
+					"hidden": false, 
+					"owner": "BaseEvent", 
+					"multivalue": false, 
+					"fieldName": "_time", 
+					"required": true, 
+					"displayName": "_time", 
+					"type": "timestamp", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"owner": "BaseEvent", 
+					"multivalue": false, 
+					"fieldName": "host", 
+					"required": true, 
+					"displayName": "host", 
+					"type": "string", 
+					"comment": ""
+				}, 
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "moid", 
+					"required": false, 
+					"fieldName": "moid", 
+					"type": "string", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "instance", 
+					"required": false, 
+					"fieldName": "instance", 
+					"type": "string", 
+					"comment": ""
+				},	
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_clusterServices_effectivecpu_megaHertz", 
+					"required": false, 
+					"fieldName": "p_average_clusterServices_effectivecpu_megaHertz", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "average_clusterServices_effectivemem_megaBytes", 
+					"required": false, 
+					"fieldName": "p_average_clusterServices_effectivemem_megaBytes", 
+					"type": "number", 
+					"comment": ""
+				},
+				{
+					"hidden": false, 
+					"multivalue": false, 
+					"displayName": "latest_clusterServices_failover_number", 
+					"required": false, 
+					"fieldName": "p_latest_clusterServices_failover_number", 
+					"type": "number", 
+					"comment": ""
+				}
+			]
+		}
+	], 
+	"modelName": "ClusterComputeResourcePerformance"
+}

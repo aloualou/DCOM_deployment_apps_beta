@@ -1,0 +1,31 @@
+.memory-overhead-info h3 {
+font-size: 16px;
+font-weight: normal;
+margin: 0;
+padding: 12px 15px 10px 15px;
+text-shadow: 0 1px 0 white;
+color: #333333;
+}
+
+.memory-overhead-info table {
+border-collapse: separate;
+border-spacing: 2px;
+border-color: gray;
+padding: 12px 15px 10px 15px;
+}
+
+.memory-overhead-info td {
+padding: 5px;
+border-bottom-width: 1px;
+border-bottom-style: solid;
+vertical-align: top;
+border-color: #CCC;
+font-size: 11px;
+color: #333;
+}
+
+.memory-overhead-info th {
+	display: table-cell;
+}
+
+

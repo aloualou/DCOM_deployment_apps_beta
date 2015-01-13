@@ -1,0 +1,41 @@
+<nav>
+    <collection label="NetFlow Logic">
+        <view name="overview" default="true"/>
+    </collection>
+    <collection label="Bandwidth by Hosts">
+        <view name="traffic_by_source"/>
+        <view name="traffic_by_destination"/>
+        <view name="traffic_by_application"/>
+        <view name="traffic_by_protocol"/>
+        <collection label="Reports">
+            <view name="simple_top_talkers"/>
+            <view name="simple_top_listeners"/>
+            <view name="simple_top_host_pairs"/>
+        </collection>
+    </collection>
+    <collection label="Bandwidth by Network Devices">
+        <view name="devices_traf"/>
+        <view name="devices_packets"/>
+        <view name="interfaces_traffic"/>
+    </collection>
+    <collection label="Services">
+    </collection>
+    <collection label="Security Events">
+    </collection>
+    <collection label="Supplemental Traffic Statistics">
+    </collection>
+    <collection label="Cisco ASA Monitor">
+    </collection>
+    <collection label="Palo Alto Networks">
+    </collection>
+    <collection label="Search">
+        <a href="/app/netflow/flashtimeline?q=search%20`netflow_search_traffic_rules`">Traffic Timeline</a>
+        <saved source="unclassified" />
+    </collection>
+    <collection label="Settings">
+        <a href="/manager/netflow/apps/local/netflow/setup?action=edit">Setup</a>
+        <view name="exporters_snmp_config"/>
+        <view name="configuration"/>
+    </collection>
+</nav>
+

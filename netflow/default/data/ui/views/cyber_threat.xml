@@ -1,0 +1,279 @@
+<dashboard onunloadCancelJobs="True" script="drilldown.js">
+    <label>Cyber Threat Statistics</label>
+    <description>Statistics provided for the last 24 hours</description>
+    <row>
+        <single>
+            <title>APT 1 (from Mandiant)</title>
+            <searchString>
+                `netflow_index` nfc_id="20051" 
+                | stats count
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="field">count</option>
+            <option name="beforeLabel">Detected</option>
+            <option name="afterLabel">Events</option>
+            <option name="linkFields">beforelabel,result</option>
+            <option name="linkView">
+                search
+            </option>
+            <option name="linkSearch">
+                `netflow_index` nfc_id="20051" 
+            </option>
+        </single>
+        <single>
+            <title>Botnet Command &amp; Control (Emergingthreats.net)</title>
+            <searchString>
+                `netflow_index` nfc_id="20050" 
+                | stats count
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="field">count</option>
+            <option name="beforeLabel">Total Events</option>
+            <option name="afterLabel">Total Events</option>
+            <option name="linkFields">beforelabel,result</option>
+            <option name="linkView">
+                search
+            </option>
+            <option name="linkSearch">
+                `netflow_index` nfc_id="20050" 
+            </option>
+        </single>
+        <single>
+            <title>Malicious Hosts (Alienvault Reputation)</title>
+            <searchString>
+                `netflow_index` nfc_id="20052" 
+                | stats count
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="field">count</option>
+            <option name="beforeLabel">Total Events</option>
+            <option name="afterLabel">Total Events</option>
+            <option name="linkFields">beforelabel,result</option>
+            <option name="linkView">
+                search
+            </option>
+            <option name="linkSearch">
+                `netflow_index` nfc_id="20052" 
+            </option>
+        </single>
+    </row>
+    <row>
+        <map>
+            <title>Events by Geo</title>
+            <searchString>
+                `netflow_index` (nfc_id="20051" OR nfc_id="20050" OR nfc_id="20052") 
+                | eval event_type=case( nfc_id="20051","APT 1",
+                                        nfc_id="20050","C&amp;C",
+                                        nfc_id="20052","Reputation")
+                | iplocation dest_ip 
+                | geostats count by event_type
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="mapping.markerLayer.markerOpacity">0.8</option>
+            <option name="mapping.markerLayer.markerMinSize">10</option>
+            <option name="mapping.markerLayer.markerMaxSize">50</option>
+            <option name="mapping.fieldColors">{APT 1:0x0000FF, Botnet:0x32CD32, Malicious:0xDC143C}</option>
+            <option name="mapping.data.maxClusters">1000</option>
+            <option name="mapping.map.center">(39.8282,-98.5795)</option>
+            <option name="mapping.map.zoom">4</option>
+            <option name="mapping.tileLayer.minZoom">2</option>
+            <option name="mapping.tileLayer.maxZoom">10</option>
+            <option name="drilldown">all</option>
+        </map>
+    </row>
+    <row>
+        <chart>
+            <title>Events by Time</title>
+            <searchString>
+                `netflow_index` (nfc_id="20051" OR nfc_id="20050" OR nfc_id="20052") 
+                | eval name = case(nfc_id=="20051", "APT 1", nfc_id=="20050", "Botnet C&amp;C", nfc_id==20052, "Malicious Hosts") 
+                | timechart count by name
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="charting.chart">line</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Count</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+    </row>
+    <row>
+        <table id="table_1_1">
+            <title>Events by Source IP</title>
+            <searchTemplate>
+                `netflow_index` (nfc_id="20050" OR nfc_id="20051" OR nfc_id="20052") 
+                | stats count by src_ip 
+                | join type=left src_ip [search `netflow_index` nfc_id="20051" 
+                    | `sampling(bytes)` 
+                    | `sampling(min_bytes)` 
+                    | `sampling(max_bytes)` 
+                    | `sampling(flow_count)` 
+                    | stats count as apt_num sum(bytes) as traffic_apt1, distinct_count(dest_ip) as dest_count_apt1 by src_ip] 
+                | join type=left src_ip [search `netflow_index` nfc_id="20050" 
+                    | `sampling(bytes)` 
+                    | `sampling(min_bytes)` 
+                    | `sampling(max_bytes)` 
+                    | `sampling(flow_count)` 
+                    | stats count as bot_num sum(bytes) as traffic_bot, distinct_count(dest_ip) as dest_count_bot by src_ip] 
+                | join type=left src_ip [search `netflow_index` nfc_id="20052" 
+                    | `sampling(bytes)` 
+                    | `sampling(min_bytes)` 
+                    | `sampling(max_bytes)` 
+                    | `sampling(flow_count)` 
+                    | stats count as mal_num sum(bytes) as traffic_mal, distinct_count(dest_ip) as dest_count_mal by src_ip] 
+                | eval traffic_apt1 = if(isnull(traffic_apt1), 0, traffic_apt1) 
+                | eval traffic_bot = if(isnull(traffic_bot), 0, traffic_bot) 
+                | eval traffic_mal = if(isnull(traffic_mal), 0, traffic_mal) 
+                | eval dest_count_apt1 = if(isnull(dest_count_apt1), 0, dest_count_apt1) 
+                | eval dest_count_bot = if(isnull(dest_count_bot), 0, dest_count_bot) 
+                | eval dest_count_mal = if(isnull(dest_count_mal), 0, dest_count_mal) 
+                | eval apt_num = if(isnull(apt_num), 0, apt_num) 
+                | eval bot_num = if(isnull(bot_num), 0, bot_num) 
+                | eval mal_num = if(isnull(mal_num), 0, mal_num) 
+                | eval traffic = traffic_apt1 + traffic_bot + traffic_mal 
+                | eval dest_count = dest_count_apt1 . "/" . dest_count_bot . "/" . dest_count_mal                 
+                | eval event_type = apt_num . "/" . bot_num . "/" . mal_num 
+                | sort - count 
+                | head 100 
+                | eval traffic = `formatbytes(traffic)`                  
+                | table src_ip event_type traffic dest_count                  
+                | rename src_ip as "Source IP"                  
+                | rename event_type as "Flows: APT1/C&amp;C/Rep"                  
+                | rename traffic as "Traffic"                  
+                | rename dest_count as "Distinct Destinations: APT1/C&amp;C/Rep" 
+            </searchTemplate>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="count">10</option>
+            <option name="displayRowNumbers">false</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">row</option>
+        </table>
+        <table id="table_1_2">
+            <title>Events by Destination IP</title>
+            <searchTemplate>
+                `netflow_index` (nfc_id="20050" OR nfc_id="20051" OR nfc_id="20052") 
+                | stats count by dest_ip 
+                | join type=left dest_ip [search `netflow_index` nfc_id="20051" 
+                    | `sampling(bytes)` 
+                    | `sampling(min_bytes)` 
+                    | `sampling(max_bytes)` 
+                    | `sampling(flow_count)` 
+                    | stats count as apt_num sum(bytes) as traffic_apt1, distinct_count(src_ip) as dest_count_apt1 by dest_ip] 
+                | join type=left dest_ip [search `netflow_index` nfc_id="20050" 
+                    | `sampling(bytes)` 
+                    | `sampling(min_bytes)` 
+                    | `sampling(max_bytes)` 
+                    | `sampling(flow_count)` 
+                    | stats count as bot_num sum(bytes) as traffic_bot, distinct_count(src_ip) as dest_count_bot by dest_ip] 
+                | join type=left dest_ip [search `netflow_index` nfc_id="20052" 
+                    | `sampling(bytes)` 
+                    | `sampling(min_bytes)` 
+                    | `sampling(max_bytes)`  
+                    | `sampling(flow_count)` 
+                    | stats count as mal_num sum(bytes) as traffic_mal, distinct_count(src_ip) as dest_count_mal by dest_ip] 
+                | eval traffic_apt1 = if(isnull(traffic_apt1), 0, traffic_apt1) 
+                | eval traffic_bot = if(isnull(traffic_bot), 0, traffic_bot) 
+                | eval traffic_mal = if(isnull(traffic_mal), 0, traffic_mal) 
+                | eval dest_count_apt1 = if(isnull(dest_count_apt1), 0, dest_count_apt1) 
+                | eval dest_count_bot = if(isnull(dest_count_bot), 0, dest_count_bot) 
+                | eval dest_count_mal = if(isnull(dest_count_mal), 0, dest_count_mal) 
+                | eval apt_num = if(isnull(apt_num), 0, apt_num) 
+                | eval bot_num = if(isnull(bot_num), 0, bot_num) 
+                | eval mal_num = if(isnull(mal_num), 0, mal_num) 
+                | eval traffic = traffic_apt1 + traffic_bot + traffic_mal 
+                | eval dest_count = dest_count_apt1 . "/" . dest_count_bot . "/" . dest_count_mal 
+                | eval event_type = apt_num . "/" . bot_num . "/" . mal_num 
+                | sort - count 
+                | head 100 
+                | eval traffic = `formatbytes(traffic)` 
+                | table dest_ip event_type traffic dest_count 
+                | rename dest_ip as "Destination IP" 
+                | rename event_type as "Flows: APT1/C&amp;C/Rep" 
+                | rename traffic as "Traffic" 
+                | rename dest_count as "Distinct Sources: APT1/C&amp;C/Rep" 
+            </searchTemplate>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="count">10</option>
+            <option name="displayRowNumbers">false</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row>
+        <table id="table_2_1">
+            <title>Source IPs for $Source IP$ traffic:</title>
+            <searchTemplate>
+                `netflow_index` (nfc_id="20051" OR nfc_id="20050" OR nfc_id="20052") src_ip="$Source IP$"
+                | `sampling(bytes)` 
+                | `sampling(min_bytes)` 
+                | `sampling(max_bytes)` 
+                | `sampling(flow_count)`
+                | eval event_type=case(nfc_id="20051","APT 1",nfc_id="20050","Botnet",nfc_id="20052","Malicious Host")
+                | eval details_src=case(nfc_id="20051",origin,nfc_id="20052",reputation)
+                | eval details=case(details_src="block","IP Address Block",details_src="host","Distinct Host",1=1,details_src) 
+                | head 100 
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name event_type src_ip dest_ip flow_count bytes min_bytes max_bytes direction details 
+                | rename exp_ip_name as "Device" 
+                | rename event_type as "Event Type" 
+                | rename src_ip as "Source IP" 
+                | rename dest_ip as "Destination IP" 
+                | rename flow_count as "Flow Count" 
+                | rename bytes as "Traffic" 
+                | rename min_bytes as "Min bytes" 
+                | rename max_bytes as "Max bytes" 
+                | rename direction as "Direction" 
+                | rename details as "Details" 
+            </searchTemplate>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="count">10</option>
+            <option name="displayRowNumbers">false</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+        <table id="table_2_2">
+            <title>Destination IPs for $Destination IP$ traffic:</title>
+            <searchTemplate>
+                `netflow_index` (nfc_id="20051" OR nfc_id="20050" OR nfc_id="20052") dest_ip="$Destination IP$"
+                | `sampling(bytes)` 
+                | `sampling(min_bytes)` 
+                | `sampling(max_bytes)` 
+                | `sampling(flow_count)`
+                | eval event_type=case(nfc_id="20051","APT 1",nfc_id="20050","Botnet",nfc_id="20052","Malicious Host")
+                | eval details_src=case(nfc_id="20051",origin,nfc_id="20052",reputation)
+                | eval details=case(details_src="block","IP Address Block",details_src="host","Distinct Host",1=1,details_src)
+                | head 100 
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name event_type src_ip dest_ip flow_count bytes min_bytes max_bytes direction details 
+                | rename exp_ip_name as "Device" 
+                | rename event_type as "Event Type" 
+                | rename src_ip as "Source IP" 
+                | rename dest_ip as "Destination IP" 
+                | rename flow_count as "Flow Count" 
+                | rename bytes as "Traffic" 
+                | rename min_bytes as "Min bytes" 
+                | rename max_bytes as "Max bytes" 
+                | rename direction as "Direction" 
+                | rename details as "Details"
+            </searchTemplate>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <drilldown>none</drilldown>
+            <option name="count">10</option>
+            <option name="displayRowNumbers">false</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</dashboard>

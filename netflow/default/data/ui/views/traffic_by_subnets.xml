@@ -1,0 +1,205 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Traffic by Subnets</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="text" token="src_ip" searchWhenChanged="False">
+            <label>Source IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="subnet" searchWhenChanged="False">
+            <label>Subnet IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="protocol_name" searchWhenChanged="False">
+            <label>Protocol</label>
+            <default>*</default>
+        </input>
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="1,1">
+        <chart>
+            <title>Traffic Inbound</title>
+            <searchTemplate>
+                `netflow_search_rule_20011` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" src_ip="$src_ip$" 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | strcat subnet "/" mask fullsubnet 
+                | search fullsubnet="$subnet$" 
+                | `sampling(bytes_in)`
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by fullsubnet)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option> 
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <chart>
+            <title>Traffic Outbound</title>
+            <searchTemplate>
+                `netflow_search_rule_20011` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" src_ip="$src_ip$" 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | strcat subnet "/" mask fullsubnet 
+                | search fullsubnet="$subnet$" 
+                | `sampling(bytes_out)`
+                | `per_second_chart(megabits, bytes_out*8/1000000, sum(megabits) by fullsubnet)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+    </row>
+    <row grouping="2">
+        <chart>
+            <title>Inbound and Outbound Traffic</title>
+            <searchTemplate>
+                `netflow_search_rule_20011` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" src_ip="$src_ip$" 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | strcat subnet "/" mask fullsubnet 
+                | search fullsubnet="$subnet$" 
+                | `sampling(bytes_in)` 
+                | `sampling(bytes_out)`
+                | `per_second_chart(megabits, ((bytes_in+bytes_out)*8/1000000), sum(megabits) by fullsubnet)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_1_1">
+            <searchTemplate>
+                `netflow_search_rule_20011` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" src_ip="$src_ip$" 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | strcat subnet "/" mask fullsubnet 
+                | search fullsubnet="$subnet$" 
+                | `sampling(bytes_in)` 
+                | `sampling(bytes_out)` 
+                | `sampling(packets_in)` 
+                | `sampling(packets_out)`
+                | eval bytes = bytes_in+bytes_out
+                | stats sum(bytes) AS TrafficAmount 
+                        sum(bytes_in) AS TrafficAmountIn 
+                        sum(packets_in) AS PacketsAmountIn 
+                        sum(bytes_out) AS TrafficAmountOut 
+                        sum(packets_out) AS PacketsAmountOut 
+                        by exp_ip src_ip fullsubnet protocol_name 
+                | sort 0 - TrafficAmount
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)`
+                | `average_speed(TrafficSpeedIn, TrafficAmountIn*8)`
+                | `average_speed(TrafficSpeedOut, TrafficAmountOut*8)`
+                | `average_speed(PacketsSpeedIn, PacketsAmountIn)`
+                | `average_speed(PacketsSpeedOut, PacketsAmountOut)`
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_traffic_column(TrafficIn, TrafficAmountIn, TrafficSpeedIn)`
+                | `format_traffic_column(TrafficOut, TrafficAmountOut, TrafficSpeedOut)`
+                | `format_packets_column(PacketsIn, PacketsAmountIn, PacketsSpeedIn)`
+                | `format_packets_column(PacketsOut, PacketsAmountOut, PacketsSpeedOut)`
+                | `get_exporter_name(exp_ip_name)`
+                | table fullsubnet exp_ip_name src_ip protocol_name TrafficIn TrafficOut Traffic PacketsIn PacketsOut
+                | rename exp_ip_name as "Device" 
+                | rename fullsubnet as "Subnet/mask" 
+                | rename src_ip as "Source IP" 
+                | rename protocol_name as "Protocol" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename TrafficIn as "Average Traffic Rate (Total Traffic) Inbound"
+                | rename TrafficOut as "Average Traffic Rate (Total Traffic) Outbound"
+                | rename PacketsIn as "Average Packet Rate (Total Packets) Inbound"
+                | rename PacketsOut as "Average Packet Rate (Total Packets) Outbound"
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row>
+        <table id="table_2_1">
+            <title>Top Source Hosts</title>
+            <searchTemplate>
+                `netflow_search_rule_20011`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | strcat subnet "/" mask fullsubnet 
+                | search fullsubnet="$Subnet/mask$" 
+                | `sampling(bytes_in)` 
+                | `sampling(bytes_out)` 
+                | `sampling(packets_in)` 
+                | `sampling(packets_out)`
+                | eval bytes = bytes_in+bytes_out
+                | stats sum(bytes) AS TrafficAmount 
+                        sum(bytes_in) AS TrafficAmountIn 
+                        sum(packets_in) AS PacketsAmountIn 
+                        sum(bytes_out) AS TrafficAmountOut 
+                        sum(packets_out) AS PacketsAmountOut 
+                        by exp_ip src_ip fullsubnet protocol_name 
+                | sort 0 - TrafficAmount
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)`
+                | `average_speed(TrafficSpeedIn, TrafficAmountIn*8)`
+                | `average_speed(TrafficSpeedOut, TrafficAmountOut*8)`
+                | `average_speed(PacketsSpeedIn, PacketsAmountIn)`
+                | `average_speed(PacketsSpeedOut, PacketsAmountOut)`
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_traffic_column(TrafficIn, TrafficAmountIn, TrafficSpeedIn)`
+                | `format_traffic_column(TrafficOut, TrafficAmountOut, TrafficSpeedOut)`
+                | `format_packets_column(PacketsIn, PacketsAmountIn, PacketsSpeedIn)`
+                | `format_packets_column(PacketsOut, PacketsAmountOut, PacketsSpeedOut)`
+                | `get_exporter_name(exp_ip_name)`
+                | table fullsubnet exp_ip_name src_ip protocol_name TrafficIn TrafficOut Traffic PacketsIn PacketsOut
+                | rename exp_ip_name as "Device" 
+                | rename fullsubnet as "Subnet/mask" 
+                | rename src_ip as "Source IP" 
+                | rename protocol_name as "Protocol" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename TrafficIn as "Average Traffic Rate (Total Traffic) Inbound"
+                | rename TrafficOut as "Average Traffic Rate (Total Traffic) Outbound"
+                | rename PacketsIn as "Average Packet Rate (Total Packets) Inbound"
+                | rename PacketsOut as "Average Packet Rate (Total Packets) Outbound"
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

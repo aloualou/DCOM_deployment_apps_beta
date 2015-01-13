@@ -1,0 +1,102 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="False" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Testcases for SavedSearch</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Testcases for SavedSearch</h1>
+    ]]></param>
+  </module>
+
+  <module name="SavedSearch" layoutPanel="panel_row1_col1" autoRun="True">
+    <param name="name">test_saved_search_with_serialized_context_positive</param>
+
+    <module name="HTML">
+      <param name="html"><![CDATA[
+
+      <h3>Search properties</h3>
+      $search$<br>
+      earliest=$search.timeRange.earliest$<br>
+      latest=$search.timeRange.latest$<br>
+      <br>
+      sid=$results.sid$<br>
+
+
+
+      <h3>Serialized Context Values</h3>
+
+      <table border="0">
+        <tr>
+          <td>should be:<br>
+      group1=per_index_thruput<br>
+      group2=per_host_thruput<br>
+      group3=per_sourcetype_thruput<br>
+      group3=per_source_thruput <br>
+      group4=per_index_thruput <br>
+      group5=per_host_thruput<br>
+      group6=per_sourcetype_thruput<br>
+      group6=per_source_thruput<br>
+      group7=per_index_thruput<br>
+      group8=per_host_thruput<br>
+      group9=per_sourcetype_thruput<br>
+      group9=per_source_thruput<br>
+          </td>
+
+          <td>is:<br>
+            group1=$group1$<br>
+            group2=$group2$<br>
+            group3=$group3$<br>
+            group4=$group4$<br>
+            group5=$group5$<br>
+            group6=$group6$<br>
+            group7=$group7$<br>
+            group8=$group8$<br>
+            group9=$group9$'
+          </td>
+        </tr>
+      </table>
+
+      ]]></param>
+    </module>
+  </module>
+
+   <module name="SavedSearch" layoutPanel="panel_row1_col2" autoRun="True">
+    <param name="name">test_saved_search_with_schedule</param>
+
+    <module name="HTML">
+      <param name="html"><![CDATA[
+
+      <h3>Search properties</h3>
+      $search$<br>
+      earliest=$search.timeRange.earliest$<br>
+      latest=$search.timeRange.latest$<br>
+      <br>
+      sid=$results.sid$<br>
+
+      ]]></param>
+    </module>
+  </module>
+    
+
+    
+    
+    
+
+    
+
+
+    
+        
+
+</view>

@@ -1,0 +1,79 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Pulldown - static config</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Pulldown - static config</h1>
+    ]]></param>
+  </module>
+  
+  <module name="HTML" layoutPanel="panel_row1_col1" group="example: static pulldown ">
+    <param name="html"><![CDATA[
+      Here we start with a single static pulldown element, configure it to output "report" for downstream modules, and then we insert it directly into a $report$ token in a Search module.  
+      ]]></param>
+  </module>
+
+  <module name="Pulldown" layoutPanel="panel_row2_col1" autoRun="True">
+    <param name="name">selectedReport</param>
+    <param name="label">Show </param>
+    <param name="staticFieldsToDisplay">
+      <list>
+        <param name="label">Average eps</param>
+        <param name="value">avg(eps)</param>
+      </list>
+      <list>
+        <param name="label">min, max and average</param>
+        <param name="value">min(eps) avg(eps) max(eps)</param>
+      </list>
+    </param>
+
+    <module name="Search">
+      <param name="search">index=_internal source="*metrics.log" group="per_sourcetype_thruput" | stats $selectedReport$ by series</param>
+      <param name="earliest">-1h</param>
+      <param name="latest">now</param>
+      
+      <module name="Pager">
+        <param name="entityName">results</param>
+        <module name="SimpleResultsTable">
+          <param name="displayRowNumbers">False</param>
+          <param name="entityName">results</param>
+        </module>
+      </module>
+
+      <!-- this HTML module here is just to show you the token values and the search -->
+      <!-- feel free to delete it -->
+      <module name="HTML">
+        <param name="html"><![CDATA[
+          the report is: <b>$selectedReport$</b><br>
+          the report label is: <b>$selectedReport.label$</b><br>
+          the entire search is: <b>$search$</b>
+        ]]></param>
+      </module>
+
+    </module>
+  </module>
+
+  <module name="HTML" layoutPanel="panel_row2_col2">
+    <param name="html"><![CDATA[
+      <h3>Notes</h3>
+      <ol class="notesList">
+        <li>Where Splunk's modules often have a 'settingToCreate' param, Sideview modules have something similar but we just call it 'name'</li>
+        <li>Note the use of a HTML module to render HTML including the dynamic values of our $foo$ tokens. <a href="html2_dynamic_ui_tokens">skip to the HTML module docs</a>.</li>
+        <li>
+          read the specification for the Sideview module <a href="/modules#Splunk.Module.Pulldown" target="_blank">Pulldown and its params</a>
+        </li>
+
+      </ol>
+      ]]></param>
+  </module>
+</view>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CmConfig xmlns="http://purl.org/cloudmeter/config" version="6.1.1">
+    <Vocabulary id="dhcp">
+    	<Name>DHCP Protocol Vocabulary</Name>
+        <Locked>true</Locked>
+        <Term id="dhcp.event">
+            <Type>object</Type>
+            <Comment>Event representing DHCP</Comment>
+        </Term>
+        <Term id="dhcp.message-type">
+            <Type>shortstring</Type>
+            <Comment>The type of DHCP message</Comment>
+        </Term>
+        <Term id="dhcp.filename">
+            <Type>shortstring</Type>
+            <Comment>Name of boot file used during initialization</Comment>
+        </Term>
+        <Term id="dhcp.client-mac">
+            <Type>shortstring</Type>
+            <Comment>Mac address of client</Comment>
+        </Term>
+        <Term id="dhcp.current-client-ip">
+            <Type>shortstring</Type>
+            <Comment>Client's current IP address</Comment>
+        </Term>
+        <Term id="dhcp.dns-ip">
+            <Type>shortstring</Type>
+            <Comment>DNS server's ip</Comment>
+        </Term>
+        <Term id="dhcp.relay-ip">
+            <Type>shortstring</Type>
+            <Comment>Relay agent IP address  (used when booting via a relay agent).</Comment>
+        </Term>
+        <Term id="dhcp.lease-time">
+            <Type>uint32</Type>
+            <Comment>Specifies lease time DHCP server is willing to offer</Comment>
+        </Term>
+        <Term id="dhcp.server-ip">
+            <Type>shortstring</Type>
+            <Comment>IP address of the next server (used when booting via a server)</Comment>
+        </Term>
+        <Term id="dhcp.server-name">
+            <Type>shortstring</Type>
+            <Comment>Host name of next server</Comment>
+        </Term>
+        <Term id="dhcp.new-client-ip">
+            <Type>shortstring</Type>
+            <Comment>New IP addr assigned to client</Comment>
+        </Term>
+        <Term id="dhcp.new-client-subnet">
+            <Type>shortstring</Type>
+            <Comment>New IP subnet assigned to client</Comment>
+        </Term>
+        <Term id="dhcp.gateway-ip">
+            <Type>shortstring</Type>
+            <Comment>IP addr of the gateway</Comment>
+        </Term>
+    </Vocabulary>
+</CmConfig>

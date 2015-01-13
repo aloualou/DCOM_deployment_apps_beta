@@ -1,0 +1,101 @@
+<dashboard onunloadCancelJobs="True">
+    <label>Cisco Overview</label>
+    <description>Statistics provided for the last 24 hours</description>
+    <row>
+        <map>
+            <title>Events by Geo</title>
+            <searchString>
+                `netflow_search_rule_20019` 
+                | stats sum(created_count) as total_num count by dest_ip 
+                | iplocation dest_ip 
+                | geostats sum(total_num)
+                | rename sum(total_num) as "Total Events" 
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="height">500px</option>
+            <option name="mapping.seriesColors">[0x5379af,0x9ac23c,0xf7902b,0x956d95,0x6ab7c7,0xd85d3c,0xfac51c,0xdd86af]</option>
+            <option name="mapping.data.maxClusters">500</option>
+            <option name="mapping.markerLayer.markerOpacity">0.8</option>
+            <option name="mapping.markerLayer.markerMinSize">10</option>
+            <option name="mapping.markerLayer.markerMaxSize">60</option>
+            <option name="mapping.map.zoom">4</option>
+        </map>
+    </row>
+    <row>
+        <chart>
+            <title>Top Bandwidth Consumers (NFI rule 10018/20090)</title>
+            <searchString>
+                `netflow_search_rule_20018` 
+                | eval bytes = `formatbytes(bytes)` 
+                | strcat src_ip "/" user ip_user 
+                | timechart limit=10 sum(bytes) by ip_user useother="f" 
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mb</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <chart>
+            <title>Top Destinations (NFI rule 10019/20090)</title>
+            <searchString>
+                `netflow_search_rule_20019` 
+                | eval bytes = `formatbytes(bytes)` 
+                | timechart limit=10 sum(bytes) by dest_ip useother="f" 
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mb</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+    </row>
+    <row>
+        <chart>
+            <title>Top Violators (NFI rule 10020/20090)</title>
+            <searchString>
+                `netflow_search_rule_20020` 
+                | timechart limit=10 sum(denied_count) by src_ip useother="f" 
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Count</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <chart>
+            <title>Top Connectors (NFI rule 10021/20090)</title>
+            <searchString>
+                `netflow_search_rule_20021` 
+                | strcat src_ip "/" user ip_user 
+                | timechart limit=10 sum(created_count) by ip_user useother="f" 
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Count</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+    </row>
+</dashboard>

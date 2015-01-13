@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isPersistable="true" isSticky="true" isVisible="true" objectMode="viewconf" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>App Install Health</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="panel_row1_col1" autoRun="true">
+		<module name="SOLNSearch" layoutPanel="panel_row1_col1" >
+			<param name="search">
+				<![CDATA[
+				| rest /servicesNS/nobody/Splunk_TA_vmware/configs/conf-hydra_node count=0 splunk_server=local | dedup host | fields host, user, updated
+				]]>
+			</param>
+			<module name="SOLNPostProcess">
+				<param name="search">
+				<![CDATA[
+					| stats count | rename count as facount
+				]]>
+				</param>
+				<module name="SOLNResultsLoader" layoutPanel="panel_row1_col1">
+					<param name="displayName">facount</param>
+					<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+						<param name="content"><![CDATA[
+							$facount[0].facount$ Data Collection Node(s)
+						]]></param>
+						<param name="style">clear:both;</param>
+					</module>
+				</module>
+			</module>
+			<module name="SOLNPostProcess">
+				<param name="search">
+					<![CDATA[
+					| table host, user updated
+					]]>
+				</param>
+				<module name="JobProgressIndicator" />
+				<module name="Paginator">
+					<param name="entityName">results</param>
+					<param name="count">10</param>
+					<param name="maxPages">15</param>
+					<module name="SimpleResultsTable">
+						<param name="drilldown">all</param>
+						<module name="SOLNRedirect">
+							<param name="url">flashtimeline</param>
+							<param name="paramList">search.sid</param>
+							<param name="renameList">sid</param>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row1_col2_header">
+				<param name="content">
+				<![CDATA[
+				ESXi host log events over last 24 hours
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row1_col2">
+			<param name="search">
+				<![CDATA[
+				| metasearch sourcetype="vmware:esxlog*" earliest=-24h | stats first(_time) AS "latest" by host | eval status=if(latest>(now()-900),"Yes","No") | rename status as "Events within last 15 minutes" | table host, "Events within last 15 minutes"
+				]]>
+			</param>
+			<module name="JobProgressIndicator" />
+				<module name="Paginator">
+				<param name="entityName">results</param>
+				<param name="count">10</param>
+				<param name="maxPages">15</param>
+				<module name="SimpleResultsTable">
+					<param name="drilldown">all</param>
+					<module name="SOLNRedirect">
+						<param name="url">flashtimeline</param>
+						<param name="paramList">search.sid</param>
+						<param name="renameList">sid</param>
+					</module>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row1_col3">
+			<param name="search">
+				<![CDATA[
+				| metasearch sourcetype="vmware:vclog*" earliest=-4h | stats values(sourcetype) AS "Available VC Log Sourcetypes" by host
+				]]>
+			</param>
+			<module name="SOLNPostProcess">
+				<param name="search">
+				<![CDATA[
+					| stats count | rename count as vcforwardercount
+				]]>
+				</param>
+				<module name="SOLNResultsLoader" layoutPanel="panel_row1_col3">
+					<param name="displayName">vcforwardercount</param>
+					<module name="SOLNContent" layoutPanel="panel_row1_col3_header">
+						<param name="content"><![CDATA[
+							$vcforwardercount[0].vcforwardercount$ vCenter Forwarder(s) count over last 4 hours
+						]]></param>
+						<param name="style">clear:both;</param>
+					</module>
+				</module>
+			</module>
+			<module name="JobProgressIndicator" />
+				<module name="Paginator">
+				<param name="entityName">results</param>
+				<param name="count">10</param>
+				<param name="maxPages">15</param>
+				<module name="SimpleResultsTable">
+					<param name="drilldown">all</param>
+					<module name="SOLNRedirect">
+						<param name="url">flashtimeline</param>
+						<param name="paramList">search.sid</param>
+						<param name="renameList">sid</param>
+					</module>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+				<param name="content">
+				<![CDATA[
+				Status for VMware Sourcetypes received in last 30 days
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row2_col1">
+			<param name="search">
+				<![CDATA[
+				| metadata type=sourcetypes | search sourcetype="vmware:*" | eval thirtyDaysAgo=now()-(3600*24*30) | where lastTime > thirtyDaysAgo | eval timeSinceLastIndexed=now()-recentTime | eval timeSinceLastSent=now()-lastTime | eval lastIndexTime=strftime(recentTime, "%m/%d/%y %H:%M:%S %Z") | eval lastSentTime=strftime(lastTime,"%m/%d/%y %H:%M:%S %Z") | eval ReceivedFrom=if(match(sourcetype,"vmware:vclog*"), "vCenter Forwarder", "Forwarder Appliance") | eval IndexedWithinFourHours=if(timeSinceLastIndexed<=(3600*4), "Yes", "No") |  eval SentFromSourceWithinFourHours=if(timeSinceLastSent<=(3600*4), "Yes", "No")  | rename lastIndexTime as "Recent Index Time" | rename lastSentTime as "Recent Sent Time" | rename IndexedWithinFourHours as "Indexed within last 4 hours" | rename SentFromSourceWithinFourHours as "Sent within last 4 hours" | rename ReceivedFrom as "Received From" | sort -"Time Last Received" | table sourcetype, "Recent Index Time", "Indexed within last 4 hours", "Recent Sent Time", "Sent within last 4 hours","Received From"
+				]]>
+			</param>
+			<module name="JobProgressIndicator" />
+			<module name="Paginator">
+				<param name="entityName">results</param>
+				<param name="count">10</param>
+				<param name="maxPages">15</param>
+				<module name="SimpleResultsTable">
+					<param name="drilldown">all</param>
+					<module name="SOLNRedirect">
+						<param name="url">flashtimeline</param>
+						<param name="paramList">search.sid</param>
+						<param name="renameList">sid</param>
+					</module>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row3_col1_header">
+				<param name="content">
+				<![CDATA[
+				Lookups in SA-VMW-HiearchyInventory Addon that must be populated
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+			<param name="search">
+				<![CDATA[
+				| inputlookup FullHierarchy | stats count as fullhierarchycount | eval isPopulated=if(fullhierarchycount>0,"Populated","Empty") | fields fullhierarchycount, isPopulated
+				]]>
+			</param>
+			<module name="SOLNResultsLoader" layoutPanel="panel_row3_col1">
+				<param name="displayName">fullhierarchycount</param>
+				<module name="SOLNContent" layoutPanel="panel_row3_col1">
+					<param name="content"><![CDATA[
+						<h1><b>FullHierarchy</b>: $fullhierarchycount[0].isPopulated$ with $fullhierarchycount[0].fullhierarchycount$ entries</h1>
+					]]></param>
+					<param name="style">clear:both;</param>
+				</module>
+				
+				<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+					<param name="search">
+					<![CDATA[
+						| inputlookup TimeDatastoreSummary | stats count as timedatastoresummarycount | eval isPopulated=if(timedatastoresummarycount>0,"Populated","Empty") | fields timedatastoresummarycount, isPopulated
+					]]>
+					</param>
+					<module name="SOLNResultsLoader" layoutPanel="panel_row3_col1">
+						<param name="displayName">timedatastoresummarycount</param>
+						<module name="SOLNContent" layoutPanel="panel_row3_col1">
+							<param name="content"><![CDATA[
+								<h1><b>TimeDatastoreSummary</b>: $timedatastoresummarycount[0].isPopulated$ with $timedatastoresummarycount[0].timedatastoresummarycount$ entries</h1>
+							]]></param>
+							<param name="style">clear:both;</param>
+						</module>
+					</module>	
+				</module>
+			</module>	
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row4_col1_header">
+				<param name="content">
+				<![CDATA[
+				Hierarchy Collection by Time
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row4_col1">
+			<param name="search">
+				<![CDATA[
+				index=_internal source=*hydra_w* OR source=*vim25*  "Finished collecting Hierarchy, stored these values" | kv pairdelim="| ", kvdelim=":", auto=f  | timechart useother=f max(last_version) by mor
+				]]>
+			</param>
+			<module name="JobProgressIndicator" />
+			<module name="HiddenChartFormatter">
+				<param name="chart">line</param>
+				<param name="charting.axisTitleX.text">Time</param>
+				<param name="charting.axisTitleY.text">Hierarchy Collection Number</param>
+				<module name="JSChart">
+					<param name="width">100%</param>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row5_col1_header">
+				<param name="content">
+				<![CDATA[
+				VMware Performance Data TSIDX Namespaces by Count
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row5_col1">
+			<param name="search">
+				<![CDATA[
+				| `tsidx_rest` | eval values_count=values_count/1000000 | search tsidx_namespace="vmw_perf*" | chart useother=`useother` sum(values_count) over tsidx_namespace by splunk_server | `sort_chart`
+				]]>
+			</param>
+			<module name="JobProgressIndicator" />
+			<module name="HiddenChartFormatter">
+				<param name="chart">bar</param>
+				<param name="charting.axisTitleX.text">tsidx_namespace</param>
+				<param name="charting.axisTitleY.text">count (millions)</param>
+				<module name="JSChart">
+					<param name="width">100%</param>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row6_col1_header">
+				<param name="content">
+				<![CDATA[
+				VMware Performance Data TSIDX Namepsaces by Filesize
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row6_col1">
+			<param name="search">
+				<![CDATA[
+				| `tsidx_rest` | `bytes2mbytes(file_size_on_disk)` | search tsidx_namespace="vmw_perf*" | chart useother=`useother` sum(file_size_on_disk) over tsidx_namespace by splunk_server | `sort_chart`
+				]]>
+			</param>
+			<module name="JobProgressIndicator" />
+			<module name="HiddenChartFormatter">
+				<param name="chart">bar</param>
+				<param name="charting.axisTitleX.text">tsidx_namespace</param>
+				<param name="charting.axisTitleY.text">filesize (megabytes)</param>
+				<module name="JSChart">
+					<param name="width">100%</param>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row7_col1_header">
+				<param name="content">
+				<![CDATA[
+				VMware Performance Data TSIDX Namespaces
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row7_col1">
+			<param name="search">
+				<![CDATA[
+				| `tsidx_rest` | `bytes2mbytes(file_size_on_disk)` | search tsidx_namespace="vmw_perf*" | eval values_count=values_count/1000000 | stats values(splunk_server) as splunk_server,min(earliest) as earliest,max(latest) as latest,sum(file_size_on_disk) as "file_size",sum(values_count) as "count" by tsidx_namespace | eval "file_size (MB)"=round(file_size,2) | eval "count (Mil)"=round(count,2) | fields - file_size,count | `uitime(earliest)` | `uitime(latest)` | sort - "file_size (MB)"
+				]]>
+			</param>
+			<module name="JobProgressIndicator" />
+			<module name="Paginator">
+				<param name="entityName">results</param>
+				<param name="count">10</param>
+				<param name="maxPages">15</param>
+				<module name="SimpleResultsTable">
+					<param name="drilldown">all</param>
+					<module name="SOLNRedirect">
+						<param name="url">flashtimeline</param>
+						<param name="paramList">search.sid</param>
+						<param name="renameList">sid</param>
+					</module>
+				</module>
+			</module>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row8_col1_header">
+				<param name="content">
+				<![CDATA[
+				Current Entity data
+				]]>
+			</param>
+		</module>
+		<module name="HiddenSavedSearch" layoutPanel="panel_row8_col1">
+			<param name="savedSearch">
+				CurrentHierarchy
+			</param>
+			<module name="SOLNPostProcess">
+				<param name="search">
+					<![CDATA[
+					| stats count list(name) AS names by type | sort str(type)
+					]]>
+				</param>
+				<module name="JobProgressIndicator" />
+				<module name="Paginator">
+					<param name="entityName">results</param>
+					<param name="count">10</param>
+					<param name="maxPages">15</param>
+					<module name="SimpleResultsTable">
+						<param name="drilldown">all</param>
+						<module name="SOLNRedirect">
+							<param name="url">flashtimeline</param>
+							<param name="paramList">search.sid</param>
+							<param name="renameList">sid</param>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>

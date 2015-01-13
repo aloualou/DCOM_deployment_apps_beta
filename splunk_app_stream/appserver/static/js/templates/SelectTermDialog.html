@@ -1,0 +1,37 @@
+<script id="select-term-template" type="text/template">
+    <div class="modal-dialog modal-lg select-term-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select a Term</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                <div class="span2 vocabulary-select">
+                    <label class="select-header">Vocabulary</label>
+                    <select id="vocabularies" size="7">
+                        <% vocabularies.each(function(vocab) { %>
+                            <option value="<%= vocab.get('id') %>"><%= vocab.get('id') %></option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <div class="span2">
+                    <label class="select-header">Terms</label>
+                    <select id="terms" size="7">
+                        <% $.each(vocabularies.at(0).get('terms'), function(i, term) { %>
+                            <option data-comment="<%= term.get('comment') %>" value="<%= term.get('id') %>"><%= term.get('name') %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                </div>
+                <div class="row">
+                    <label class="term-description">Description of Term</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="btnYes" class="btn btn-primary yes">Select</a>
+                <a href="#" data-dismiss="modal" aria-hidden="true" class="btn secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</script>

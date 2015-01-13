@@ -1,0 +1,268 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>using HTML instead of the SingleValue module</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Using HTML instead of the SingleValue module</h1>
+    ]]></param>
+  </module>
+
+  <module name="HTML" layoutPanel="panel_row1_col1">
+    <param name="html"><![CDATA[
+      <p>
+        If you put this all together, HTML is a very powerful tool and one of the things it can do easily is replace Splunk's "SingleValue" module. 
+      </p>
+
+
+<style type="text/css">
+
+  .dashboardCell .HTML { 
+    padding:0px;
+    margin:0px;
+  }
+  .valueDisplay { 
+    float:left;
+    margin:0 10px 10px 0;
+  }
+  .valueDisplay div {
+    padding:3px 5px;
+    
+    background-color:#999;
+    
+    border-radius: 4px 4px 4px 4px;
+    -moz-border-radius: 4px 4px 4px 4px;
+    -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.25) inset;
+    -box-shadow: 0 0 5px rgba(0, 0, 0, 0.25) inset;
+    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.25) inset;
+  }
+  .valueDisplay .superlow {
+    background-color:#72C72D;
+  }
+  .valueDisplay .prettylow {
+    background-color:#4DA6DF;
+  }
+
+  .valueDisplay .normal {
+    background-color:#E9DA34
+  }
+  .valueDisplay .insane {
+    background-color:#E67918;
+  }
+  .valueDisplay .impossible {
+    background-color:#BB2121;
+  }
+
+</style>
+        
+      
+    ]]></param>
+  </module>
+
+  <!--  ******************************************************************* -->
+  
+  
+  <module name="URLLoader" layoutPanel="viewHeader" autoRun="True">
+
+
+    <module name="Search" layoutPanel="panel_row2_col1" group="simply displaying single numbers or value">
+      <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | stats sum(kb) as sumKB avg(eps) as avgEPS by series | sort - sumKB | head 1</param>
+      <param name="earliest">-15min</param>
+
+      <module name="HTML">
+        <param name="html"><![CDATA[
+          <div class="valueDisplay">
+            <div><b>total KB = $results[0].sumKB$</b></div>
+          </div>
+          <br clear="all">
+        ]]></param>
+      </module>
+
+    </module>
+
+    <module name="Search" layoutPanel="panel_row3_col1" group="dynamic links">
+      <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | stats sum(kb) as sumKB avg(eps) as avgEPS by series | sort - sumKB | head 1</param>
+      <param name="earliest">-15min</param>
+
+      <module name="HTML">
+        <param name="html"><![CDATA[
+          <p>
+            linking to another view is just a matter of using an &lt;a&gt; tag, since this is just HTML.  So linking and passing a dynamic value is just a matter of putting a $$foo$$ token into the href attribute of that &lt;a&gt; tag.  Simple enough? 
+          </p>
+
+          <div class="valueDisplay">
+            <div><b>total KB = $results[0].sumKB$</b></div>
+          </div>
+          <div class="valueDisplay">
+            <div><b>top sourcetype= <a href='flashtimeline?q=search index=* sourcetype="$results[0].series$"&amp;earliest=-15min&amp;latest=now'>$results[0].series$</a></b></div>
+          </div>
+          <br clear="all">
+        ]]></param>
+      </module>
+
+    </module>
+
+
+    <module name="HTML"  layoutPanel="panel_row4_col1">
+      <param name="html"><![CDATA[
+        <p>
+            Although embedding $$foo$$ arguments directly into URLs often works with simple alphanumeric values you often have to worry about escaping special characters.   ResultsValueSetter and ValueSetter can help create the URLs for you: 
+          </p>
+      ]]></param>
+    </module>
+    
+    <module name="Search" layoutPanel="panel_row4_col1" group="using ValueSetter to escape link arguments">
+      <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | stats sum(kb) as sumKB avg(eps) as avgEPS by series | sort - sumKB | head 1</param>
+      <param name="earliest">-15min</param>
+      <module name="ResultsValueSetter">
+        <param name="fields">series,sumKB</param>
+        <module name="ValueSetter">
+          <param name="name">encodedURL</param>
+          <param name="urlEncodeKeys">series</param>
+          <param name="value"><![CDATA[
+            flashtimeline?q=search index=* sourcetype="$series$"&earliest=15min&latest=now
+          ]]></param>
+          <module name="HTML">
+            <param name="html"><![CDATA[
+              
+              <div class="valueDisplay">
+                <div><b>total KB = $sumKB$</b></div>
+              </div>
+              <div class="valueDisplay">
+                <div><b>top sourcetype= <a href='$encodedURL$'>$results[0].series$</a></b></div>
+              </div>
+              <br clear="all">
+            ]]></param>
+          </module>
+        </module>
+      </module>
+    </module>
+
+
+
+
+
+    <module name="Search" layoutPanel="panel_row5_col1" group="getting some color in there.">
+      <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | stats sum(kb) as KB by series | sort - sumKB | head 1 | rangemap field=KB superlow=0-0.99 prettylow=1-499.99 normal=500-4999.99 insane=5000-99999999 impossible=100000000-100000000000000</param>
+      <param name="earliest">-15min</param>
+
+      <module name="HTML">
+        <param name="html"><![CDATA[
+          <div class="valueDisplay">
+            <div class="$results[0].range$">
+              <b>total KB = $results[0].KB$</b>
+            </div>
+          </div>
+          <br clear="all">
+        ]]></param>
+      </module>
+
+    </module>
+
+    <module name="HTML"  layoutPanel="panel_row6_col1">
+      <param name="html"><![CDATA[
+        The way that you combined N SingleValue modules without running N separate searches was to use postProcess searches.  This method is also possible with the HTML module of course.
+      ]]></param>
+    </module>
+    <module name="Search" layoutPanel="panel_row6_col1" group="Using PostProcess to make it cleaner">
+      <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | stats sum(kb) as sumKB avg(eps) as avgEPS by series | sort - avgEPS | head 1</param>
+      <param name="earliest">-15min</param>
+
+      <module name="PostProcess">
+        <param name="search">| rangemap field=sumKB superlow=0-0.99 prettylow=1-499.99 normal=500-4999.99 insane=5000-99999999 impossible=100000000-100000000000000</param>
+
+        <module name="HTML">
+          <param name="html"><![CDATA[
+            <div class="valueDisplay">
+              <div class="$results[0].range$">
+                <b>total KB = $results[0].sumKB$</b>
+              </div>
+            </div>
+          ]]></param>
+        </module>
+      </module>
+
+      <module name="PostProcess">
+        <param name="search">| rangemap field=avgEPS superlow=0-0.99 prettylow=1-499.99 normal=500-4999.99 insane=5000-99999999 impossible=100000000-100000000000000</param>
+
+        <module name="HTML">
+          <param name="html"><![CDATA[
+            <div class="valueDisplay">
+              <div class="$results[0].range$">
+                <b>avg EPS = $results[0].avgEPS$</b>
+              </div>
+            </div>
+          ]]></param>
+        </module>
+      </module>
+
+    </module>
+
+
+
+    <module name="HTML"  layoutPanel="panel_row7_col1">
+      <param name="html"><![CDATA[
+        However it's even easier to just build all you value fields and color fields in the search language and then display it all at once in a single HTML module.  This allows you to control the layout a LOT more.  You could lay out your display in tables or in floated divs or even in a &lt;canvas&gt; element. 
+      ]]></param>
+    </module>
+    <module name="Search" layoutPanel="panel_row7_col1" group="using multiple fields to make it cleaner.">
+      <param name="search">
+        index=_internal source=*metrics.log group=per_sourcetype_thruput 
+        | stats sum(kb) as sumKB avg(eps) as avgEPS by series 
+        | sort - sumKB | head 1 
+        | rangemap field=sumKB superlow=0-0.99 prettylow=1-499.99 normal=500-4999.99 insane=5000-99999999 impossible=100000000-100000000000000
+        | rename range as kbRange
+        | rangemap field=avgEPS superlow=0-0.99 prettylow=1-499.99 normal=500-4999.99 insane=5000-99999999 impossible=100000000-100000000000000
+        | rename range as avgEPSRange
+        </param>
+      <param name="earliest">-15min</param>
+
+      <module name="HTML">
+        <param name="html"><![CDATA[
+          <div class="valueDisplay">
+            <div class="$results[0].kbRange$">
+              <b>total KB = $results[0].sumKB$</b>
+            </div>
+          </div>
+          <div class="valueDisplay">
+            <div class="$results[0].avgEPSRange$">
+              <b>avg EPS = $results[0].avgEPS$</b>
+            </div>
+          </div>
+
+          <br clear="all">
+        ]]></param>
+      </module>
+
+    </module>
+
+
+    
+
+    <module name="HTML" layoutPanel="panel_row2_col2">
+      <param name="html"><![CDATA[
+        <h3>Notes</h3>
+        <ol class="notesList">
+          
+          <li>
+            read the specification for the Sideview module <a href="/modules#Splunk.Module.HTML" target="_blank">HTML and its params</a>
+          </li>
+        </ol>
+        ]]></param>
+    </module>
+  </module>
+    
+   
+
+
+</view>

@@ -1,0 +1,312 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Top Devices by Packet Rate</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="text" token="src_ip" searchWhenChanged="False">
+            <label>Source IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_ip" searchWhenChanged="False">
+            <label>Destination IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="protocol_name" searchWhenChanged="False">
+            <label>Protocol</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="src_port" searchWhenChanged="False">
+            <label>Src. Port</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_port" searchWhenChanged="False">
+            <label>Dest. Port</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="src_dscp" searchWhenChanged="False">
+            <label>Src. DSCP</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_dscp" searchWhenChanged="False">
+            <label>Dest. DSCP</label>
+            <default>*</default>
+        </input>
+        <input type="time" searchWhenChanged="false">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2">
+        <chart>
+            <title>Top 10 Devices</title>
+            <searchTemplate>
+                `netflow_search_rule_20068` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                                (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                                           src_port="$src_port$" dest_port="$dest_port$" 
+                                           (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                           (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `sampling(packets_in)`
+                | `get_exporter_name(exp_ip_name)`
+                | `per_second_chart(kilopackets, packets_in*2/1000, sum(kilopackets) by exp_ip_name)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Kpps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_1_1">
+            <searchTemplate>
+                `netflow_search_rule_20068` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                                (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                                           src_port="$src_port$" dest_port="$dest_port$" 
+                                           (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                           (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `devices_table(PacketsAmount)` 
+            </searchTemplate>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row grouping="2">
+        <chart id="chart_2_1">
+            <title>Device Packets Details: $Device$</title>
+            <searchTemplate>
+                `netflow_search_rule_20068` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `get_exporter_name(exp_ip_name)`
+                | search  exp_ip_name="$Device$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                         (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                         src_port="$src_port$" dest_port="$dest_port$" 
+                         (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                         (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `get_iface_name(input_snmp_name, input_snmp)` 
+                | `get_iface_name(output_snmp_name, output_snmp)` 
+                | strcat exp_ip_name "/" input_snmp_name exp_isnmp 
+                | strcat exp_ip_name "/" output_snmp_name exp_osnmp 
+                | eval snmps=exp_isnmp+","+exp_osnmp | eval snmps=split(snmps,",")
+                | `sampling(packets_in)`
+                | `per_second_chart(kilopackets, packets_in/1000, sum(kilopackets) by snmps)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Kpps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_2_1">
+            <searchTemplate>
+                `netflow_search_rule_20068` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `get_exporter_name(exp_ip_name)`
+                | search exp_ip_name="$Device$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                         (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                         src_port="$src_port$" dest_port="$dest_port$" 
+                         (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                         (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | eval snmps=input_snmp+","+output_snmp | eval snmps=split(snmps,",")
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | stats sum(bytes_in) as TrafficAmount
+                        sparkline(sum(bytes_in)) as TrafficLine 
+                        sparkline(sum(packets_in)) as PacketsLine
+                        sum(packets_in) as PacketsAmount 
+                        by exp_ip snmps
+                | `get_iface_speed(snmp_speed, snmps)`  
+                | `get_iface_name(snmp_name, snmps)`
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | eval percOfUsage = round(TrafficSpeed/(snmp_speed*1000000)*100, 2) 
+                | sort - percOfUsage PacketsAmount
+                | head 100
+                | eval TrafficSpeed = `formatbps(TrafficSpeed)`
+                | eval PacketsSpeed = `formatpps(PacketsSpeed)` 
+                | eval percOfUsage = if(isnull(percOfUsage), "", tostring(percOfUsage)+"%") 
+                | eval "Average Packet Rate/% of Usage" = PacketsSpeed."/".percOfUsage 
+                | `get_exporter_name(exp_ip_name)`
+                | eval snmps = exp_ip_name."/".snmp_name
+                | table snmps "Average Packet Rate/% of Usage" PacketsLine TrafficSpeed TrafficLine 
+                | rename snmps as "Device/Interface" 
+                | rename TrafficLine as "Traffic Line" 
+                | rename PacketsLine as "Packets Line"
+                | rename TrafficSpeed as "Average Traffic Rate"
+            </searchTemplate>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row>
+        <table id="table_3_1">
+            <title>Interface Packets Details: "$Device/Interface$"</title>
+            <searchTemplate>
+                `netflow_search_rule_20068` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | search  (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                         (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                         src_port="$src_port$" dest_port="$dest_port$" 
+                         (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                         (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `get_exporter_name(exp_ip_name)`
+                | `get_iface_name(input_snmp_name, input_snmp)` 
+                | `get_iface_name(output_snmp_name, output_snmp)` 
+                | strcat exp_ip_name "/" input_snmp_name exp_isnmp 
+                | strcat exp_ip_name "/" output_snmp_name exp_osnmp 
+                | search ( exp_isnmp="$Device/Interface$" OR exp_osnmp="$Device/Interface$" )
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | eval DirectionIN=if(exp_isnmp="$Device/Interface$","In","")    
+                | eval DirectionOUT=if(exp_osnmp="$Device/Interface$","Out","")   
+                | eval Direction=DirectionIN+","+DirectionOUT 
+                | makemv Direction delim="," 
+                | eval speed = ceil(packets_in / (t_int/1000))
+                | stats sum(bytes_in) as TrafficAmount 
+                        sum(packets_in) as PacketsAmount 
+                        sparkline(sum(bytes_in)) as TrafficLine 
+                        sparkline(sum(packets_in)) as PacketsLine 
+                        max(speed) AS "Max" 
+                        min(speed) AS "Min" 
+                        avg(speed) AS "Avg" 
+                        stdev(speed) AS "StDev" 
+                        perc95(speed) AS "Perc95"
+                            by exp_ip Direction 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | eval TrafficSpeed = `formatbps(TrafficSpeed)`
+                | eval PacketsSpeed = `formatpps(PacketsSpeed)` 
+                | eval Max=`formatpps(Max)`
+                | eval Min=`formatpps(Min)`
+                | eval Avg=`formatpps(Avg)`
+                | eval StDev = `formatpps(StDev)` 
+                | eval Perc95 = `formatpps(Perc95)` 
+                | table Direction TrafficSpeed TrafficLine PacketsSpeed PacketsLine Max Min Avg StDev Perc95
+                | rename TrafficLine as "Traffic Line" 
+                | rename PacketsLine as "Packets Line" 
+                | rename Avg as "Average"
+                | rename StDev as "Standart Deviation" 
+                | rename Perc95 as "95th Percentile" 
+                | rename TrafficSpeed as "Average Traffic Rate"
+                | rename PacketsSpeed as "Average Packet Rate"
+            </searchTemplate>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row>
+        <table id="table_4_1">
+            <title>Conversations Packets Details: "$Device/Interface$/$Direction$"</title>
+            <searchTemplate>
+                `netflow_search_rule_20068` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0"))
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | search  (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                         (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                         src_port="$src_port$" dest_port="$dest_port$" 
+                         (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                         (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `get_exporter_name(exp_ip_name)`
+                | search exp_ip_name = "$Device$" 
+                | eval exp_snmp_dir = "$Device/Interface$/$Direction$" 
+                | `get_iface_name(output_snmp_name, output_snmp )` 
+                | strcat  exp_ip_name "/" output_snmp_name "/Out" exp_osnmp 
+                | `get_iface_name(input_snmp_name, input_snmp )` 
+                | strcat  exp_ip_name "/" input_snmp_name "/In" exp_isnmp 
+                | where (exp_snmp_dir == exp_isnmp) OR (exp_snmp_dir == exp_osnmp) 
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | `conversation` 
+            </searchTemplate>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

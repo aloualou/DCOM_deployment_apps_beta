@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Datastore Detail</label>
+	<module name="AccountBar" layoutPanel="appHeader" />
+	<module name="AppBar" layoutPanel="navigationHeader" />
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter" />
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<!-- Static Titles have no need of existing in the main module hierarchy-->
+	<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+		<param name="content">
+			<![CDATA[Virtual Machines Storage Consumption]]>
+		</param>
+	</module>
+	<module name="SOLNContent" layoutPanel="panel_row3_col1_header">
+		<param name="content">
+			<![CDATA[Datastore Filer Latency rate [ms] (requires <a href="http://apps.splunk.com/app/1293/">Splunk App for Netapp Data ONTAP</a>)]]>
+		</param>
+	</module>
+	<module name="SOLNContent" layoutPanel="panel_row4_col1_header">
+		<param name="content">
+			<![CDATA[Datastore Filer IOPS rate (requires <a href="http://apps.splunk.com/app/1293/">Splunk App for Netapp Data ONTAP</a>)]]>
+		</param>
+	</module>
+	<module name="SOLNContent" layoutPanel="panel_row5_col1_header">
+		<param name="content">
+			<![CDATA[Datastore Volume Latency [ms] (requires <a href="http://apps.splunk.com/app/1293/">Splunk App for Netapp Data ONTAP</a>)]]>
+		</param>
+	</module>
+	<module name="SOLNContent" layoutPanel="panel_row6_col1_header">
+		<param name="content">
+			<![CDATA[Datastore Volume IOPS rate (requires <a href="http://apps.splunk.com/app/1293/">Splunk App for Netapp Data ONTAP</a>)]]>
+		</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="viewHeader" autoRun="true">
+		<module name="SOLNSearch" layoutPanel="viewHeader">
+			<param name="search">| inputlookup Entity | search type="Datastore" | dedup host | table host, moid | sort host</param>
+			<module name="SOLNDropdown">
+				<param name="valueField">host, moid</param>
+				<param name="displayField">host</param>
+				<param name="varName">host</param>
+				<param name="label">Virtual Center:</param>
+				<module name="SOLNSearch">
+					<param name="search">| inputlookup Entity | search type="Datastore" | eval dsguid=host+"-"+moid  | search host=$host.host$ | table dsguid, name, moid  | sort name</param>
+					<module name="SOLNDropdown">
+						<param name="valueField">dsguid,name,moid</param>
+						<param name="displayField">name</param>
+						<param name="varName">dsguid</param>
+						<param name="label">DataStore:</param>
+						<module name="TimeRangePicker">
+							<param name="searchWhenChanged">True</param>
+							<param name="selected">Last 4 hours</param>
+							<module name="SOLNSearch">
+								<param name="search">
+									<![CDATA[sourcetype = "vmware:inv:datastore" earliest=1 | spath moid output=datastoremoid | spath changeSet.info.nas.remotePath output=remotePath | spath changeSet.info.vmfs.extent{0}.diskName output=device | spath changeSet.info.url output=url | spath changeSet.info.name output=name | spath changeSet.summary.accessible output=accessible | spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace | spath changeSet.summary.uncommitted output=dsuncommitted | spath collectionVersion | spath changeSet.summary.type output=type | dedup host, datastoremoid, name | search name="$name.name$" host="$host.host$" | head collectionVersion!=1 keeplast=t | eval path=coalesce(remotePath, device) | stats first(name) as name first(datastoremoid) as datastoremoid first(freeSpace) as freeSpace first(capacity) as capacity first(path) as path first(url) as url first(accessible) as accessible first(dsuncommitted) as dsuncommitted first(type) as type | eval RemainingCapacity_GB=`BytesToGigaBytes(freeSpace)` | eval totalSpace=`BytesToGigaBytes(capacity)` | eval provisioned=capacity-freeSpace+if(isnull(dsuncommitted),0,dsuncommitted) | eval provisionedSpace=`BytesToGigaBytes(provisioned)` | eval Overprovisioned_GB=(provisionedSpace-totalSpace) | eval overprovisionedPct=(provisioned/capacity - 1)*100 | thresholdlookup entitytype=Datastore,perftype=inv,metric=RemainingCapacity_GB match=false | rename threshold_severity AS CapacityThreshold | thresholdlookup entitytype=Datastore,perftype=inv,metric=Overprovisioned_GB match=false | rename threshold_severity AS OverprovisionedThreshold | table name datastoremoid RemainingCapacity_GB totalSpace provisionedSpace overprovisionedPct path type accessible url Overprovisioned_GB OverprovisionedThreshold CapacityThreshold | fillnull value="Not Available" name datastoremoid RemainingCapacity_GB totalSpace provisionedSpace overprovisionedPct path type accessible url Overprovisioned_GB OverprovisionedThreshold CapacityThreshold]]>
+								</param>
+								<module name="JobProgressIndicator" layoutPanel="panel_row2_col1" />
+								<module name="SOLNNullSwapper">
+									<param name="search">
+										<![CDATA[| stats count |  eval name="Not Available" |  eval datastoremoid="Not Available" | eval RemainingCapacity_GB="Not Available" | eval totalSpace="Not Available" | eval provisionedSpace="Not Available" | eval overprovisionedPct= "Not Available" | eval path="Not Available" | eval type="Not Available" | eval accessible="Not Available" | eval url="Not Available" | eval Overprovisioned_GB="Not Available" | eval OverprovisionedThreshold="Not Available" | eval CapacityThreshold="Not Available"]]>
+									</param>
+									<module name="SOLNResultsLoader">
+										<param name="displayName">dssum</param>
+										<module name="SOLNSearch">
+											<param name="search">
+												<![CDATA[sourcetype=vmware:inv:datastore earliest=-8h  moid="$name.moid$" host="$host.host$" | spath collectionVersion | head collectionVersion!=1 keeplast=t | spath changeSet.vm.ManagedObjectReference{}.moid output=vms_moid | eval num_vms=mvcount(vms_moid) | spath changeSet.vm output=vms_obj | eval num_vms=if(isnull(vms_obj), num_vms, if(isnull(num_vms), "0", num_vms)) | stats sum(num_vms) as num_vms by host | fields num_vms | eval num_vms=if(isnull(num_vms), "Not Available", num_vms)]]>
+											</param>
+											<module name="SOLNNullSwapper">
+												<param name="search">
+													<![CDATA[| stats count | eval num_vms="Not Available"]]>
+												</param>
+												<module name="SOLNResultsLoader">
+													<param name="displayName">dssum2</param>
+													<module name="SOLNContent" layoutPanel="warnings">
+														<param name="content">
+															<![CDATA[<table class="propertyTable">
+															<tr>
+															<td class="warningIcon $dssum[0].OverprovisionedThreshold$ $dssum[0].CapacityThreshold$"></td>
+															<td style="vertical-align:top">
+															<table class="propertyTable">
+															<tr>
+															<th>Remaining Capacity:</th>
+															<td class="$dssum[0].CapacityThreshold$">$dssum[0].CapacityThreshold$</td>
+															<td>$dssum[0].RemainingCapacity_GB$</td>
+															</tr>
+															<tr>
+															<th>GB Overprovisioned:</th>
+															<td class="$dssum[0].OverprovisionedThreshold$">$dssum[0].OverprovisionedThreshold$</td>
+															<td>$dssum[0].Overprovisioned_GB$</td>
+															</tr>
+															</table>
+															</td>
+															</tr>
+															</table>]]>
+														</param>
+													</module>
+													<module name="SOLNPanelClasser" layoutPanel="warnings">
+														<param name="class">$dssum[0].OverprovisionedThreshold$,$dssum[0].CapacityThreshold$</param>
+													</module>
+													<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+														<param name="content">
+															<![CDATA[$name.name$ Configuration and Status]]>
+														</param>
+													</module>
+													<module name="SOLNContent" layoutPanel="panel_row1_col1">
+														<param name="content">
+															<![CDATA[<p>
+															<table class="propertyTable">
+															<tr>
+															<td style="vertical-align:top">
+															<table class="propertyTable">
+															<tr>
+															<th>Accessible</th>
+															<td class="dsaccess-$dssum[0].accessible$">$dssum[0].accessible$</td>
+															</tr>
+															<tr>
+															<th>Volume Type</th>
+															<td>$dssum[0].type$</td>
+															</tr>
+															</table>
+															</td>
+															</tr>
+															</table>
+															<br>
+															<hr style="clear: both;border:0;height:1px;"></hr>
+															</br>
+															<table class="propertyTable">
+															<tr>
+															<td style="vertical-align:top">
+															<table class="propertyTable">
+															<tr>
+															<th>Available Space (GB)</th>
+															<td>$dssum[0].RemainingCapacity_GB$</td>
+															</tr>
+															<tr>
+															<th>Total Space (GB)</th>
+															<td>$dssum[0].totalSpace$</td>
+															</tr>
+															</table>
+															</td>
+															<td style="vertical-align:top">
+															<table class="propertyTable">
+															<tr>
+															<th>Provisioned Space of VMs (GB)</th>
+															<td>$dssum[0].provisionedSpace$</td>
+															</tr>
+															<tr>
+															<th>Percent Overprovisioned (%)</th>
+															<td>$dssum[0].overprovisionedPct$</td>
+															</tr>
+															</table>
+															</td>
+															</tr>
+															</table>
+															<br>
+															<hr style="clear: both;border:0;height:1px;"></hr>
+															</br>
+															<table>
+															<tr>
+															<td style="vertical-align:top">
+															<table class="propertyTable">
+															<tr>
+															<th>Path</th>
+															<td>$dssum[0].path$</td>
+															</tr>
+															<tr>
+															<th>URL</th>
+															<td>$dssum[0].url$</td>
+															</tr>
+															</table>
+															</td>
+															<td style="width:75px">&nbsp;</td>
+															<td style="vertical-align:top">
+															<table class="propertyTable">
+															<tr>
+															<th>Number of VMs on Datastore</th>
+															<td>$dssum2[0].num_vms$</td>
+															</tr>
+															</table>
+															</td>
+															</tr>
+															</table>
+															</p>]]>
+														</param>
+													</module>
+												</module>
+											</module> <!-- END SOLNNullSwapper -->
+										</module> <!-- END SOLNSearch -->
+									</module>
+									<!--resultsloader-->
+									<module name="SOLNSearch">
+										<!--bottom table-->
+										<param name="search">
+											<![CDATA[sourcetype=vmware:inv:vm `HandleFourHourWindowEndConditional` "$name.name$" host="$host.host$" | spath moid output=vmmoid | spath changeSet.name output=vmname | spath changeSet.layoutEx.file{}.name output=filelist | spath changeSet.layoutEx.file{}.size output=filesizes | spath changeSet.layoutEx.file{}.type output=filetypes | spath changeSet.storage.perDatastoreUsage{}.committed output=committed | spath changeSet.storage.perDatastoreUsage{}.uncommitted output=uncommitted | spath changeSet.summary.runtime.host.moid output=vmhost | dedup vmname, vmmoid, host | eval provisioned=committed+uncommitted | rex field=filelist "\[(?<datastore>.*)\] .+/(?<filenames>[^/]+)" | eval dsname=mvindex(datastore,0) | search dsname="$name.name$" host="$host.host$" | eval uncommitted=`format_bytes(uncommitted)` | eval committed=`format_bytes(committed)` | eval provisioned=`format_bytes(provisioned)` | rename vmhost as HIDE-HostSystem-moid, vmmoid as HIDE-VirtualMachine-moid, vmname as "VirtualMachine", filenames as "Individual Files", filesizes as "Individual File Sizes", filetypes as "File Types", uncommitted as "Uncommitted Space", committed as "Committed Space", provisioned as "Provisioned Space" | table _time HIDE-HostSystem-moid host HIDE-VirtualMachine-moid "HostSystem" "VirtualMachine" "Committed Space" "Uncommitted Space" "Provisioned Space" "Individual Files" "Individual File Sizes" "File Types" | lookup FullHierarchy host, moid AS HIDE-HostSystem-moid, host AS host OUTPUT name AS HostSystem | fields - _time | rename host as HIDE-host]]>
+										</param>
+										<module name="SOLNPostProcess" layoutPanel="panel_row2_col1">
+											<param name="search">
+												<![CDATA[| fields - "Individual Files", - "Individual File Sizes", - "File Types" | eval "File Information"="[Click to Show]"]]>
+											</param>
+											<module name="JobProgressIndicator" />
+											<module name="Paginator">
+												<param name="entityName">results</param>
+												<param name="count">10</param>
+												<param name="maxPages">20</param>
+												<module name="SimpleResultsTable">
+													<param name="drilldown">all</param>
+													<module name="SOLNRedirect">
+														<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+														<param name="paramList">click.name2,click.HIDE-VirtualMachine-moid,click.HIDE-HostSystem-moid,click.HIDE-host,search.sid</param>	
+														<param name="renameList">Type,VirtualMachine-moid,HostSystem-moid,host,sid</param>
+													</module>
+												</module>
+												<module name="ViewRedirectorLink">
+													<param name="label">View Results</param>
+													<param name="viewTarget">flashtimeline</param>
+												</module>
+											</module>
+										</module>
+									</module>
+									<!-- End of SOLNSearch -->
+									<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+										<param name="search">
+											<![CDATA[sourcetype="ontap:volume" (source=volume-get-iter OR source=volume-list-info-iter-start) | eval name=coalesce(name, "volume-id-attributes.name") | stats values(name) as volname by host | lookup dnslookup clienthost AS host OUTPUT clientip AS ip | mvexpand volname | table * | join max=0 type=inner ip, volname [search sourcetype=vmware:inv:datastore changeSet.info.nas.type="NFS" | rename changeSet.info.nas.name as name, changeSet.info.nas.remotePath as path, changeSet.info.nas.remoteHost as filer, host as vcenter | dedup path filer vcenter | rex field=path ".+/(?<volname>[^/]+)" | lookup dnslookup clienthost AS filer OUTPUT clientip AS ip | table name, moid, path, filer, ip, volname, vcenter] | rename name as "Datastore name", path as "Path", volname as Volume, filer as "Filer (VMware data)", host as Filer, ip as IP, vcenter as VCenter | search moid=$name.moid$]]>
+										</param>
+										<module name="SOLNPostProcess">
+											<param name="search">| fields Filer</param>
+											<module name="JobProgressIndicator" />
+											<module name="SOLNResultsLoader">
+												<param name="displayName">filer</param>
+												<module name="SimpleResultsTable" layoutPanel="panel_row3_col1">
+													<param name="dataOverlayMode">heatmap</param>
+													<param name="displayRowNumbers">False</param>
+													<param name="drilldown">all</param>
+													<module name="SOLNRedirect">
+														<param name="url">/app/splunk_app_netapp/ontap_entity_filer</param>
+														<param name="paramList">click.Filer,search.sid</param>
+														<param name="renameList">form.name,sid</param>
+													</module>
+												</module>
+												<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+													<param name="search">
+														<![CDATA[| `tstats` avg(read_latency_average), avg(write_latency_average), avg(other_latency_average) from netapp_perf_volume groupby _time span=2m, host | search  [search `SystemHostname($filer[0].Filer$)`] | timechart avg(read_latency_average), avg(write_latency_average), avg(other_latency_average) by host | rename avg(read_latency_average) AS read_latency, avg(write_latency_average) AS write_latency, avg(other_latency_average) AS other_latency | eval read_latency=read_latency/1000 | eval write_latency=write_latency/1000 | eval other_latency=other_latency/1000]]>
+													</param>
+													<module name="JobProgressIndicator" />
+													<module name="HiddenChartFormatter">
+														<param name="chart">line</param>
+														<param name="charting.chart.showMarkers">false</param>
+														<param name="charting.axisTitleX.text">Time</param>
+														<module name="LineMarkerFormatter">
+															<module name="JSChart" />
+														</module>
+													</module>
+													<module name="SOLNSearch" layoutPanel="panel_row4_col1">
+														<param name="search">
+															<![CDATA[| `tstats` avg(read_ops_rate), avg(write_ops_rate), avg(other_ops_rate), avg(total_ops_rate)  from netapp_perf_system groupby _time span=5m, host | search  [search `SystemHostname($filer[0].Filer$)`] | timechart limit=5 avg(read_ops_rate), avg(write_ops_rate), avg(other_ops_rate), avg(total_ops_rate) by host]]>
+														</param>
+														<module name="JobProgressIndicator" />
+														<module name="HiddenChartFormatter">
+															<param name="chart">line</param>
+															<param name="charting.chart.showMarkers">false</param>
+															<param name="charting.axisTitleX.text">Time</param>
+															<module name="LineMarkerFormatter">
+																<module name="JSChart" />
+															</module>
+														</module>
+													</module>
+												</module>
+											</module>
+										</module>
+										<module name="SOLNPostProcess">
+											<param name="search">| table Volume Filer IP</param>
+											<module name="SOLNResultsLoader">
+												<param name="displayName">volume</param>
+												<module name="SimpleResultsTable" layoutPanel="panel_row5_col1">
+													<param name="dataOverlayMode">heatmap</param>
+													<param name="displayRowNumbers">False</param>
+													<param name="drilldown">all</param>
+													<module name="SOLNRedirect">
+														<param name="url">/app/splunk_app_netapp/volume_detail</param>
+														<param name="paramList">click.Volume,click.Filer,search.sid</param>
+														<param name="renameList">form.name,form.host,sid</param>
+													</module>
+												</module>
+												<module name="SOLNSearch" layoutPanel="panel_row5_col1">
+													<param name="search">
+														<![CDATA[sourcetype=ontap:perf source=VolumePerfHandler host=$volume[0].Filer$ objname=$volume[0].Volume$ | timechart limit=5 first(eval(avg_latency_average/1000)) as avg_latency_average first(eval(other_latency_average/1000)) as avg_latency_average first(eval(write_latency_average/1000)) as write_latency_average first(eval(read_latency_average/1000)) as read_latency_average by objname]]>
+													</param>
+													<module name="JobProgressIndicator" />
+													<module name="HiddenChartFormatter">
+														<param name="chart">line</param>
+														<param name="charting.chart.showMarkers">false</param>
+														<param name="charting.axisTitleX.text">Time</param>
+														<module name="LineMarkerFormatter">
+															<module name="JSChart" />
+														</module>
+													</module>
+												</module>
+												<module name="SOLNSearch" layoutPanel="panel_row6_col1">
+													<param name="search">
+														<![CDATA[sourcetype=ontap:perf source=VolumePerfHandler host=$volume[0].Filer$ objname=$volume[0].Volume$ | timechart limit=5 first(total_ops_rate) as total_ops_rate first(write_ops_rate) as write_ops_rate first(read_ops_rate) as read_ops_rate first(other_ops_rate) as other_ops_rate by objname]]>
+													</param>
+													<module name="JobProgressIndicator" />
+													<module name="HiddenChartFormatter">
+														<param name="chart">line</param>
+														<param name="charting.chart.showMarkers">false</param>
+														<param name="charting.axisTitleX.text">Time</param>
+														<module name="LineMarkerFormatter">
+															<module name="JSChart" />
+														</module>
+													</module>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>

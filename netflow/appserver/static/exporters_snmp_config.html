@@ -1,0 +1,121 @@
+<h3>Step 2</h3>
+<p>
+Once you have downloaded and setup NetFlow Integrator software, you can enrich 
+your data with network interface name and speed information from auto SNMP polling. 
+Follow the steps below.
+</p>
+
+<h3>List of Devices</h3>
+A Device is a network device that emits NetFlow. 
+Every 30 minutes a job runs to populate a list of Device IP 
+drop down on various dashboards in the App. This list is also 
+used for SNMP polling. If you are already sending NetFlow data, 
+but don’t see the list of devices in the drop down, press update button below.
+
+<form id="updateexp" action="javascript:void(0);">
+    <input type="submit" value="Update Device list" class="btn btn-primary submit"></input>&nbsp;&nbsp;<span id="updateexp_text"></span>
+</form>
+
+If you need to run this job for a different time period, copy the following 
+(including first vertical bar) into Search &gt; Timeline of this app, 
+selecting the appropriate interval.
+<pre>| savedsearch "save_exporters"
+| eval search_name="save_exporters"
+| collect index="flowintegrator_exp_ips"</pre>
+
+<h3>Auto SNMP Polling Configuration</h3>
+<p>
+    If SNMP data is present, the dashboards will use the interface names and speed configured in SNMP.
+</p>
+<h5>Steps to configure</h5>
+<p>
+    <ol>
+        <li>Install free Splunk App: SNMP Modular Input <a href="http://apps.splunk.com/app/1537/">http://apps.splunk.com/app/1537/</a></li>
+        <li>Check the box below to enable SNMP polling</li>
+        <li>Configure SNMP community string and polling interval</li>
+
+        <form id="snmpconf" action="javascript:void(0);">
+            <table>
+                <tr>
+                    <td colspan="3">
+                        <input type="checkbox" id="enable"></input><label for="enable">Enable Auto SNMP Polling</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="commstr">Community String</label>
+                    </td>
+                    <td>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        <input type="text" id="commstr"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="pollint">Polling Interval</label>
+                    </td>
+                    <td>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        <input type="text" id="pollint"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="index">Index</label>
+                    </td>
+                    <td>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        <input type="text" id="index" disabled="disabled"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="sourcetype">Sourcetype</label>
+                    </td>
+                    <td>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td>
+                        <input type="text" id="sourcetype" disabled="disabled"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <input type="submit" value="Save" class="btn btn-primary submit"></input>&nbsp;&nbsp;<span id="saving_text"></span>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </ol>
+</p>
+
+
+<h3>Devices, Management IPs, Device Groups</h3>
+
+<p>
+    Create exporters-devices.csv file to map devices management IPs to exporter IPs, and to groups devices (see exporters-devices.csv.sample), where<br>
+    <table>
+        <tr>
+            <td>exp_ip</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>is IP address of the device’s NetFlow exporter</td>
+        </tr>
+        <tr>
+            <td>management_ip</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>is the management IP address of the device (the same as exp_ip if the device doesn't have actual management IP)</td>
+        </tr>
+        <tr>
+            <td>device_group</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>is the name of the group where the device belongs (this field is optional, input "*" without quotes if the device shouldn't belong to any group)</td>
+        </tr>
+    </table>
+</p>
+

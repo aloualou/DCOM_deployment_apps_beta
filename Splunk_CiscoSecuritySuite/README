@@ -1,0 +1,39 @@
+Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.
+
+Add-on:             Splunk for Cisco Security
+Last Modified:	    Mar 27, 2014
+Splunk Version:	    6.0 or higher
+Author:             Splunk
+
+The Cisco Security Suite provides a single pane of glass interface into Cisco security data. It supports Cisco ASA and PIX firewall appliances, the FWSM firewall services module, the WSA web security appliance, and the Cisco Identity Services Engine (ISE).
+
+##### What's New #####
+3.0.2
+- Support for Cisco ESA added
+- Documentation updates
+
+3.0.1
+- Support for Cisco ISE added
+- WSA Add-on moved to a separate package
+
+3.0.0 (02.20.2014)
+- Major update to the app.
+- Completely rewritten for Splunk Enterprise 6 with support for Cisco ASA, PIX, FWSM and WSA
+
+2.0 (04.01.12)
+- Major updaate to the app.
+- Completely change the look and feel of the app.
+- Refactor the code base.
+
+1.0.1 (05.22.11)
+- Resolved issue (SOLN-949) that causes the map to fail on a Windows system when package extracted using Winzip
+
+1.0.0 (03.07.11)
+- Updated to provide compatibility with Splunk 4.2
+- Updated to include a setup application
+
+###### Installation Instructions ######
+
++++ Configuring the App +++
+
+Documentation is now included in the app.  Once the app is installed, navigate to the “Help” menu.

@@ -1,0 +1,10 @@
+<nav color="#154e7a">
+    <view name="streams" default='true' />
+    <view name="capture_ip_addresses" default='false' />
+    <collection label="Dashboards">
+        <view name="interface_metrics" default='false' />
+        <view name="processor_metrics" default='false' />
+        <view name="log_viewer" default='false' />
+        <view name="ssl_activity" default='false' />
+    </collection>
+</nav>

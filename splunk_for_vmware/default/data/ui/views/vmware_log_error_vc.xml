@@ -1,0 +1,62 @@
+<form>
+  <label>vCenter Log Browser</label>
+  <description>Simple interface for browsing the virtual center logs.</description>
+  <fieldset autoRun="false" submitButton="true">
+    <input type="time" searchWhenChanged="true">
+      <default>
+        <earliestTime>-60m@m</earliestTime>
+        <latestTime>now</latestTime>
+      </default>
+    </input>
+    <input type="dropdown" token="vc">
+      <label>vCenter:</label>
+      <choice value="*">All</choice>
+      <populatingSearch fieldForValue="host" fieldForLabel="host" earliest="-60m" latest="$latest$">| metasearch sourcetype=vmware:vclog:* | dedup host | table host</populatingSearch>
+      <default>*</default>
+    </input>
+    <input type="text" token="lookfor">
+      <label>Look For:</label>
+      <default/>
+    </input>
+    <input type="text" token="level">
+      <label>Level:</label>
+      <default>error</default>
+    </input>
+  </fieldset>
+  <row>
+    <table>
+      <title>vpxd: Main vCenter diagnostic logs (Limited to first 10,000 Messages in Time Range)</title>
+      <searchString>sourcetype="vmware:vclog:vpxd" host="$vc$" $lookfor$ Level="$level$" | head 10000 | rename host AS vc _time as Time | convert ctime(Time) | table Time, vc, Level, Object, opID, Message</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+    </table>
+  </row>
+  <row>
+    <table>
+      <title>sms: Storage management service logs (Limited to first 10,000 Messages in Time Range)</title>
+      <searchString>sourcetype="vmware:vclog:sms" host="$vc$" $lookfor$ Level="$level$" | head 10000 | rename host AS vc _time as Time | convert ctime(Time) | table Time, vc, Level, Object, Message</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+    </table>
+  </row>
+  <row>
+    <table>
+      <title>vws/tomcat/stat/cim-diag: vCenter web services logs (Limited to first 10,000 Messages in Time Range)</title>
+      <searchString>(sourcetype="vmware:vclog:vws" OR sourcetype="vmware:vclog:stats" OR sourcetype="vmware:vclog:cim-diag" OR sourcetype="vmware:vclog:vim-tomcat-shared" OR sourcetype="vmware:vclog:tomcat") host="$vc$" $lookfor$ Level="$level$" | head 10000 | rename host AS vc _time as Time | convert ctime(Time) | table Time, vc, sourcetype, Level, Object, Message</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+    </table>
+  </row>
+</form>

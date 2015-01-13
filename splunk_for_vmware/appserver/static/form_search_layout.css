@@ -1,0 +1,10 @@
+/*Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved. */
+
+.mainSearchControls .TimeRangePicker,
+.mainSearchControls .Pulldown,
+.mainSearchControls .TextField,
+.mainSearchControls .Checkbox,
+.mainSearchControls .SubmitButton {
+    float:left;
+    min-height:27px;
+}

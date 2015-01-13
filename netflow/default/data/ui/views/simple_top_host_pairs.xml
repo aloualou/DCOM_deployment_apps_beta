@@ -1,0 +1,113 @@
+<form onunloadCancelJobs="True" script="search_rerun.js">
+    <label>Top Host Pairs Report</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="time" searchWhenChanged="false">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row>
+        <single>
+            <searchString>
+                `netflow_search_rule_20064` earliest=$earliest$ latest=$latest$ 
+                | head 1 
+                | addinfo 
+                | eval selection_duration=strftime(info_min_time, "%m/%d/%Y %I:%M:%S %p") . " - " . strftime(info_max_time, "%m/%d/%Y %I:%M:%S %p") 
+                | table selection_duration
+            </searchString>
+            <option name="beforeLabel"></option>
+            <option name="field">selection_duration</option>
+            <title>Top Host Pairs</title>
+        </single>
+    </row>  
+    <row>
+        <chart> 
+            <title>Device group - $exp_group$ | Device - $exp_ip$</title>
+            <searchTemplate>
+                `netflow_search_rule_20064` earliest=$earliest$ latest=$latest$ 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes)`
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `format_ip_column(src_ip, src_ip, src_host)`
+                | `format_ip_column(dest_ip, dest_ip, dest_host)`
+                | strcat src_ip " - " dest_ip host_pair 
+                | `per_second_chart(megabits, bytes*8/1000000, sum(megabits) by host_pair)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.chart.stackMode">stacked</option>  
+            <option name="charting.legend.placement">bottom</option>
+        </chart>
+    </row>
+    <row>
+        <table>
+            <title>Top Host Pairs Details</title>
+            <searchTemplate>
+                `netflow_search_rule_20064` earliest=$earliest$ latest=$latest$ 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes_in)` 
+                | `sampling(bytes_out)` 
+                | `sampling(bytes)` 
+                | `sampling(packets_in)` 
+                | `sampling(packets_out)` 
+                | `sampling(flow_count)`
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `format_ip_column(src_ip, src_ip, src_host)`
+                | `format_ip_column(dest_ip, dest_ip, dest_host)`
+                | stats sum(bytes) AS TrafficAmount 
+                        sum(bytes_in) AS TrafficAmountIn 
+                        sum(packets_in) AS PacketsAmountIn 
+                        sum(bytes_out) AS TrafficAmountOut 
+                        sum(packets_out) AS PacketsAmountOut 
+                        sum(flow_count) AS Connections 
+                        by exp_ip src_ip dest_ip 
+                | `average_speed(TrafficSpeedIn, TrafficAmountIn*8)`          
+                | `average_speed(TrafficSpeedOut, TrafficAmountOut*8)`          
+                | `average_speed(PacketsSpeedIn, PacketsAmountIn)`         
+                | `average_speed(PacketsSpeedOut, PacketsAmountOut)`
+                | sort 0 - TrafficAmount         
+                | head 20          
+                | `format_traffic_column(TrafficIn, TrafficAmountIn, TrafficSpeedIn)`          
+                | `format_traffic_column(TrafficOut, TrafficAmountOut, TrafficSpeedOut)`          
+                | `format_packets_column(PacketsIn, PacketsAmountIn, PacketsSpeedIn)`          
+                | `format_packets_column(PacketsOut, PacketsAmountOut, PacketsSpeedOut)`
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name src_ip dest_ip TrafficIn TrafficOut PacketsIn PacketsOut Connections
+                | rename exp_ip_name as "Device" 
+                | rename src_ip as "Server" 
+                | rename dest_ip as "Client" 
+                | rename TrafficIn as "Average Traffic Rate (Total Traffic) Inbound"
+                | rename TrafficOut as "Average Traffic Rate (Total Traffic) Outbound"
+                | rename PacketsIn as "Average Packet Rate (Total Packets) Inbound"
+                | rename PacketsOut as "Average Packet Rate (Total Packets) Outbound"
+            </searchTemplate>
+            <option namw="showPager">false</option>
+            <option name="wrap">false</option>
+            <option name="rowNumbers">true</option>
+            <option name="count">20</option>
+            <option namw="showPager">false</option>
+        </table>
+    </row>
+</form>

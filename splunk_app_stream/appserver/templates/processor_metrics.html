@@ -1,0 +1,117 @@
+<%inherit file="base.html"/>
+<div class="preload">
+    <div class="header">
+        <div id="placeholder-splunk-bar">
+            <a href="{{SPLUNKWEB_URL_PREFIX}}/app/launcher/home" class="brand" title="splunk &gt; listen to your data">splunk<strong>&gt;</strong></a>
+        </div>
+        <div id="placeholder-app-bar"></div>
+    </div>
+    <div id="app-main-layout">
+        <!--<div id="placeholder-main-section-body">${_('Loading...')}</div>-->
+        <div>
+            <div class="dashboard-body container-fluid main-section-body" data-role="main">
+                <div class="row">
+                    <div class="span12 dashboard-header clearfix">
+                        <h2>Processor Metrics</h2>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: 10px;">
+                    <div class="span2" id="time-range"></div>
+                    <div class="span2 host-label">Select a host:</div>
+                    <div class="span3" id="hosts-drop-down"></div>
+                    <div id="processors-panel">
+                        <div class="span2 processor-label">Select a processor:</div>
+                        <div class="span3" id="processors-drop-down"></div>
+                    </div>
+                </div>
+
+                <div id="current-processor-metrics">
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Packet Queue Size</h3>
+                                </div>
+                                <div id="packet-queue-size-chart" class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Tcp Session Count</h3>
+                                </div>
+                                <div id="tcp-session-count-chart" class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>SSL Session Key Count</h3>
+                                </div>
+                                <div id="ssl-session-key-count-chart" class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-cell" style="width: 50%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Tcp Reassembly Packet Count</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div id="tcp-reassembly-packet-count-chart" class="splunk-view"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="dashboard-cell" style="width: 100%;">
+                        <div class="dashboard-panel">
+                            <div class="dashboard-element">
+                                <div class="panel-head">
+                                    <h3>Tcp Reassembly Payload Size</h3>
+                                </div>
+                                <div id="tcp-reassembly-payload-size-chart" class="panel-body">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="footer"></div>
+</div>
+
+
+<script src="${make_url('/static/js/contrib/require.js')}"></script>
+<script>
+    // IE9 and IE10 fix
+    if(!window.console) {
+        var console = {
+            log : function(){},
+            warn : function(){},
+            error : function(){}
+        }
+        // window.console=console;
+    }
+</script>
+

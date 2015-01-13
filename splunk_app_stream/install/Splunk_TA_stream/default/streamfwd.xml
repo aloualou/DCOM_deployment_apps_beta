@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CmConfig xmlns="http://purl.org/cloudmeter/config" version="6.1.1">
+  <Port>8889</Port>
+  <UIDirectory>../ui</UIDirectory>
+  <DataDirectory>../data</DataDirectory>
+  <LogConfig>streamfwdlog.conf</LogConfig>
+</CmConfig>

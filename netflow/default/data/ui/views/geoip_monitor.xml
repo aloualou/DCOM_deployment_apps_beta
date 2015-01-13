@@ -1,0 +1,82 @@
+<dashboard onunloadCancelJobs="True">
+    <label>GEO IP Monitor</label>
+    <description>Statistics provided for the last 24 hours</description>
+    <row grouping="1,1">
+        <map>
+            <title>Inbound Traffic</title>
+            <searchString>
+                `netflow_search_rule_20040` direction=ingress 
+                | iplocation src_ip 
+                | geostats globallimit=0 sum(flow_count) by src_ip
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="mapping.markerLayer.markerOpacity">0.8</option>
+            <option name="mapping.markerLayer.markerMinSize">10</option>
+            <option name="mapping.markerLayer.markerMaxSize">50</option>
+            <option name="mapping.data.maxClusters">1000</option>
+            <option name="mapping.map.center">(39.8282,-98.5795)</option>
+            <option name="mapping.map.zoom">4</option>
+            <option name="mapping.tileLayer.minZoom">2</option>
+            <option name="mapping.tileLayer.maxZoom">10</option>
+            <option name="drilldown">all</option>
+        </map>
+        <map>
+            <title>Outbound Traffic</title>
+            <searchString>
+                `netflow_search_rule_20040` direction=egress 
+                | iplocation dest_ip 
+                | geostats globallimit=0 sum(flow_count) by dest_ip
+            </searchString>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="mapping.markerLayer.markerOpacity">0.8</option>
+            <option name="mapping.markerLayer.markerMinSize">10</option>
+            <option name="mapping.markerLayer.markerMaxSize">50</option>
+            <option name="mapping.data.maxClusters">1000</option>
+            <option name="mapping.map.center">(39.8282,-98.5795)</option>
+            <option name="mapping.map.zoom">4</option>
+            <option name="mapping.tileLayer.minZoom">2</option>
+            <option name="mapping.tileLayer.maxZoom">10</option>
+            <option name="drilldown">all</option>
+        </map>
+    </row>
+    <row grouping="1,1">
+        <table>
+            <title>Inbound Traffic</title>
+            <searchTemplate>
+                `netflow_search_rule_20040` direction=ingress 
+                | stats sum(bytes) as TrafficAmount sparkline as TrafficLine sum(flow_count) as "Num. of Flows" by exp_ip src_ip dest_ip cc 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)` 
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name src_ip dest_ip cc "Num. of Flows" Traffic TrafficLine   
+                | rename exp_ip_name as Device 
+                | rename src_ip as "Source IP" 
+                | rename dest_ip as "Dest. IP"
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+            </searchTemplate>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="drilldown">none</option>
+        </table>
+        <table>
+            <title>Outbound Traffic</title>
+            <searchTemplate>
+                `netflow_search_rule_20040` direction=egress 
+                | stats sum(bytes) as TrafficAmount sparkline as TrafficLine sum(flow_count) as "Num. of Flows" by exp_ip src_ip dest_ip cc 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)` 
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name src_ip dest_ip cc "Num. of Flows" Traffic TrafficLine   
+                | rename exp_ip_name as Device 
+                | rename src_ip as "Source IP" 
+                | rename dest_ip as "Dest. IP"
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+            </searchTemplate>
+            <earliestTime>-24h@h</earliestTime>
+            <latestTime>now</latestTime>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</dashboard>

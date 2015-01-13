@@ -1,0 +1,98 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="False" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Testcases for Pulldown prepopulation</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Testcases for Pulldown prepopulation</h1>
+    ]]></param>
+  </module>
+
+  <module name="URLLoader" layoutPanel="panel_row1_col1" autoRun="True">
+    <param name="keepURLUpdated">False</param>
+    
+    <module name="HTML" layoutPanel="viewHeader">
+      <param name="html"><![CDATA[
+
+        <p>
+          Set up a testcase: <br>
+          <a href="testcases_for_timerangepicker_prepopulation">Clear</a><br>  
+          <a href="testcases_for_timerangepicker_prepopulation?earliest=1305820200&latest=1305820260">8:50AM 5/19/2011</a><br>
+          <a href="testcases_for_timerangepicker_prepopulation?earliest=all&latest=all">all,all</a><br>
+          <a href="testcases_for_timerangepicker_prepopulation?earliest=1305820200&latest=">since 8:50AM 5/19/2011</a><br>
+          <a href="testcases_for_timerangepicker_prepopulation?earliest=&latest=1305820200">before 8:50AM 5/19/2011</a><br>
+          <a href="testcases_for_timerangepicker_prepopulation?earliest=1305820200&latest=all">since 8:50AM 5/19/2011, with 'all'</a><br>
+          <a href="testcases_for_timerangepicker_prepopulation?earliest=all&latest=1305820200">before 8:50AM 5/19/2011, with 'all'</a><br>
+          <a href="testcases_for_timerangepicker_prepopulation?earliest=-7d@h&latest=now">-7d@h,now</a><br>
+        </p>
+
+      ]]></param>
+    </module>
+
+    
+    <module name="TimeRangePicker">
+      <param name="selected">last 24 hours</param>
+      <param name="searchWhenChanged">True</param>
+
+      
+      <module name="Search">
+        <param name="search">search * | head 1000 | timechart count</param>
+
+        <module name="ZoomLinks"></module>
+
+        <module name="JobProgressIndicator"></module>
+        <module name="Pager">
+          
+          <module name="SimpleResultsTable">
+            <param name="displayRowNumbers">False</param>
+          </module>
+        </module>
+        <module name="Button">
+          <module name="Redirector">
+            <param name="url">testcases_for_timerangepicker_prepopulation</param>
+            <param name="arg.earliest">$search.timeRange.earliest$</param>
+            <param name="arg.latest">$search.timeRange.latest$</param>
+          </module>
+        </module>
+        <module name="HTML">
+          <param name="html"><![CDATA[
+           
+            <p>
+              $search.timeRange.label$<br>
+              <br>
+              $search.timeRange.earliest$<br>
+              $search.timeRange.latest$<br>
+            </p>
+           
+           
+          ]]></param>
+        </module>
+      </module>
+    </module>
+  </module>
+
+
+
+
+
+
+
+
+
+
+    
+  
+        
+
+</view>

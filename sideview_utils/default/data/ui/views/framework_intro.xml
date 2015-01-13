@@ -1,0 +1,97 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>overview of the advanced XML</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Overview of the Advanced XML</h1>
+    ]]></param>
+  </module>
+  
+
+  
+
+  <module name="HTML" layoutPanel="panel_row1_col1">
+    <param name="html"><![CDATA[
+
+      <h2>OK I lied.  You're not ready for the examples yet.  Lets talk about the Advanced XML.</h2>
+      
+
+
+<h3>In the advanced XML, the hierarchy is everything. </h3>
+<p>
+  The way that the module tags are always nested inside eachother is extremely important. Understanding why is more so. 
+</p>
+<p>
+  Data essentially flows down through the Advanced XML from the modules "higher up" to the modules contained within.  As the data passes down through each module,  each module gets a chance to contribute it's own data to the overall set of data that's being passed down.  When this snowball of data hits a fork, it multiplies and from that point down there are N fully independent snowballs moving down, each through a separate subtree of the hierarchy.   
+</p>
+
+     ]]></param>
+  </module>
+<module name="HTML" layoutPanel="panel_row2_col1">
+    <param name="html"><![CDATA[
+
+<h3>Each Module knows nothing about any other modules. </h3>
+<p>
+  It's a common misconception that modules know which modules are above them, and which are below.  They do not.  They have no idea.  They only receive their package of data from above, and where applicable, they contribute their own data to the package they give to the modules below.  That's it. They only interact with eachother through the data. 
+</p>
+
+    ]]></param>
+  </module>
+<module name="HTML" layoutPanel="panel_row3_col1">
+    <param name="html"><![CDATA[
+
+<h3>The system automatically dispatches the searches, based upon certain rules.</h3> 
+
+<p>
+  It's another common misconception that Searches are kicked off by "special" modules like HiddenSearch. This is technically not true. Instead the module system watches this package of timeranges and arguments and search strings, as it passes down through the XML tree.  When it sees a need to dispatch a search, it reaches in and does so. Then it puts a reference to that newly-running job into the data for the other modules to access.  Here's a breakdown: 
+</p>
+<ol>
+  <li>The system knows which of the modules in the tree "require a search to be running".  We'll come back to this.  For now accept that some modules "require a search to be running", and some do not.   </li>
+  <li>As the data is being passed down from tier to tier through the module hierarchy, the system knows where there are tiers of modules that contain at least one "dispatching" module.  (By tier I mean a bunch of modules next to eachother that are siblings -- ie modules that all share a common direct parent.)</li>
+  <li>When a snowball of data is about to hit such a "tier",  the module system intervenes.  It reaches in, dispatches the search within that one snowball....
+  <li>After the HTTP traffic for the dispatch is done and the search is running, the snowball continues running downstream towards the leafnodes. Except now the system has given that data (snowball) the appropriate references to the running search, whereas before it was just a bunch of arguments really.</li>
+  <li>If someone changes something fundamental in the snowball pertaining to the search, like if there's a second TimeRangePicker down there overriding the timerange, or if there's a whole other 'Search' module specifying new search language, then as the data gets passed through that module, the first dispatched job gets kicked out of the snowball.  From then on as the snowball keeps moving down, a second set of search arguments will accumulate, until it hits a second tier and this whole bullet list starts over again. </li>
+
+</ol>
+
+    ]]></param>
+  </module>
+<module name="HTML" layoutPanel="panel_row4_col1">
+    <param name="html"><![CDATA[
+<h3>What was that about some modules that "require a search to be running" </h3>
+
+<p>
+  Picture EventsViewer, or FlashChart, or JobProgressIndicator.  Ask yourself if these module can do their jobs meaningfully when there's no running search for it to talk to.  If they cant, then you can assume that it's a dispatching module.  
+  On the other hand picture TextField, or TimeRangePicker.  These modules have no need of a running search, so they are not dispatching modules. 
+</p>
+<p>
+  If that's not good enough, you can always go look at the autogenerated module docs at `http://<splunkhost>:<splunkport>/en-US/modules.   In the entry for each module you'll see whether it extends 'DispatchingModule' or 'AbstractModule'.  (In a couple cases it'll be some other class like 'AbstractPagedModule', but just go and look *that* class up, and eventually you'll hit the top of the class hierarchy.)
+</p>
+
+    ]]></param>
+  </module>
+<module name="HTML" layoutPanel="panel_row5_col1">
+    <param name="html"><![CDATA[
+
+
+<h3>Yawn.  Did I really need to know that?</h3>
+<p>
+  Yep.  Until people understand this stuff they all hit the same stumbling blocks, and they do weird things assuming that modules know how to "talk to eachother".
+</p>
+
+
+    ]]></param>
+  </module>
+
+</view>

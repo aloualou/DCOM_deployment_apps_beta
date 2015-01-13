@@ -1,0 +1,103 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Pulldown - dynamic config</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Pulldown - Dynamic Config</h1>
+    ]]></param>
+  </module>
+  
+
+
+  <module name="HTML" layoutPanel="panel_row1_col1" group="example: dynamic pulldown">
+    <param name="html"><![CDATA[
+      Now the only change is changing our Pulldown to a dynamic configuration from a dynamic one. 
+      ]]></param>
+  </module>
+
+  <module name="Search" layoutPanel="panel_row2_col1" autoRun="True">
+    <param name="search">index=_internal source="*metrics.log" group="per_sourcetype_thruput" | dedup series | sort series | fields series</param>
+    <param name="earliest">-1h</param>
+    <param name="latest">now</param>
+    
+    <module name="Pulldown">
+      <param name="name">selectedSourcetype</param>
+      <param name="label">Sourcetype</param>
+      <param name="searchFieldsToDisplay">
+        <list>
+          <param name="label">series</param>
+          <param name="value">series</param>
+        </list>
+      </param>
+
+      <module name="Search">
+        <param name="search">index=_internal source="*metrics.log" group="per_sourcetype_thruput" series="$selectedSourcetype$" | stats min(eps) avg(eps) max(eps) </param>
+        <param name="earliest">-1h</param>
+        <param name="latest">now</param>
+        
+        <module name="Paginator">
+          <param name="entityName">results</param>
+          <module name="SimpleResultsTable">
+            <param name="displayRowNumbers">False</param>
+            <param name="entityName">results</param>
+          </module>
+        </module>
+        
+        <!-- this HTML module here is just to show you the token values and the search -->
+        <!-- feel free to delete it -->
+        <module name="HTML">
+          <param name="html"><![CDATA[
+            selectedSourcetype is: <b>$selectedSourcetype$</b><br>
+            the entire search is: <b>$search$</b>
+          ]]></param>
+        </module>
+
+      </module>
+    </module>
+
+  </module>
+
+  <module name="HTML" layoutPanel="panel_row2_col2">
+    <param name="html"><![CDATA[
+      <h3>Notes</h3>
+      <ol class="notesList">
+        <li>
+          The big change of course is that the Pulldown is now configured dynamically.  Obviously the dynamic-ness will still come from a search. However unlike with Splunk's "lister" modules, with Pulldown there is no "internal" search to configure.  Instead the Pulldown will inherit whatever search was defined upstream.  Think of Pulldow just like any other dynamic module like SimpleResultsTable.  This may seem strange at first, but in the end with the special 'internal' searches gone your configuration becomes a lot more transparent, consistent and flexible.  
+        </li>
+        <li>
+          There are lots of very nice things that fall into place with this improvement, but the biggest one is PostProcess.  You can now reuse the same job across multiple pulldowns, and you can have your pulldowns' results affected by dynamic postProcess arguments.*
+        </li>
+        <li>
+          Want to use a scheduled saved search or just a saved search to render the options for your pulldown?  It's trivial - you just use HiddenSavedSearch instead. 
+        </li>
+        <li>
+          Want there to be a JobProgressIndicator to show the user the progress on the job running the pulldowns?  No problem just throw a JobProgressIndicator in there.* 
+        </li>
+        <li>
+          Want there to be 7 dynamic pulldowns but you don't want to run 7 searches to populate them?  Now you can use postProcess and hang them all off of one datacube search.*
+        </li>
+        <li>
+          Pulldown picks up one convention from Splunk's modules in that it uses params called 'searchFieldsToDisplay' and 'staticFieldsToDisplay'. I thought about simplifying the config here but it seemed a better idea to give them the same names.   As time goes on I may provide simplified param names but if I do, it will still be backwards-compatible to these old ones.
+        </li>
+
+        <li>
+          read the specification for the Sideview module <a href="/modules#Splunk.Module.Pulldown" target="_blank">Pulldown and its params</a>
+        </li>
+
+      </ol>
+
+      * The functionality denoted with an asterisk is not possible using just Splunk's core modules.
+      ]]></param>
+  </module>
+</view>

@@ -1,0 +1,99 @@
+
+/**
+ * logo stuff
+ */
+ div.AccountBar {
+    padding-left:5px;
+}
+.appLogo {
+    width: 34px;
+    height: 25px; 
+    background-image: url(images/logo_sideview.gif);
+    background-repeat: no-repeat;
+    position:relative;
+    top:4px;
+}
+.appLogoContainer {
+    width:300px;
+    height:42px;
+    display:block;
+    
+    background-image:url(images/splunk_powered_logo_white.gif);
+    background-repeat:no-repeat;
+    background-position:190px 10px;
+}
+.appHeaderWrapper h1 {
+    color:#f0f0f0;
+    line-height:37px;
+}
+
+
+
+#bumpContent {
+    display:none;
+}
+
+/* Im not sure who picked Splunk's default font-size of 11px, but I envy their 
+eyesight --ncm */
+.layoutCell {
+    font-size:12px;
+}
+    
+/* this is just to help the readability of the example pages */
+.dashboardContent .HTML ul li {
+    margin-bottom:10px;
+}
+
+.viewHeader h1 {
+    display:inline;
+    margin:0px;
+    padding:0px;
+    font-size:15px;
+}
+
+/* take away the 'about' link and the 'help' link cause it's confusing in this 
+ * context.
+ */
+.AppBar .auxLinks {
+    display:none;
+}
+#appBarUnitTests {
+    display:none;
+}
+.dashboardCell .Paginator {
+    clear:both;
+}
+
+table.splTable th.rowTh {
+    border-color:#ccc;
+}
+
+
+.splView-refresh_entities .Pulldown {
+    float:left;
+    margin-right:10px;
+}
+
+ol li {
+    margin-left:5px;
+}
+
+.splView-events1_intro .SoftWrap,
+.splView-events1_intro .RowNumbers,
+.splView-events1_intro .Segmentation,
+.splView-events1_intro .MaxLines {
+    float:left;
+    margin-right:15px;
+}
+.splView-events1_intro .MaxLines {
+    clear:left;
+}
+/* for some insane reasont he RowNumbers module has it's own custom top margin
+ *  which we have to undo here. 
+ */
+.splView-events1_intro .RowNumbers  {
+    margin-top:4px;
+}
+.splView-events1_intro .Events {
+    clear:left;
+}

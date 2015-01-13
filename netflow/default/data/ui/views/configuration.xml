@@ -1,0 +1,7 @@
+<dashboard onunloadCancelJobs="True" script="configuration.js" stylesheet="configuration.css">
+    <label>Configuration</label>
+    <row>
+        <html src="configuration.html"></html>
+    </row>
+</dashboard>
+

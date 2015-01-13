@@ -1,0 +1,82 @@
+<form>
+  <label>Stream Forwarder Logs</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time_picker" searchWhenChanged="true">
+      <label>Time</label>
+      <default>
+        <earliestTime>-60m@m</earliestTime>
+        <latestTime>now</latestTime>
+      </default>
+    </input>
+    <!--
+    <input type="checkbox" token="level" searchWhenChanged="true">
+      <label>Log Level</label>
+      <choice value="DEBUG">DEBUG</choice>
+      <choice value="INFO">INFO</choice>
+      <choice value="WARN">WARN</choice>
+      <choice value="ERROR">ERROR</choice>
+      <default>WARN,ERROR,INFO</default>
+      <valuePrefix>level=</valuePrefix>
+      <delimiter> OR </delimiter>
+    </input>
+    -->
+    <input type="text" token="search" searchWhenChanged="true">
+      <label>Search</label>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <chart>
+      <title>Top Messages</title>
+      <searchString>`stream_logs` $search$ | top limit=5 message</searchString>
+      <earliestTime>$time_picker.earliest$</earliestTime>
+      <latestTime>$time_picker.latest$</latestTime>
+      <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleY2.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.axisY2.enabled">false</option>
+      <option name="charting.axisY2.scale">inherit</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+    <chart>
+      <title>Errors by Host</title>
+      <searchString>`stream_logs` $search$ | stats count by host</searchString>
+      <earliestTime>$time_picker.earliest$</earliestTime>
+      <latestTime>$time_picker.latest$</latestTime>
+    </chart>
+  </row>
+  <row>
+    <table>
+      <title>Stream Forwarder Logs</title>
+      <searchString>`stream_logs` $search$ | table _time, level, message</searchString>
+      <earliestTime>$time_picker.earliest$</earliestTime>
+      <latestTime>$time_picker.latest$</latestTime>
+      <option name="showPager">true</option>
+      <option name="displayRowNumbers">false</option>
+      <option name="list.drilldown">full</option>
+      <option name="list.wrap">1</option>
+      <option name="maxLines">5</option>
+      <option name="raw.drilldown">full</option>
+      <option name="rowNumbers">false</option>
+      <option name="table.drilldown">all</option>
+      <option name="table.wrap">1</option>
+      <option name="type">list</option>
+      <option name="wrap">true</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+      <option name="count">10</option>
+    </table>
+  </row>
+</form>

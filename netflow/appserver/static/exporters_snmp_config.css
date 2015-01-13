@@ -1,0 +1,21 @@
+form#updateexp {
+    margin-top: 1em;
+}
+
+input[type=checkbox] {
+    margin-top: 0px;
+}
+
+input[type=text] {
+    margin-bottom: 0px;
+}
+
+label {
+    display: inline;
+    margin-bottom: 0px;
+}
+
+label[for=enable] {
+    margin-left: 0.5em;
+}
+

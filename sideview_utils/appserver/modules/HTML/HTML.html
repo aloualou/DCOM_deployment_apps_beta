@@ -1,0 +1,86 @@
+<%page args="module"/>
+<%namespace name="lib" file="//lib.html" import="*"/>
+<%
+# Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved.
+
+from mako import exceptions
+from splunk.appserver.mrsparkle.lib.i18n import path_to_i18n_paths
+
+
+###############################################################################
+# this is a straight port from replaceTokensFromContext() in SideviewUtils.js
+# We use it here so that if a $foo$ token is present in the URL, we will load 
+# it initially with the value we see there.  Then later at runtime it may be 
+# replaced again, usually by URLLoader.  But this prevents the HTML from 
+# flashing the unreplaced "$foo$" briefly.
+# And if there is no matching foo in the args this function will simply 
+# replace them with "".
+###############################################################################
+def replaceTokens(s) :
+    args = cherrypy.request.params
+    within = False
+    currentTokenName = []
+    out = []
+    for i in range(len(s)) :
+        ch = s[i]
+        if (ch=="$") :
+            within = not within
+            # check for '$$' to handle all those cases correctly.
+            if (not within and i>0 and s[i-1]=="$") :
+                out.append("$")
+                continue
+            # we just finished the token.
+            if (not within) :
+                out.append(args.get("".join(currentTokenName), ""))
+                currentTokenName = []
+        elif (within) :
+            currentTokenName.append(ch)
+        else :
+            out.append(ch)
+        
+    return "".join(out)
+
+def getHTMLContent() :
+    return replaceTokens(_(module["html"]))
+
+
+def getSrcContent() :
+    srcPath = "/APP/%s/appserver/static/%s" % (APP["id"], module["src"])
+
+    src = None
+
+    # we check for "foo-en-GB.html" before checking for "foo.html"
+    for i18nsrc in path_to_i18n_paths(srcPath):
+        try:
+            src = capture(self.include_file, i18nsrc)
+            break
+        except exceptions.TemplateLookupException, e:
+            continue
+        except:
+            traceback = exceptions.RichTraceback()
+            src = lib.template.get_def('traceback').render()
+    if src is None:
+        src = "<pre>%s</pre>" % e
+    return _(src)
+    
+    
+
+%>
+% if "html" in module and module["html"] :
+    ${getHTMLContent()}
+% elif "src" in module and module["src"] :
+    <%
+    module["src"] = replaceTokens(module["src"])
+    srcContent = getSrcContent()
+    %>
+    ${replaceTokens(srcContent)}
+    <%call expr="lib.add_script_block()">
+        Splunk.Module.loadParams.${module['id']}.html = ${jsonify(replaceTokens(srcContent))};
+    </%call>
+    
+% else :
+    <div class="error">
+        ERROR: HTML module present but no value was found for either the "html" param or the "src" param. This is a configuration error. 
+    </div>
+% endif
+

@@ -1,0 +1,135 @@
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="true" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Capacity Planning (Hosts)</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">1</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="mainSearchControls" autoRun="True">
+		<module name="TimeRangePicker">
+			<param name="default">Last 24 hours</param>
+			<param name="searchWhenChanged">True</param>
+			<module name="SOLNDropdown">
+				<param name="varName">caphostperftype</param>
+				<param name="label">Show hosts with</param>
+				<param name="displayField">perftype</param>
+				<param name="valueField">val,name</param>
+				<param name="staticOnly">True</param>
+				<param name="staticItem">max CPU usage,perftype="cpu",cpu;max Memory usage,perftype="mem",mem</param>
+				<!-- very weird but very useful trick so we dont have to list out a huge
+				static list of percents and labels in *both* SOLNDropdowns below. Although
+				strange this is much more compact and works great.
+				-->
+				<module name="SOLNSearch">
+					<param name="search">| stats count | eval values="5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100" | fields - count | eval values=split(values,",") | mvexpand values | eval labels=values+"%"</param>
+					<module name="SOLNDropdown">
+						<param name="varName">caphostusageThreshold</param>
+						<param name="label">of</param>
+						<param name="displayField">labels</param>
+						<param name="valueField">values</param>
+						<module name="SOLNDropdown">
+							<param name="varName">caphosthigherOrLower</param>
+							<param name="staticOnly">True</param>
+							<param name="displayField">higherOrLower</param>
+							<param name="valueField">val,label</param>
+							<param name="staticItem"><![CDATA[or higher,>=,or higher;or lower,<=,or lower]]></param>
+							<module name="SOLNDropdown">
+								<param name="varName">caphosttimeThreshold</param>
+								<param name="label">more than</param>
+								<param name="displayField">labels</param>
+								<param name="valueField">values</param>
+								<module name="SOLNContent">
+									<param name="content">
+										<![CDATA[
+										of the time.
+										]]>
+									</param>
+								</module>
+								<module name="SubmitButton">
+									<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+										<param name="content"><![CDATA[
+											Host Performance
+										]]></param>
+									</module>
+									<module name="SOLNAppVarSetter">
+										<param name="key">tspan</param>
+										<param name="rangeMap">
+											<param name="default">
+												<param name="setter">20s</param>
+											</param>
+											<param name="2h">
+												<param name="setter">1m</param>
+											</param>
+											<param name="5h">
+												<param name="setter">2m</param>
+											</param>
+											<param name="2d">
+												<param name="setter">30m</param>
+											</param>
+										</param>
+										<module name="SOLNSavedSearchLookup" layoutPanel="panel_row1_col1">
+											<param name="savedSearch">d_capacity_planning_hosts_list_usage_$perftype.name$</param>
+											<module name="JobProgressIndicator"></module>
+												<module name="EnablePreview">
+													<param name="display">false</param>
+													<module name="Paginator">
+														<param name="entityName">results</param>
+														<module name="SimpleResultsTable">
+															<param name="displayRowNumbers">False</param>
+															<param name="drilldown">all</param>
+															<module name="ViewRedirectorLink">
+																<param name="label">View results</param>
+																<param name="viewTarget">flashtimeline</param>
+															</module>
+															<module name="SOLNContent">
+																<param name="content">
+																	<![CDATA[
+																	<br>
+																	<hr style="clear: both;border:0;height:1px;"></hr>
+																	]]>
+																</param>
+															</module>
+															<module name="SOLNSavedSearchLookup" layoutPanel="panel_row1_col1">
+																<param name="savedSearch">d_capacity_planning_hosts_20s_$perftype.name$</param>
+																<module name="JobProgressIndicator"></module>
+																	<module name="SOLNContent">
+																		<param name="useTemplate">False</param>
+																		<param name="content">
+																			<![CDATA[
+																			<h2>Maximum and average $perftype.name$ for host $click.ESX/i$ $search.timerange$</h2>
+																			]]>
+																		</param>
+																	</module>
+																	<module name="HiddenChartFormatter">
+																		<param name="charting.chart">line</param>
+																		<param name="charting.chart.nullValueMode">connect</param>
+																		<param name="charting.chart.showMarkers">false</param>
+																		<param name="charting.chart.markerSize">5</param>
+																		<param name="charting.axisTitleX.text">Time</param>
+																		<module name="JSChart"></module>
+																		<module name="ViewRedirectorLink">
+																			<param name="viewTarget">flashtimeline</param>
+																		</module>
+																	</module>
+															</module>
+														</module>
+													</module>
+												</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>
+

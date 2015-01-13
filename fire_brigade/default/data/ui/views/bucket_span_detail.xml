@@ -1,0 +1,110 @@
+<form script="bucket_span_detail.js">
+  <label>Bucket Span Detail</label>
+
+  <searchTemplate>
+earliest=@d
+`_fb_summary_recs($host$, $index$)`
+| extract auto=f fb_extract_bucket_type_time_source
+| search NOT bucket_type="rb"
+| dedup path
+| fields id, bucket_et, bucket_lt
+  </searchTemplate>
+
+  <fieldset>
+    <input type="dropdown" token="host" searchWhenChanged="true">
+      <label>Host</label>
+      <populatingSearch fieldForValue="orig_host" fieldForLabel="orig_host">| inputlookup fb_hostname_index_cache | dedup orig_host | sort orig_host</populatingSearch>
+    </input>
+    <input type="dropdown" token="index" searchWhenChanged="true">
+      <label>Index</label>
+      <populatingSearch fieldForValue="orig_index" fieldForLabel="orig_index">| inputlookup fb_hostname_index_cache | search orig_host=$host$ | dedup orig_index | sort orig_index</populatingSearch>
+    </input>
+  </fieldset>
+
+  <row>
+    <html>
+<div id="fire_brigade_help">
+The purpose of this view is to provide a high-level estimate of the
+average span (read as the difference between the <i>earliest</i> and
+<i>latest</i> events) of the bucket. Taken in combination with data
+about the span of searches (i.e., what is the default time range for
+most searches?), this information can help tune bucket sizing for
+search performance. Generally speaking, searching lots of small
+buckets is slower than searching a few large ones.
+<p/>
+All of the buckets searched for purposes of this dashboard are
+<em>locally</em> indexed buckets--buckets replicated to this host from
+another clustered indexer are not included. The purpose of this
+restriction is to provide insight to the data <i>as it is
+indexed</i>.
+<p/>
+The panel titled <em>Host Time Limits</em> shows the configuration
+values from indexes.conf for this index. The first is
+<code>maxHotSpanSecs</code> indicating the longest amount of time that
+a bucket will be allowed to span. The second value shown here is
+<code>maxHotIdleSecs</code>, governing how long a bucket will sit idle
+(not receiving new events) before being rolled to warm.
+Tuning these can change the behavior of Splunk with respect to
+creating index buckets. Please be careful when changing these
+parameters.
+<p/>
+More information about index configuration can be found <a href="http://docs.splunk.com/Documentation/Splunk/latest/Admin/indexesconf">here</a>.
+</div>
+    </html>
+  </row>
+
+  <row grouping="1,2,2">
+    <single id="bucket_span_detail_count_label">
+      <title>Local Bucket Count</title>
+      <option name="field">count</option>
+      <searchPostProcess>stats count</searchPostProcess>
+    </single>
+
+    <single id="bucket_span_detail_avg_span_label">
+<!--      <title>Average Local Bucket Span</title> -->
+      <option name="field">average</option>
+      <option name="underLabel">seconds</option>
+      <searchPostProcess>eval bucket_span=bucket_lt - bucket_et
+| stats avg(bucket_span) AS average | eval average=round(average, 0)
+      </searchPostProcess>
+    </single>
+    <single>
+<!--      <title>Average Local Bucket Span (Human-Readable)</title> -->
+      <option name="field">average</option>
+      <option name="underLabel">Human-Readable</option>
+      <searchPostProcess>eval bucket_span=bucket_lt - bucket_et
+| stats avg(bucket_span) AS average
+| eval average=tostring(round(average, 0), "duration")
+      </searchPostProcess>
+    </single>
+
+    <single id="bucket_span_detail_hot_limits_label">
+<!--      <title>Configured Hot Span Limit</title> -->
+      <option name="field">maxHotSpanSecs</option>
+      <option name="underLabel">maxHotSpanSecs</option>
+      <searchString>| `_fb_rest_index_config($host$, $index$)`</searchString>
+    </single>
+    <single>
+<!--      <title>Configured Hot Idle Limit</title> -->
+      <option name="field">maxHotIdleSecs</option>
+      <option name="underLabel">maxHotIdleSecs</option>
+      <searchString>| `_fb_rest_index_config($host$, $index$)`</searchString>
+    </single>
+  </row>
+
+  <row>
+    <chart>
+      <title>Local Bucket Span In Hours</title>
+      <option name="link.visible">false</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.axisTitleX.text">Bucket ID</option>
+      <option name="charting.axisTitleY.text">Hours</option>
+      <option name="charting.legend.placement">none</option>
+      <searchPostProcess>sort 0 id
+| eval bucket_span=round((bucket_lt - bucket_et) / 3600, 1)
+| chart max(bucket_span) by id
+      </searchPostProcess>
+    </chart>
+  </row>
+
+</form>

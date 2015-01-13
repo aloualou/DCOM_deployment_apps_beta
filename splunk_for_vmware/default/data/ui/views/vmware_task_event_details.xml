@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Task and Event Details</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">1</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="viewHeader">
+		<module name="TimeRangePicker" layoutPanel="viewHeader" autoRun="True">
+			<param name="searchWhenChanged">True</param>
+			<param name="selected">Last 24 Hours</param>
+			<!--This next block contains a list of elements to replace-->
+			<module name="SOLNSearch">
+				<param name="search">
+					<![CDATA[
+					| inputlookup vmware_event_lookup | search NOT belong=Events | stats first(belong) by belong
+					]]>
+				</param>
+				<module name="SOLNDropdown" layoutPanel="viewHeader">
+					<param name="varName">taskeventeventClassification</param>
+					<param name="label">Event Classification:</param>
+					<param name="staticItem">All,*</param>
+					<param name="displayField">belong</param>
+					<param name="valueField">belong</param>
+					<module name="SOLNContent">
+						<param name="content">
+							<![CDATA[
+							<br style="clear:both;" />
+							<br />
+							]]>
+						</param>
+					</module>
+					<module name="SOLNTextInput" layoutPanel="viewHeader">
+						<param name="varName">taskeventvc</param>
+						<param name="template">VirtualCenter="$text$"</param>
+						<param name="label">Virtual Center:</param>
+						<module name="SOLNTextInput" layoutPanel="viewHeader">
+							<param name="varName">taskeventdatacenter</param>
+							<param name="template">(Datacenter="$text$" OR Destination-Datacenter="$text$")</param>
+							<param name="label">Datacenter:</param>
+							<module name="SOLNTextInput" layoutPanel="viewHeader">
+								<param name="varName">taskeventcluster</param>
+								<param name="template">Cluster="$text$"</param>
+								<param name="label">Cluster:</param>
+								<module name="SOLNTextInput" layoutPanel="viewHeader">
+									<param name="varName">taskeventhost</param>
+									<param name="template">HostSystem="$text$" OR Destination-HostSystem="$text$"</param>
+									<param name="label">Host:</param>
+									<module name="SOLNTextInput" layoutPanel="viewHeader">
+										<param name="varName">taskeventvm</param>
+										<param name="template">VirtualMachine="$text$"</param>
+										<param name="label">Virtual Machine:</param>
+										<module name="SOLNTextInput" layoutPanel="viewHeader">
+											<param name="varName">taskeventusername</param>
+											<param name="template">UserName="$text$"</param>
+											<param name="label">Username:</param>
+											<module name="SOLNTextInput" layoutPanel="viewHeader">
+												<param name="varName">taskeventtask</param>
+												<param name="template">Task="$text$"</param>
+												<param name="label">Task:</param>
+												<module name="SOLNTextInput" layoutPanel="viewHeader">
+													<param name="varName">taskeventmessage</param>
+													<param name="template">Message="$text$"</param>
+													<param name="label">Message:</param>
+													<module name="SOLNContent" layoutPanel="panel_row3_col1_header">
+														<param name="content">
+															<![CDATA[
+															Task and event details $search.timerange$
+															]]>
+														</param>
+													</module>
+													<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+														<param name="search">
+															<![CDATA[
+															sourcetype=vmware:events OR sourcetype=vmware:tasks | spath queueTime | spath reason.name output=TaskDescription | spath eventChainId | spath name output=Task | eval UserName=replace(source,"^Username\:","") | spath state | spath destDatacenter.name output=destDatacenter | spath destDatastore.name output=destDatastore | spath destHost.name output=destHost | spath datacenter.name output=Datacenter | spath eventClass | spath chainId | spath computeResource.name output=Cluster | spath host.name output=HostSystem | spath vm.name output=VirtualMachine | spath host.host.moid output=HostSystem-Moid | spath vm.vm.moid output=VirtualMachine-Moid | spath key | spath createdTime | spath fullFormattedMessage | eval fullFormattedMessage=coalesce(fullFormattedMessage,TaskDescription, descriptionId) | eval chainId=coalesce(chainId, eventChainId) | eval createdTime=coalesce(createdTime, queueTime) | eval eventClass=if(substr(key,1,4)="task", "Not Available", eventClass) | eval HostSystem =if(substr(key,1,4)="task", "Not Available", HostSystem) | eval Cluster=if(substr(key,1,4)="task", "Not Available", Cluster) | eval VirtualMachine=if(substr(key,1,4)="task", "Not Available", VirtualMachine)  | eval eventClass=if(substr(key,1,4)="task", "Not Available", eventClass) |  table _time createdTime UserName Task state fullFormattedMessage key chainId eventClass eventClassification host HostSystem VirtualMachine Cluster Datacenter destDatacenter destDatastore destHost | rename fullFormattedMessage AS Message, host AS VirtualCenter, eventClassification AS EventGroup, eventClass AS EventClass, destDatacenter AS Destination-Datacenter, destDatastore AS Destination-Datastore, destHost AS Destination-Host | stats first(_time) AS _time list(*) AS * by chainId,VirtualCenter | fields _time, createdTime, chainId, key, Message, EventClass, EventGroup, Task, UserName, VirtualCenter, Datacenter, Destination-Datacenter, Cluster, HostSystem, Destination-Host, VirtualMachine, Destination-Datastore | search $taskeventvc$ $taskeventdatacenter$ $taskeventusername$ $taskeventtask$ $taskeventmessage$ $taskeventvm$ $taskeventhost$ $taskeventcluster$ EventGroup="*$taskeventeventClassification$*" 
+																]]>
+														</param>
+														<module name="JobProgressIndicator"/>
+														<module name="Paginator">
+															<param name="entityName">results</param>
+															<param name="count">20</param>
+															<module name="SimpleResultsTable">
+																<param name="count">20</param>
+																<param name="drilldown">all</param>
+																<param name="entityName">results</param>
+																<param name="displayRowNumbers">false</param>
+																<module name="SOLNSearch">
+																	<param name="search">
+																		<![CDATA[
+																		sourcetype=vmware:events OR sourcetype=vmware:tasks | spath queueTime | spath reason.name output=TaskDescription | spath eventChainId | spath name output=Task | eval UserName=replace(source,"^Username\:","") | spath state | spath destDatacenter.name output=destDatacenter | spath destDatastore.name output=destDatastore | spath destHost.name output=destHost | spath datacenter.name output=Datacenter | spath eventClass | spath chainId | spath computeResource.name output=Cluster | spath host.name output=HostSystem | spath vm.name output=VirtualMachine | spath host.host.moid output=HostSystem-Moid | spath vm.vm.moid output=VirtualMachine-Moid | spath key | spath createdTime | spath fullFormattedMessage | eval fullFormattedMessage=coalesce(fullFormattedMessage,TaskDescription) | eval chainId=coalesce(chainId, eventChainId) | eval createdTime=coalesce(createdTime, queueTime) | search chainId="$click.chainId$" host="$click.VirtualCenter$"
+																		]]>
+																	</param>
+																	<module name="JobProgressIndicator"/>
+																	<module name="SOLNRedirect">
+																		<param name="url">flashtimeline</param>
+																		<param name="paramList">search.sid</param>
+																		<param name="renameList">sid</param>
+																	</module>
+																</module>
+															</module> <!-- End Module Simple Results Table -->
+														</module><!-- End Module Paginator -->
+														<module name="ViewRedirectorLink">
+															<param name="viewTarget">flashtimeline</param>
+															<param name="label">View Full Report</param>
+														</module>
+													</module> <!-- End Module Search -->
+												</module> <!-- End Module Pulldown (Event Classification) -->
+											</module> <!-- End Module Search (Event Classification) -->
+										</module> <!-- End Module Pulldown (Host Type) -->
+									</module> <!-- End Module TextField message-->
+								</module> <!-- End Module TextField task-->
+							</module> <!-- End Module TextField username-->
+						</module> <!-- End Module TextField vm-->
+					</module> <!-- End Module TextField host-->
+				</module> <!-- End Module TextField cluster -->
+			</module> <!-- End Module TextField datacenter -->
+		</module> <!-- End Module TextField virtual center-->
+	</module> <!-- End Module TimeRangePicker -->
+</view>

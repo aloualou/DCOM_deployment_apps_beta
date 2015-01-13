@@ -1,0 +1,93 @@
+<form script="capacity_forecasting.js">
+    <label>Capacity Forecasting</label>
+    <fieldset autoRun="false" submitButton="true">
+
+        <input type="time">
+        	<label>Time Selector</label>
+            <default>Last 24 hours</default>
+        </input>
+
+        <input type="dropdown" token="host">
+            <label>Virtual Center</label>
+            <populatingSearch fieldForValue="host" >| inputlookup Entity | table host | dedup host </populatingSearch>
+        </input>
+
+        <input type="dropdown" token="hmoid">
+            <label>HostSystem</label>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForValue="moid" fieldForLabel="name">| inputlookup Entity | search type=HostSystem host=$host$ | table name moid | dedup name </populatingSearch>
+        	<default>*</default>
+        </input> 
+
+        <input type="dropdown" token="vmoid">
+            <label>VirtualMachine</label>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForValue="moid" fieldForLabel="name">| inputlookup Entity | search type=VirtualMachine host=$host$ | table name moid | dedup name | append [stats count | eval moid="*"]</populatingSearch>
+        	<default>*</default>
+        </input>
+
+        <input type="text" token="timeSpan">
+			<label>Prediction</label>
+			<default></default>
+			<option name="width">50%</option>
+     	</input>
+     	<input type="dropdown" token="timeMultiplier">
+     		<label>Time Unit</label>
+     		<default>Days Later</default>
+     		<choice value="0.003333">Seconds Later</choice>
+			<choice value="0.2">Minutes Later</choice>
+			<choice value="288">Days Later</choice>
+			<choice value="2016">Weeks later</choice>
+			<choice value="8640">Months Later</choice>
+			<choice value="25920">Quarters Later</choice>
+			<choice value="103680">Years later</choice>
+     	</input> 
+
+		<input type="dropdown" token="algo">
+            <label>Prediction Algorithm</label>
+            <default>LLP</default>
+			<choice value="LLP">LLP-Seasonal local level</choice>
+			<choice value="LL">LL-Local level</choice>
+			<choice value="LLT">LLT-Local level trend</choice>
+        </input> 
+
+    </fieldset>
+
+   <row>
+        <chart id="chart1">
+            <title>CPU Usage Prediction Over Time (%)</title>
+            
+            <searchString>|  `tstats` avg(p_average_cpu_usage_percent) from vmw_perf_cpu_hostsystem where *  moid=$hmoid$ host=$host$ groupby _time span=5m | timechart avg(p_average_cpu_usage_percent) AS avgUsage span=5m | predict avgUsage as predict_avg algorithm=$algo$ future_timespan=$futuretimeSpan$ | timechart avg(avgUsage) as avg_usage avg(predict_avg) as predict_avg avg(upper95(predict_avg)) as upper95(predict_avg) avg(lower95(predict_avg)) as lower95(predict_avg)  span=1d</searchString>
+            <earliestTime>$earliest$</earliestTime>
+            <option name="charting.axisTitleX.text">time</option>
+            <option name="charting.chart">line</option>
+            <option name="charting.drilldown">none</option>
+            <option name="charting.legend.placement">bottom</option>
+        </chart>
+    </row>
+     <row>
+        <chart id="chart2">
+            <title>Mem Usage Prediction Over Time (%)</title>
+            
+            <searchString>| `tstats` avg(p_average_mem_usage_percent) from vmw_perf_mem_hostsystem where * moid=$hmoid$ host=$host$ groupby _time span=5m | timechart avg(p_average_mem_usage_percent) AS avgUsage span=5m  | predict avgUsage as predict_avg algorithm=$algo$ future_timespan=$futuretimeSpan$ period=50 | timechart avg(avgUsage) as avg_usage avg(predict_avg) as predict_avg avg(upper95(predict_avg)) as upper95(predict_avg) avg(lower95(predict_avg)) as lower95(predict_avg) span=1d</searchString>
+            <earliestTime>$earliest$</earliestTime>
+            <option name="charting.axisTitleX.text">time</option>
+            <option name="charting.chart">line</option>
+            <option name="charting.drilldown">none</option>
+            <option name="charting.legend.placement">bottom</option>
+        </chart>
+    </row>
+         <row>
+        <chart id="chart3">
+            <title>Disk Usage Prediction Over Time (KBs/sec)</title>
+            
+            <searchString>| `tstats` avg(p_average_disk_usage_kiloBytesPerSecond) from vmw_perf_disk_virtualmachine where * moid=$vmoid$ host=$host$ groupby _time span=5m | timechart avg(p_average_disk_usage_kiloBytesPerSecond) AS avgUsage span=5m  | predict avgUsage as predict_avg algorithm=$algo$ future_timespan=$futuretimeSpan$ period=50 | timechart avg(avgUsage) as avg_usage avg(predict_avg) as predict_avg avg(upper95(predict_avg)) as upper95(predict_avg) avg(lower95(predict_avg)) as lower95(predict_avg) span=1d</searchString>
+            <earliestTime>$earliest$</earliestTime>
+            <option name="charting.axisTitleX.text">time</option>
+            <option name="charting.chart">line</option>
+            <option name="charting.drilldown">none</option>
+            <option name="charting.legend.placement">bottom</option>
+        </chart>
+    </row>
+    
+</form>

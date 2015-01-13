@@ -1,0 +1,247 @@
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<setup>
+	<block title="Splunk for VMware Setup">
+		<text>
+		
+			<![CDATA[
+			<style>
+				#item-blockFieldset-0 legend {
+			    	font-size: 13pt;
+				}
+        
+                #item-blockFieldset-3 {
+                    display: none;
+                }
+        
+                #eaiform > h2 {
+	            	display: none;
+                }
+                
+                .setup-description > dt{
+                	font-weight: bold;
+                }
+                
+                .setup-description > dd{
+	            	border-left: 4px solid #DDD;
+                    margin-left: 10px;
+                    padding-left: 5px;
+                    margin-bottom: 8px;
+                }
+			</style>
+      
+			<script type="text/javascript">
+				function openAppPage( appname ){
+					if( is42plus() ){
+                        link = Splunk.util.make_url("/manager/appinstall/" + appname) + "/"?return_to="+Splunk.util.make_url("/manager/splunk_for_vmware/apps/local/splunk_for_vmware/setup") + "%3Faction%3Dedit";
+                        window.open(location.protocol + "//" + location.host + link);
+						//window.open(location.protocol + "//" + location.host +  "/manager/launcher/apps/remote?q=" + appname);
+						return false;
+					}
+					else{
+						return true;
+					}
+				}
+				
+				function is42plus(){
+					var version_re = /Splunk ([0-9]+)([.]([0-9]+))?/;
+					var title = $('title').text();
+					var m = version_re.exec(title);
+					
+					if( m == null || m.length < 4 ){
+						return false;
+					}
+					
+					var major = parseInt(m[1], 10);
+					var minor = parseInt(m[3], 10);
+					
+					if( major > 4 || (major == 4 && minor >= 2 ) ){
+						return true;
+					}
+					
+					return false;
+				}
+        
+			</script>
+
+			]]>
+      
+            <![CDATA[
+            Splunk for VMware has been successfully installed.
+            A few additional steps are required to optimize Splunk for VMware.
+            Review the steps below and when you have made your selections, click <b>Save</b> to complete the setup. 
+            ]]>
+            
+			<![CDATA[
+			<p>
+			If you need help, please <a target="_blank" href="http://www.splunk.com/support">contact support.</a>
+			</p>
+			]]>
+			
+		</text>
+	</block>
+	
+	<block title="Search Job Quota Configuration" endpoint="admin/roles/" >
+		<text>
+            <![CDATA[
+            To improve the performance of the VMware app views, we recommend that you increase the search job and disk quotas (the number of concurrent searches and the amount of disk space allowed respectively).
+            Set the admin and power user concurrent search job quota to 10 or more.
+            Set the admin search disk quota to 25 gigabytes or more.
+            <p>
+            The settings below show your current configuration. Review these settings and update them if necessary.
+            </p>
+            <a target="_blank" href="http://www.splunk.com/base/Documentation/latest/admin/Authorizeconf#authorize.conf.spec">View more information about search job quotas.</a>
+            ]]>
+			
+		</text>
+        
+        <input entity="admin" field="srchDiskQuota">
+            <label>Maximum amount of disk space (MB) that can be used for search jobs by the $name$ user</label>
+            <type>text</type>
+            <validation>\d+</validation>
+        </input>
+        
+        <input entity="admin" field="srchJobsQuota">
+    		<label>Maximum number of concurrent searches for the $name$ user</label>
+    		<type>text</type>
+    		<validation>\d+</validation>
+    	</input>
+      
+        <input entity="power" field="srchJobsQuota">
+            <label>Maximum number of concurrent searches for the $name$ user</label>
+            <type>text</type>
+            <validation>\d+</validation>
+      </input>
+	</block>
+  
+	<block title="Finalize Setup">
+		<text>
+            <![CDATA[
+            To complete Splunk for VMware setup the setup mechanism needs to perform some final steps.  When you click <b>Save</b> the setup mechanism will do the following:
+            
+            <dl class="setup-description">
+              <dt>Deploy default lookups</dt>
+                <dd>
+                A number of default lookup files need to be available for Splunk for VMware to function properly.
+                Default files will be deployed if they do not already exist from a previous deployment of Splunk for VMware (pre-existing lookup files will not be modified).
+                </dd>
+              <dt>Disable/delete old add-ons</dt>
+                <dd>
+                Some Add-ons are no longer in use and will be disabled and optionally deleted. If you wish for them to be deleted please check the box below.
+                <br/>
+                <input id="delete-da-proxy" type="checkbox" name="/admin/splunk_for_vmware/general_settings/VMW_do_delete" value="1"><label for="/admin/splunk_for_vmware/general_settings/VMW_do_delete">Delete all deprecated Add-ons</label>
+                </dd>
+            </dl>
+            ]]>
+
+			<![CDATA[
+			<script>
+			$(document).ready(function() {
+				$(document.getElementById("/admin/splunk_for_vmware/general_settings/VMW_delete_da_id")).val(0);
+				//Splunk actually validates ALL form inputs so just before submit we disable our proxy.
+				$("form").submit(function() {
+					$('#delete-da-proxy').attr("disabled","true");
+				});
+			});
+			$("#delete-da-proxy").click(function() {
+				if($(this).is(':checked')){
+					$(document.getElementById("/admin/splunk_for_vmware/general_settings/VMW_delete_da_id")).val(1);
+				}
+				else {
+					$(document.getElementById("/admin/splunk_for_vmware/general_settings/VMW_delete_da_id")).val(0);
+				}
+			});
+			function addJavascript( filename ){
+				var script = $("<script>");
+				script.attr({type: 'text/javascript', src: filename});
+				$("head").append( script );
+			}
+			
+			function addStylesheet( filename ){
+				// For Internet Explorer, use createStyleSheet since adding a stylesheet using a link tag will not be recognized
+				// (http://stackoverflow.com/questions/1184950/dynamically-loading-css-stylesheet-doesnt-work-on-ie)
+				if( document.createStyleSheet ){
+					document.createStyleSheet(filename);
+				}
+				// For everyone else
+				else{
+					var link = $("<link>");
+					link.attr({type: 'text/css',rel: 'stylesheet', href: filename});
+					$("head").append( link );
+				}
+			}
+				
+			
+            function redirectToConfig(){
+              window.location.assign(Splunk.util.make_url('/app/splunk_for_vmware/vmw_configuration'));
+            }
+            
+            function setRedirectURL(){
+            
+               if( window.location.search != null && window.location.search.indexOf("redirected") >= 0 ){
+                  return;
+               }
+            
+               tmp = window.location.search.split("&");
+               has_redirect_already = false;
+               
+               for (c = 0; c < tmp.length; c++){
+                  if( tmp[c].indexOf( "redirect_override" ) >= 0 && ( tmp[c].indexOf("/app/splunk_for_vmware/") >= 0 || tmp[c].indexOf("%2Fapp%2Fsplunk_for_vmware%2Fcollection_config") >= 0 ) ){
+                    has_redirect_already = true;
+                  }
+               }
+            
+               if( has_redirect_already == false ){
+                  window.location.assign(Splunk.util.make_url("/manager/splunk_for_vmware/apps/local/splunk_for_vmware/setup")+"?action=edit&redirect_override="+ Splunk.util.make_url("/app/splunk_for_vmware/collection_config") + "&redirected=true");
+               }
+               
+            }
+            
+            setRedirectURL(); 
+
+			function stopSaveIfValidationFails(){
+	            return true;
+	            //Removing validation, not ready yet
+              
+				// First, try the validation engine check
+				validation = $("#eaiform").validationEngine('validate');
+				
+				if( validation == true ){
+					return true;
+				}
+				else if( validation == false ){
+					return false;
+				}
+			}
+						
+			function configureSetupAppInputValidation(){
+                $('input[name$="admin/roles/admin/srchJobsQuota"]').attr("id", "srch_jobs_admin");
+				$('#srch_jobs_admin').addClass("validate[required,custom[integer],min[10]]");
+				
+                $('input[name$="admin/roles/power/srchJobsQuota"]').attr("id", "srch_jobs_power");
+				$('#srch_jobs_power').addClass("validate[required,custom[integer],min[10]]");
+				
+				$("#eaiform").validationEngine();
+				$('#eaiform').click( stopSaveIfValidationFails );
+			}
+						
+			$(document).ready(function(){
+				//configureSetupAppInputValidation();
+			});
+      
+            </script>
+			]]>
+		</text>
+	</block>
+  
+    <block title=" " endpoint="admin/splunk_for_vmware/" entity="general_settings">
+        <input field="VMW_do_install">
+            <label>Run the Splunk for VMware Installer</label>
+            <type>bool</type>
+        </input>
+        <input field="VMW_delete_da">
+            <label>Delete all old Domain Add-ons</label>
+            <type>bool</type>
+        </input>
+    </block>
+  
+</setup>

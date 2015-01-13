@@ -1,0 +1,132 @@
+<script id="regular-streams-list-template" type="text/template">
+
+        <thead>
+        <tr>
+            <th>
+                <span><input type="checkbox" class='streams-select-all regular-checkbox'></span>
+            </th>
+            <th style="width: 13%">
+                Name
+                <span class="chevron-grouping">
+                    <span class="icon-chevron-down"/>
+                    <span class="icon-chevron-up"/>
+                </span>
+            </th>
+            <th>
+                Type
+                <span class="chevron-grouping">
+                    <span class="icon-chevron-down"/>
+                    <span class="icon-chevron-up"/>
+                </span>
+            </th>
+            <th>
+                App
+                <span class="chevron-grouping">
+                    <span class="icon-chevron-down"/>
+                    <span class="icon-chevron-up"/>
+                </span>
+            </th>
+            <th>
+                Description
+                <span class="chevron-grouping">
+                    <span class="icon-chevron-down"/>
+                    <span class="icon-chevron-up"/>
+                </span>
+            </th>
+            <th style="width: 25%">
+                Recent Traffic(60s)
+            </th>
+            <th >
+                Enabled
+            </th>
+            <th class="streams-action-column">
+                Actions
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+            <% var regex = new RegExp(searchString, "i"); %>
+            <% for (var i = 0; i < streams.length; i++) { %>
+
+                <% var stream = streams[i]; %>
+                <% if (regex.test(stream.id) || regex.test(stream.name) || regex.test(stream.app)) { %> 
+
+                    <tr class="stream-row" data-id="<%=stream.id%>">
+
+                        <!-- Checkbox -->
+                        <td>
+                            <% if (stream.app == 'Stream') {%>
+                                <span ><input type="checkbox" class="stream-select regular-checkbox"></span>
+                            <% } %> 
+                        </td>
+
+                        <!-- Name -->
+                        <td>
+                            <a class="stream-id" data-id="<%=stream.id%>"> <%= stream.id %> </a>
+                        </td>
+
+                        <!-- Type -->
+                        <td>
+                            <% if (stream.cloned) { %> 
+                                <p>Cloned </p>
+                            <% } else { %>
+                                <p>Original</p>
+                            <% } %>
+                        </td>
+
+                        <!-- App -->
+                        <td>
+                            <% if (!stream.app) { %>
+                                <p style="color: #bbb">Undefined</p>
+                            <% } else { %>
+                                <p><%=stream.app %> </p>
+                            <% } %>
+                        </td>
+
+                        <!-- Description -->
+                        <td>
+                            <p> <%= stream.name %> </p>
+                            <%if (stream.expirationDate) {%> (Expires at <%= new Date(stream.expirationDate * 1000) %> )
+                            <%}%>
+                        </td>
+
+                        <td>
+                            <% if(!stream.enabled) { %> 
+                                <p style="color: #bbb">Disabled</p>
+                            <% } else { %>
+                                <span class="loadingMsg">Loading....</span>
+                                <span class="sparkline"></span>
+                            <% } %>
+                        </td>
+
+                        <!-- Enabled/Disabled -->
+                        <td class="stream-status">
+                            <% if(stream.enabled) { %> <span class="icon-check"></span> <% } %>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="streams-action-column" data-id="<%=stream.id%>">
+                            <% if (stream.app == 'Stream') {%>
+                            <div class="stream-edit btn-combo">
+                                <a class="dropdown-toggle btn-pill" href="#"><span class="icon-chevron-down"></span></a>
+
+                                <div class="dropdown-menu dropdown-menu-narrow">
+                                    <div class="arrow"></div>
+                                    <ul>
+                                        <% if (stream.enabled) { %> <li><a href="#" class="stream-disable">Disable</a></li> <% } else { %>
+                                            <li><a href="#" class="stream-enable">Enable</a></li> <% } %>
+                                        <li><a href="#" class="stream-clone">Clone</a></li>
+                                        <% if (!stream.locked) { %> <li><a href="#" class="stream-delete">Delete</a></li><% } %>
+                                    </ul>
+                                </div>
+                            </div>
+                            <%} %>
+                        </td>
+
+                    </tr>
+
+                <% } %> <!-- end if -->   
+            <% } %> <!-- end loop -->
+        </tbody>
+
+</script>

@@ -1,0 +1,9 @@
+.SingleValue .singleResult {
+	font-size: 19px !important;
+	vertical-align: 0px !important;
+}
+.appLogo {
+	height: 33px;
+	width: 80px;
+	background: url(appLogo.png) no-repeat 0 0;
+}

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Virtual Machine Snapshots</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="ServerSideInclude" layoutPanel="viewHeader">
+		<param name="src">vm_snapshot_welcome.html</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="viewHeader" autoRun="true">
+	   <module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+            <param name="content">
+				<![CDATA[
+				Snapshots present on VM
+				]]>
+            </param>
+        </module>
+		<!-- Start of Virtual Center Dropdown -->
+		<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+			<param name="search">| inputlookup Entity | search type=RootFolder | table name | sort name | rename name AS vc</param>
+			<module name="SOLNDropdown" layoutPanel="panel_row1_col1">
+				<param name="valueField">vc</param>
+				<param name="displayField">vc</param>
+				<param name="label">VirtualCenter:</param>
+				<module name="TimeRangePicker" layoutPanel="panel_row1_col1">
+					<param name="searchWhenChanged">True</param>
+					<param name="selected">Last 4 hours</param>
+					<module name="SOLNContent" layoutPanel="panel_row1_col1">
+				        <param name="style">float:left;clear:both;</param>
+						<param name="content">
+							<![CDATA[
+							Click on a datastore to see snapshot details on it
+							]]>
+						</param>
+					</module>
+					<!-- Start of Row 1 Tables -->
+					<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+						<param name="search">
+							<![CDATA[
+							| `tstats` first(filesize) first(filedatastore) from vmw_inv_datastore_virtualmachine where * host="$vc.vc$" (filename="*.vmsn" OR filename="*.vmsd" OR filename="*.vmdk") groupby host, moid, filename, filetype | stats first(filesize) AS Filesize, first(filedatastore) AS Datastore by host, moid, filename, filetype | stats sum(Filesize) AS totalSpace by host, moid, Datastore, filetype, filename | eval vmsnspace = if (filetype=="snapshotdata", totalSpace, 0 ) | stats list(filename) AS "SnapshotFiles", sum(totalSpace) AS TotalSnapSpace, sum(vmsnspace) AS VmsnSpace, count by host, moid, Datastore | search VmsnSpace > 0 | eval TotalSpace=`format_bytes(TotalSnapSpace)` | eval SnapshotSpace= `format_bytes(VmsnSpace)` | fields - totalSpace vmsnspace | lookup Entity moid AS moid, host AS host OUTPUT name AS name | lookup Entity lowername AS Datastore, host AS host OUTPUT moid AS HIDE-Datastore-moid | rename count AS "TotalFiles", host AS VirtualCenter, moid AS HIDE-VirtualMachine-moid, name AS VirtualMachine | table VirtualCenter VirtualMachine HIDE-VirtualMachine-moid Datastore SnapshotFiles TotalFiles HIDE-Datastore-moid SnapshotSpace TotalSpace
+							]]>
+						</param>
+						<module name="JobProgressIndicator"/>
+						<module name="Paginator">
+							<param name="entityName">results</param>
+							<module name="SimpleResultsTable">
+								<param name="drilldown">all</param>
+								<param name="entityName">results</param>
+								<param name="displayRowNumbers">false</param>
+								<module name="SOLNContent" layoutPanel="panel_row1_col1">
+									<param name="content">
+										<![CDATA[
+										<h2>Snapshot details for $click.Datastore$</h2>
+										]]>
+									</param>
+								</module>
+								<module name="SOLNSearch">
+									<param name="search">
+										<![CDATA[
+										| `tstats` first(filesize) first(filedatastore) first(snapshotTime) first(snapshotState) first(snapshotName) first(snapshotDescr) first(snapshotDepth) from vmw_inv_datastore_virtualmachine where * host=$vc.vc$ filedatastore="$click.Datastore$" filetype="snapshotdata" groupby _time, host, moid, filename | stats first(snapshotName) AS SnapshotName, first(snapshotState) AS State,  first(snapshotTime) AS CreateTime, first(snapshotDescr) AS Description, first(snapshotDepth) as Depth, first(filesize) AS size BY filename | eval CreateTimeEpoch=strptime(CreateTime,"%Y-%m-%d %H:%M:%S.%Q") | convert ctime(CreateTimeEpoch) AS CreatedTime | eval Size =`format_bytes(size)` | fields - splitSubPath, CreateTime, CreateTimeEpoch, size | rename filename as Filename
+										]]>
+									</param>
+									<module name="JobProgressIndicator"/>
+									<module name="SimpleResultsTable">
+										<param name="drilldown">all</param>
+										<param name="entityName">results</param>
+										<param name="displayRowNumbers">false</param>
+									</module><!-- End SimpleResultsTable for snapshot details -->
+								</module><!-- End Search snapshot details -->
+							</module><!-- End SimpleResultsTable for VM snapshots -->
+						</module><!-- End Paginator for VM snapshots -->
+					</module><!-- End Search VM snapshots -->
+				</module><!-- End Search VM snapshots -->
+			</module><!-- End Search VM snapshots -->
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+			<param name="content">
+				<![CDATA[
+				Snapshot Statistics for Datastore
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row2_col1">
+			<param name="search">
+			     <![CDATA[
+			     | inputlookup Entity | search type="Datastore" | dedup host | table host | sort host
+			     ]]>
+            </param>
+			<module name="SOLNDropdown" layoutPanel="panel_row2_col1">
+				<param name="valueField">host</param>
+				<param name="displayField">host</param>
+				<param name="varName">host</param>
+				<param name="label">Virtual Center:</param>
+				<module name="SOLNSearch" layoutPanel="panel_row2_col1">
+					<param name="search">
+                        <![CDATA[
+                        | inputlookup Entity  | search type="Datastore" | search host=$host.host$ | table host, name, moid  | sort name | eval lowername=lower(name) | rename name AS datastore 
+				        ]]>
+				    </param>
+				    <module name="SOLNDropdown" layoutPanel="panel_row2_col1">
+				        <param name="valueField">moid,host,lowername</param>
+				        <param name="displayField">datastore</param>
+				        <param name="label">DataStore:</param>
+				        <param name="varName">datastore</param>
+				        <module name="TimeRangePicker" layoutPanel="panel_row2_col1">
+                            <param name="searchWhenChanged">True</param>
+                            <param name="selected">Last 4 hours</param>
+                            <module name="SOLNSearch" layoutPanel="panel_row2_col1_grp1">
+					           <param name="search">
+                                    <![CDATA[
+                                    | `tstats` first(filesize) first(filedatastore) from vmw_inv_datastore_virtualmachine where * filedatastore="$datastore.lowername$" host="$datastore.host$" filetype="snapshotdata" groupby _time, host, moid, filename span=10m | stats first(filesize) AS Filesize BY _time, host, moid, filename |  timechart minspan=10m sum(Filesize) AS "SnapshotSpace"
+                                    ]]>
+                                </param>
+                                <module name="HiddenChartFormatter">
+                                    <param name="charting.chart">line</param>
+                                    <param name="charting.chartTitle">Snapshot space used on disk</param>
+                                    <param name="charting.chart.nullValueMode">connect</param>
+                                    <param name="charting.primaryAxisTitle.text">Time</param>
+                                    <param name="charting.secondaryAxisTitle.text">Snapshot space in bytes</param>
+                                    <module name="JSChart">
+                                        <module name="JobProgressIndicator"/>
+                                    </module>
+                                </module>
+                            </module>
+                            <module name="SOLNSearch" layoutPanel="panel_row2_col1_grp2">
+                                <param name="search">
+                                    <![CDATA[
+                                    | `tstats` dc(filename) first(filesize) first(filedatastore) from vmw_inv_datastore_virtualmachine where * filedatastore="$datastore.lowername$" host="$datastore.host$" filetype="snapshotdata" groupby _time, host, moid, filename span=10m | timechart minspan=10m dc(filename) AS "Total count"
+                                    ]]>
+                                </param>
+                                <module name="HiddenChartFormatter">
+                                    <param name="charting.chart">line</param>
+                                    <param name="charting.chartTitle">Number of Snapshots on datastore</param>
+                                    <param name="charting.chart.nullValueMode">connect</param>
+                                    <param name="charting.primaryAxisTitle.text">Time</param>
+                                    <param name="charting.secondaryAxisTitle.text">Number of snapshots</param>
+                                    <module name="JSChart">
+                                        <module name="JobProgressIndicator"/>
+                                    </module>
+                                </module>
+                            </module>
+                        </module> <!-- End TimeRangePicker for datastore stats -->
+                    </module><!-- End Dropdown for datastore -->
+				</module><!-- End Search for datastore -->
+			</module><!-- End Dropdown for vcenter for datastore -->
+		</module><!-- End Search for vcenter for datastore -->
+	</module><!-- End for SOLNCommon -->
+</view>

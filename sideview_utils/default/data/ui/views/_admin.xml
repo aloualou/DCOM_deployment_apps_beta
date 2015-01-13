@@ -1,0 +1,27 @@
+  <!-- 
+  Note: if an app uses Sideview utils in the course of customizations in
+  application.js, there may come the temptation to make this _admin view 
+  supercede the default _admin view.   BEWARE if you do that that the 
+  SideviewUtils module will be present in the manager section of all apps
+  and this *may* have an undesired effect.  For the sake of keeping 
+  sideview_utils away from other apps that dont want to use it's modules and
+  its techniques, we have NOT exported this view by default to the system 
+  space
+  -->
+  
+  <view isVisible="false">
+  <label>Internal Admin Nav</label>
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="clearOnJobDispatch">False</param>
+    <param name="maxSize">1</param>
+  </module>
+  <module name="AccountBar" layoutPanel="appHeader">
+    <param name="mode">lite</param>
+  </module>
+
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+</view>
+
+  
+  

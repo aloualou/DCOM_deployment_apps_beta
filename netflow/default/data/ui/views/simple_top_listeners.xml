@@ -1,0 +1,90 @@
+<form onunloadCancelJobs="True" script="search_rerun.js">
+    <label>Top Listeners Report</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="time" searchWhenChanged="false">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row>
+        <single>
+            <searchString>
+                 `netflow_search_rule_20067` earliest=$earliest$ latest=$latest$ 
+                 | head 1 
+                 | addinfo 
+                 | eval selection_duration=strftime(info_min_time, "%m/%d/%Y %I:%M:%S %p") . " - " . strftime(info_max_time, "%m/%d/%Y %I:%M:%S %p") 
+                 | table selection_duration
+            </searchString>
+            <option name="beforeLabel"></option>
+            <option name="field">selection_duration</option>
+            <title>Top Listeners</title>
+        </single>
+    </row>  
+    <row>
+        <chart> 
+            <title>Device group - $exp_group$ | Device - $exp_ip$</title>
+            <searchTemplate>
+                `netflow_search_rule_20067` earliest=$earliest$ latest=$latest$ 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes_in)`  
+                | `fix_dest_ip_mapping`
+                | `format_ip_column(dest_ip, dest_ip, dest_host)`
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by dest_ip)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.chart.stackMode">stacked</option>  
+            <option name="charting.legend.placement">bottom</option>
+        </chart>
+    </row>
+    <row>
+        <table>
+            <title>Top Listener Details</title>
+            <searchTemplate>
+                `netflow_search_rule_20067` earliest=$earliest$ latest=$latest$
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | `fix_dest_ip_mapping`
+                | fillnull value="" dest_host 
+                | stats sum(bytes_in) as TrafficAmount, sum(packets_in) as PacketsAmount, sum(flow_count) as Connections by dest_ip dest_host
+                | sort 0 - TrafficAmount 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)` 
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)` 
+                | table dest_ip dest_host Traffic Packets Connections 
+                | head 20 
+                | rename dest_ip as "Destination IP" 
+                | rename dest_host as "Destination Host" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"
+            </searchTemplate>
+            <option name="wrap">false</option>
+            <option name="rowNumbers">true</option>
+            <option name="count">20</option>
+            <option namw="showPager">false</option>
+        </table>
+    </row>
+</form>

@@ -1,0 +1,57 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Tools</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Tools</h1>
+    ]]></param>
+  </module>
+  
+
+
+  <module name="HTML" layoutPanel="panel_row1_col1" group="Sideview Console">
+    <param name="html"><![CDATA[
+      <p>
+        the Sideview Console is still a VERY young tool, and even I dont use it that much but it allows you to inspect a particular view at runtime and look at the context values of any of that view's modules. 
+      </p>
+
+      <p>
+        It's easier to show an example but you basically just tack ?showsvconsole=1 onto your URL. eg: <a href="pulldown4_dynamic_postprocess?showsvconsole=1" target="_blank">pulldown4_dynamic_postprocess?showsvconsole=1</a>.   When you click this link, not only will that example view load, but you'll also get a weird other popup window.   Whenever you mouseover a module in the main view, you'll see the context keys and values displayed in the popup view.   
+      </p>
+    ]]></param>
+  </module>
+
+
+  <module name="HTML" layoutPanel="panel_row1_col2" group="The FreshMaker">
+    <param name="html"><![CDATA[
+      <p>
+        When you build and edit Splunk views and Splunk apps,  you find yourself keeping <b>http://&lt;your host and port&gt;/debug/refresh?entity=/admin/views</b> open in a separate tab.   You probably also find yourself reloading this tab a few hundred times a day.  You probably also find this tiresome. 
+      </p>
+      <p>
+        <a href="refresh_entities">The FreshMaker</a> does not make this tedium go away entirely, but it does make it slightly more pleasant.
+      </p>
+    ]]></param>
+  </module>
+
+
+  <module name="HTML" layoutPanel="panel_row2_col1" group="Everything else">
+    <param name="html"><![CDATA[
+      <p>
+        If you somehow read this far you are one of the few, the proud, the possibly nonexistent.  Your reward is that you get to see the <a href="custom_behavior1_overview">secret page about the CustomBehavior module</a>.
+      </p>
+    ]]></param>
+  </module>
+
+  
+</view>

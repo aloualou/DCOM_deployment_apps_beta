@@ -1,0 +1,11 @@
+CN=sc-db-centos2.sv.splunk.com,O=SplunkUser
+C=US,postalCode=20814,ST=Maryland,L=Bethesda,STREET=Suite 205,STREET=8120 Woodmont Ave,O=The SANS Institute,OU=Network Operations Center (NOC),OU=Unified Communications,CN=isc.sans.org 
+C=US,ST=California,L=Mountain View,O=Google Inc,CN=www.google.com
+OU=Domain Control Validated,CN=*.dropbox.com
+serialNumber=jde9iuVneOEaNkFotOvLFaWx0vb5-Qpv,C=US,ST=California,L=Los Altos,O=\"Box, Inc.\",CN=*.box.com
+C=US,ST=California,L=Mountain View,O=Google Inc,CN=mail.google.com
+C=US,ST=California,L=Sunnyvale,O=Yahoo Inc.,CN=www.yahoo.com
+C=US,ST=California,L=Mountain View,O=Google Inc,CN=*.google.com
+CN=sc-db-centos2.sv.splunk.com,O=SplunkUser 
+C=US,ST=CA,L=Menlo Park,O=\"Facebook, Inc.\",CN=*.facebook.com
+C=US,ST=CA,L=Santa Clara,O=DevCreations Inc,OU=BD,CN=devc,E=devc@devc.com

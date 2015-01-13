@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Virtual Machine Detail</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">side
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="viewHeader" autoRun="true">
+		<!-- Start of Hierarchy Selector Panel -->
+		<module name="HiddenSavedSearch" >
+			<param name="savedSearch">SelectorHierarchy</param>
+			<module name="SOLNSelector" >
+				<param name="varName">selectedVirtualMachine</param>
+				<param name="varTemplate">(moid="$moid$" AND host="$host$")</param>
+				<param name="idFields">host,moid</param>
+				<param name="pathFields">host,grandParentName,parentName</param>
+				<param name="limitSelectionCount">1</param>
+				<param name="types">VirtualMachine</param>
+				<module name="TimeRangePicker" >
+					<param name="searchWhenChanged">True</param>
+					<param name="selected">Last 4 hours</param>
+					<!-- End of Hierarchy Selector Panel -->
+					<!-- Start of Warning Panel -->
+					<module name="SOLNSavedSearchLookup" layoutPanel="panel_row1_col1">
+						<param name="savedSearch">d_vm_detail_row1_VMData</param>
+						<module name="SOLNNullSwapper">
+							<param name="search">d_vm_detail_row1_VMData_null</param>
+							<param name="lookupSavedSearch">true</param>
+							<module name="SOLNResultsLoader">
+								<param name="displayName">VMInfo</param>
+								<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+									<param name="search">
+										<![CDATA[
+										sourcetype=vmware:inv:vm earliest=1 | spath moid | spath collectionVersion | search $selectedVirtualMachine$ | head (collectionVersion!=1) keeplast=t | spath changeSet.summary.runtime.maxCpuUsage output=maxCpuUsage | spath changeSet.summary.runtime.maxMemoryUsage output=maxMemoryUsage | spath changeSet.summary.quickStats.overallCpuUsage output=overallCpuUsage | spath changeSet.summary.quickStats.guestMemoryUsage output=guestMemoryUsage | stats max(maxCpuUsage) AS MaxPossibleCpuUsage max(maxMemoryUsage) AS MaxPossibleMemUsage max(overallCpuUsage) AS OverallCpuUsage max(guestMemoryUsage) AS OverallMemUsage  | eval VMInvCpuMaxUsg=floor(OverallCpuUsage/MaxPossibleCpuUsage*100) | eval VMInvMemMaxUsg=floor(OverallMemUsage/MaxPossibleMemUsage*100) | thresholdlookup entitytype=VirtualMachine, perftype=inv, metric=VMInvCpuMaxUsg match=false | rename threshold_severity AS VMInvCpuMaxUsg_Threshold | thresholdlookup entitytype=VirtualMachine, perftype=inv, metric=VMInvMemMaxUsg, match=false | rename threshold_severity AS VMInvMemMaxUsg_Threshold | fillnull value="Not Available" MaxPossibleCpuUsage, MaxPossibleMemUsage, OverallCpuUsage, OverallMemUsage, VMInvCpuMaxUsg, VMInvMemMaxUsg | fillnull value="Unknown" VMInvCpuMaxUsg_Threshold, VMInvMemMaxUsg_Threshold   
+										]]>
+									</param>
+									<module name="SOLNNullSwapper">
+										<param name="search">
+											<![CDATA[
+											| stats count | eval MaxPossibleCpuUsage="Not Available" | eval MaxPossibleMemUsage="Not Available" | eval OverallCpuUsage="Not Available" | eval OverallMemUsage="Not Available" | eval VMInvCpuMaxUsg="Not Available" | eval VMInvMemMaxUsg="Not Available" | eval VMInvCpuMaxUsg_Threshold="Unknown" | eval VMInvMemMaxUsg_Threshold="Unknown" | fields - count
+											]]>
+										</param>
+										<module name="SOLNResultsLoader">
+											<param name="displayName">VMInfo</param>
+											<module name="SOLNContent" layoutPanel="warnings">
+												<param name="content">
+													<![CDATA[
+													<table class="propertyTable">
+													<tr>
+													<td class="warningIcon $VMInfo[0].VMInvCpuMaxUsg_Threshold$ $VMInfo[0].VMInvMemMaxUsg_Threshold$"></td>
+													<td style="vertical-align:top">
+													<table class="propertyTable">
+													<tr class="VMDetailWarningRow-$VMInfo[0].VMInvCpuMaxUsg_Threshold$">
+													<th>Max CPU usage during the selected time range peaked at a <span class="$VMInfo[0].VMInvCpuMaxUsg_Threshold$">$VMInfo[0].VMInvCpuMaxUsg_Threshold$</span> level with value of <span class="$VMInfo[0].VMInvCpuMaxUsg_Threshold$">$VMInfo[0].VMInvCpuMaxUsg$%</span>.  This VM may be undercommited on CPU or the host is stressed.</th>
+													</tr>
+													<tr class="VMDetailWarningRow-$VMInfo[0].VMInvMemMaxUsg_Threshold$">
+													<th>Max memory Usage during the selected time range peaked at a <span class="$VMInfo[0].VMInvMemMaxUsg_Threshold$">$VMInfo[0].VMInvMemMaxUsg_Threshold$</span> level with value of <span class="$VMInfo[0].VMInvMemMaxUsg_Threshold$">$VMInfo[0].VMInvMemMaxUsg$%</span>.  This VM may be undercommited on memory or the host is stressed.</th>
+													</tr>
+													</table>
+													</td>
+													</tr>
+													</table>
+													]]>
+												</param>
+											</module>
+											<module name="SOLNPanelClasser" layoutPanel="warnings">
+												<param name="class">$VMInfo[0].VMInvCpuMaxUsg_Threshold$,$VMInfo[0].VMInvMemMaxUsg_Threshold$</param>
+											</module>
+										</module>
+									</module>
+								</module>
+								<!-- End of Warning Panel -->
+								<!-- Start of Row 1 -->
+								<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+									<param name="content">
+										<![CDATA[
+										Virtual Machine Configuration and Status
+										]]>
+									</param>
+								</module>
+								<module name="SOLNContent" layoutPanel="panel_row1_col1">
+									<param name="content">
+										<![CDATA[
+										</br>
+										<table class="propertyTable">
+										<tr>
+										<td style="vertical-align:top">
+										<table class="propertyTable">
+										<tr>
+										<th>VM Name:</th>
+										<td>$VMInfo[0].name$</td>
+										<th>Power State:</th>
+										<td>$VMInfo[0].powerState$</td>
+										</tr>
+										<tr>
+										<th>OS:</th>
+										<td>$VMInfo[0].guestFullName$</td>
+										<th>VMTools:</th>
+										<td class="$VMInfo[0].toolsStatus$">$VMInfo[0].toolsStatus$</td>
+										</tr>
+										</table>
+										</td>
+										</tr>
+										</table>
+										<br>
+										<hr style="clear: both;border:0;height:1px;"></hr>
+										</br>
+										<table class="propertyTable">
+										<tr>
+										<td style="vertical-align:top">
+										<table class="propertyTable">
+										<tr>
+										<th>CPUs - Cores</th>
+										<td>$VMInfo[0].numCPU$ - $VMInfo[0].numCoresPerSocket$</td>
+										</tr>
+										<tr>
+										<th>Memory</th>
+										<td>$VMInfo[0].memorySizeMB$</td>
+										</tr>
+										</table>
+										</td>
+										<td style="vertical-align:top">
+										<table class="propertyTable">
+										<tr>
+										<th>Reservations</th>
+										<td>$VMInfo[0].cpuReservation$</td>
+										</tr>
+										<tr>
+										<th>Reservations</th>
+										<td>$VMInfo[0].memoryReservation$</td>
+										</tr>
+										</table>
+										</td>
+										<td style="vertical-align:top">
+										<table class="propertyTable">
+										<tr>
+										<th>Shares</th>
+										<td>$VMInfo[0].cpuSharesLevel$ ($VMInfo[0].cpuSharesShares$)</td>
+										</tr>
+										<tr>
+										<th>Shares</th>
+										<td>$VMInfo[0].memSharesLevel$ ($VMInfo[0].memSharesShares$)</td>
+										</tr>
+										</table>
+										</td>
+										</tr>
+										</table>
+										<br>
+										<hr style="clear: both;border:0;height:1px;"></hr>
+										</br>
+										<table>
+										<tr>
+										<td style="vertical-align:top">
+										<table class="propertyTable">
+										<tr>
+										<th>Cluster</th>
+										<td>
+										<a href="/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect?Type=ClusterComputeResource&nid=$VMInfo[0].ClusterMoid$&host=$VMInfo[0].host$">$VMInfo[0].ClusterName$</a>
+										</td>
+										</tr>
+										</table>
+										</td>
+										<td style="vertical-align:top">
+										<table class="propertyTable">
+										<tr>
+										<th>Host</th>
+										<td>
+										<a href="/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect?Type=HostSystem&nid=$VMInfo[0].HostSystem$&host=$VMInfo[0].host$">$VMInfo[0].HostSystemName$</a>
+										</td>
+										</tr>
+										</table>
+										</td>
+										</tr>
+										</table>
+										<br>
+										<hr style="clear: both;border:0;height:1px;"></hr>
+										</br>
+										]]>
+									</param>
+								</module>
+								<module name="SOLNSavedSearchLookup" layoutPanel="panel_row1_col1">
+									<param name="savedSearch">d_vm_detail_row1_datastore_base</param>
+									<module name="SimpleResultsTable">
+										<param name="drilldown">all</param>
+										<param name="displayRowNumbers">0</param>
+										<module name="SOLNSavedSearchLookup">
+											<param name="savedSearch">d_vm_detail_row1_datastore_drill</param>
+											<module name="JobProgressIndicator">
+												<module name="SOLNRedirect">
+													<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+													<param name="paramList">click.name2,click.HIDE-host,click.HIDE-Datastore-moid,search.sid</param>
+													<param name="renameList">Type,host,Datastore-moid,sid</param>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+								<!-- End of Row 1 -->
+								<!-- Start of Row 2 -->
+								<!-- Start of Power Tasks - Row 2 col 1 -->
+								<module name="SOLNSearch" layoutPanel="panel_row2_col1">
+									<param name="search">
+										<![CDATA[
+										sourcetype=vmware:tasks | spath entity.moid output=moid | search $selectedVirtualMachine$ | spath state output=State | spath name output=tasktype | spath cancelled output=Cancelled | spath reason.scheduledTask.type output=scheduledTask | spath reason.name output=Description | eval Description=if(isnull(Description), descriptionId, Description) | eval scheduledTask=if(isnull(scheduledTask), "No", "Yes") | spath startTime output=startTime | lookup FullHierarchy moid AS moid OUTPUT parent AS HIDE-HostSystem-moid | lookup FullHierarchy moid AS HIDE-HostSystem-moid OUTPUT name AS HostSystem | rename host as HIDE-host | table startTime, Description, State, tasktype, scheduledTask, Cancelled, HIDE-HostSystem-moid, HostSystem, HIDE-host
+										]]>
+									</param>
+									<module name="JobProgressIndicator" />
+									<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+										<param name="content">
+											<![CDATA[
+											Configuration Changes
+											]]>
+										</param>
+									</module>
+									<module name="SimpleResultsTable">
+										<param name="drilldown">all</param>
+										<module name="SOLNRedirect">
+											<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+											<param name="paramList">click.name2,click.HIDE-HostSystem-moid,click.HIDE-host,search.sid</param>
+											<param name="renameList">Type,HostSystem-moid,host,sid</param>
+										</module>
+									</module>
+								</module>
+								<!-- End of VM - Row 2 col 1 -->
+								<!-- Start of Power Tasks - Row 2 col 2 -->
+								<module name="SOLNSearch" layoutPanel="panel_row2_col2">
+									<param name="search">
+										<![CDATA[
+										sourcetype=vmware:inv:hierarchy | spath moid | spath type | search type="VirtualMachine" $selectedVirtualMachine$ | spath changeSet.runtime.host.moid output=hostsystemmoid | table _time, moid, host, hostsystemmoid | sort 0 host, moid, _time | dedup  consecutive=t moid, hostsystemmoid | sort 0 _time | streamstats first(hostsystemmoid) as prev_hostsystem window=1 global=f current=f by moid host | reverse | search prev_hostsystem=* | lookup FullHierarchy moid AS hostsystemmoid host AS host OUTPUT name AS "Migrated To" | lookup FullHierarchy moid AS prev_hostsystem host AS host OUTPUT name AS "Migrated From" | fields _time, host, hostsystemmoid, prev_hostsystem, "Migrated From", "Migrated To" | eval HIDE-type="HostSystem" | rename host AS HIDE-host, hostsystemmoid AS HIDE-hostsystemmoid, prev_hostsystem AS HIDE-prev_hostsystem
+										]]>
+									</param>
+									<module name="JobProgressIndicator" />
+									<module name="SOLNContent" layoutPanel="panel_row2_col2_header">
+										<param name="content">
+											<![CDATA[
+											Migrations
+											]]>
+										</param>
+									</module>
+									<module name="Paginator" layoutPanel="panel_row2_col2">
+										<param name="entityName">results</param>
+										<param name="count">10</param>
+										<param name="maxPages">15</param>
+										<module name="SimpleResultsTable">
+											<param name="drilldown">all</param>
+											<module name="SOLNPostProcess">
+												<param name="search">stats count | eval name="$click.value2$" | eval host="$click.HIDE-host$" | `SetHandleInfoMaxTimeNow` | lookup FullHierarchy name, host OUTPUT moid type | eval type=if(isnull(type), "FlashTimeline", type) | table type moid host</param>
+												<module name="SOLNResultsLoader">
+													<module name="SOLNRedirect">
+														<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+														<param name="paramList">results[0].type,results[0].moid,results[0].host,search.sid</param>
+														<param name="renameList">Type,HostSystem-moid,host,sid</param>
+													</module>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+								<!-- End of VM - Row 2 col 2 -->
+								<!-- End of Row 2 -->
+								<!-- Start of VM Perf Panel - Row 3-->
+								<!-- Start of Row 3 Pulldowns -->
+								<module name="TimeRangePicker" layoutPanel="panel_row3_col1">
+										<param name="searchWhenChanged">True</param>
+										<param name="selected">Last 4 hours</param>
+								<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+									<param name="search">
+										<![CDATA[
+										| inputlookup VMWPerformanceMetrics | search entity=virtualmachine |stats values(metric) as metric by entity,perftype,tsidxnamespace | eval shorthand=perftype | eval perftype="vmware:perf:" + perftype | eval displayperftype=replace(perftype,"vmware:perf:","")
+												]]>
+									</param>
+									<module name="SOLNNullSwapper">
+										<param name="search">|stats count | eval displayperftype="None_Found" | eval perftype="Not Available" | eval instance="Not Available" | eval fields="Not Available" | eval tsidxnamespace="None_Found"</param>
+										<module name="SOLNDropdown">
+											<param name="displayField">displayperftype</param>
+											<param name="valueField">displayperftype,perftype,tsidxnamespace</param>
+											<module name="SOLNSearch">
+												<param name="search">
+													<![CDATA[
+													| `tstats` values(instance) from $displayperftype.tsidxnamespace$ where $selectedVirtualMachine$  | stats values(instance) AS instance | mvexpand instance
+													]]>
+												</param>
+												<module name="SOLNDropdown">
+													<param name="displayField">instance</param>
+													<param name="valueField">instance</param>
+													<module name="SOLNSearch">
+														<param name="search">
+															<![CDATA[
+															|inputlookup VMWPerformanceMetrics |  search tsidxnamespace=$displayperftype.tsidxnamespace$  |stats values(metric) as displayfield by field,tsidxnamespace
+															]]>
+														</param>
+														<module name="SOLNNullSwapper">
+															<param name="search">|stats count | eval field="Not_Found" | eval command="Not_Found" </param>
+															<module name="SOLNDropdown">
+																<param name="displayField">displayfield</param>
+																<param name="valueField">field</param>
+																<module name="SOLNPostProcess">
+																	<param name="search">| search meid="none"| eval splitby="" | eval splitbyval=""</param>
+																	<module name="SOLNDropdown">
+																		<param name="displayField">splitby</param>
+																		<param name="valueField">splitbyval</param>
+																		<param name="staticItem">(none), ;host,by HostSystem</param>
+																		<module name="SOLNPostProcess">
+																			<param name="search">| search meid="none"| eval chartfun="" | eval chartfunval=""</param>
+																			<module name="SOLNDropdown">
+																				<param name="displayField">chartfun</param>
+																				<param name="valueField">chartfunval</param>
+																				<param name="staticItem">Average,avg;Minimum,min;Maximum,max;Count,count;Distinct Count,dc</param>
+																				<!-- End of Row 3 Pulldowns -->
+																				<!-- Start of Row 3 Perf chart -->
+																				<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+																					<param name="search">
+																						<![CDATA[
+																						| `tstats` $chartfun.chartfunval$($displayfield.field$) from $displayperftype.tsidxnamespace$ where $selectedVirtualMachine$ instance=$instance.instance$ groupby _time,moid,host,hs span=5m | lookup FullHierarchy moid AS moid host AS host OUTPUT name AS name | lookup FullHierarchy moid AS hs, host AS host OUTPUT name AS HostSystem | timechart minspan=5m $chartfun.chartfunval$($displayfield.field$) AS $displayfield.field$ $splitby.splitbyval$ | thresholdlookup entitytype="VirtualMachine", perftype=$displayperftype.displayperftype$, metric=$displayfield.field$ | fields - threshold_severity, threshold_comparator | rename threshold_critlevel AS Critical, threshold_warnlevel AS Warning
+																						]]>
+																					</param>
+																					<module name="JobProgressIndicator">
+																						<module name="HiddenChartFormatter">
+																							<param name="chart">line</param>
+																							<param name="charting.chart.showMarkers">false</param>
+																							<param name="charting.axisTitleX.text">Time</param>
+																							<module name="LineMarkerFormatter">
+																								<module name="JSChart">
+																									<param name="width">100%</param>
+																									<param name="height">360px</param>
+																									<module name="ViewRedirector">
+																										<param name="viewTarget">flashtimeline</param>
+																									</module>
+																								</module>
+																							</module>
+																						</module>
+																					</module>
+																				</module>
+																				</module>
+																				<!-- End of Row 3 Perf chart -->
+																			</module>
+																		</module>
+																	</module>
+																</module>
+															</module>
+													  	</module> <!-- SOLNNullSwapper -->
+													</module>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+								<!-- End of VM Perf - Row 3 -->
+							</module>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>

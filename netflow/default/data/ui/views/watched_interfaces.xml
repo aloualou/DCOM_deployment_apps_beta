@@ -1,0 +1,146 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Watched Interfaces Utilization</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row>
+        <table id="table_1_1">
+            <title>Interfaces by % of Use</title>
+            <searchTemplate>
+                `netflow_search_rule_20067` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group management_ip
+                | eval management_ip=if(management_ip=="unknown", exp_ip, management_ip)
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | eval snmps=input_snmp+","+output_snmp 
+                | eval snmps=split(snmps,",")
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | stats sum(bytes_in) as TrafficAmountBoth 
+                        sum(packets_in) as PacketsAmount 
+                        sparkline(sum(bytes_in)) as TrafficLine 
+                        sparkline(sum(packets_in)) as PacketsLine
+                            by exp_ip management_ip snmps 
+                | lookup watched_interfaces_lookup management_ip OUTPUT if_name
+                | `get_iface_name(snmp_name, snmps)` 
+                | `get_iface_speed(snmp_speed, snmps)` 
+                | where snmp_name=if_name
+                | `get_exporter_name(exp_ip_name)`
+                | strcat exp_ip_name "/" snmp_name exp_snmp 
+                | `average_speed(TrafficSpeedBoth, TrafficAmountBoth*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | eval percOfUsageBoth = round(TrafficSpeedBoth/(snmp_speed*1000000)*100, 2)
+                | sort - percOfUsageBoth TrafficSpeedBoth
+                | head 100
+                | eval percOfUsageBoth = if(isnull(percOfUsageBoth), "", tostring(percOfUsageBoth)+"%") 
+                | eval TrafficSpeedBoth = `formatbps(TrafficSpeedBoth)`
+                | eval PacketsSpeed = `formatpps(PacketsSpeed)` 
+                | eval TrafficBoth = TrafficSpeedBoth."/".percOfUsageBoth 
+                | table exp_snmp TrafficBoth TrafficLine PacketsSpeed PacketsLine
+                | rename TrafficLine as "Traffic Line"
+                | rename PacketsLine as "Packets Line"
+                | rename exp_snmp as "Device/Interface" 
+                | rename TrafficBoth as "Average Traffic Rate Both/% of Usage Both" 
+                | rename PacketsSpeed as "Average Packet Rate"
+            </searchTemplate>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row>
+        <table id="table_2_1">
+            <title>Interface Traffic Details: "$Device/Interface$" </title>
+            <searchTemplate>
+                `netflow_search_rule_20067` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | `get_exporter_name(exp_ip_name)`
+                | `get_iface_name(input_snmp_name, input_snmp)` 
+                | `get_iface_name(output_snmp_name, output_snmp)` 
+                | strcat exp_ip_name "/" input_snmp_name exp_isnmp 
+                | strcat exp_ip_name "/" output_snmp_name exp_osnmp 
+                | search ( exp_isnmp="$Device/Interface$" OR exp_osnmp="$Device/Interface$" )
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | eval DirectionIN=if(exp_isnmp="$Device/Interface$","In","")    
+                | eval DirectionOUT=if(exp_osnmp="$Device/Interface$","Out","")   
+                | eval Direction=DirectionIN+","+DirectionOUT 
+                | makemv Direction delim="," 
+                | eval speed = ceil((bytes_in*8) / (t_int/1000))
+                | stats sum(bytes_in) as TrafficAmount 
+                        sum(packets_in) as PacketsAmount 
+                        sparkline(sum(bytes_in)) as TrafficLine 
+                        sparkline(sum(packets_in)) as PacketsLine 
+                        max(speed) AS "Max" 
+                        min(speed) AS "Min" 
+                        avg(speed) AS "Avg" 
+                        stdev(speed) AS "StDev" 
+                        perc95(speed) AS "Perc95"
+                            by exp_ip Direction  
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | eval TrafficSpeed = `formatbps(TrafficSpeed)`
+                | eval PacketsSpeed = `formatpps(PacketsSpeed)` 
+                | eval Max=`formatbps(Max)`
+                | eval Min=`formatbps(Min)`
+                | eval Avg=`formatbps(Avg)`
+                | eval StDev = `formatbps(StDev)` 
+                | eval Perc95 = `formatbps(Perc95)` 
+                | table Direction TrafficSpeed TrafficLine PacketsSpeed PacketsLine Max Min Avg StDev Perc95
+                | rename TrafficLine as "Traffic Line" 
+                | rename PacketsLine as "Packets Line" 
+                | rename Avg as "Average"
+                | rename StDev as "Standart Deviation" 
+                | rename Perc95 as "95th Percentile" 
+                | rename TrafficSpeed as "Average Traffic Rate"
+                | rename PacketsSpeed as "Average Packet Rate"
+            </searchTemplate>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row>
+        <table id="table_3_1">
+            <title>Conversations Traffic Details: "$Device/Interface$/$Direction$" </title>
+            <searchTemplate>
+                `netflow_search_rule_20067` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | `get_exporter_name(exp_ip_name)`
+                | `get_iface_name(input_snmp_name, input_snmp)` 
+                | `get_iface_name(output_snmp_name, output_snmp)` 
+                | strcat exp_ip_name "/" input_snmp_name exp_isnmp 
+                | strcat exp_ip_name "/" output_snmp_name exp_osnmp 
+                | search ( exp_isnmp="$Device/Interface$" OR exp_osnmp="$Device/Interface$" )
+                | eval exp_snmp_dir = "$Device/Interface$/$Direction$" 
+                | `get_iface_name(output_snmp_name, output_snmp )` 
+                | strcat  exp_ip_name "/" output_snmp_name "/Out" exp_osnmp 
+                | `get_iface_name(input_snmp_name, input_snmp )` 
+                | strcat  exp_ip_name "/" input_snmp_name "/In" exp_isnmp 
+                | where (exp_snmp_dir == exp_isnmp) OR (exp_snmp_dir == exp_osnmp) 
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | lookup protocol_lookup protocol AS protocol 
+                | `conversation` 
+            </searchTemplate>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

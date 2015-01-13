@@ -1,0 +1,103 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js">
+    <label>Palo Alto Networks Top Violators</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="time" searchWhenChanged="false">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2">
+        <chart>
+            <title>Top Violators (NFI Rule 10032/20093)</title>
+            <searchTemplate>
+                `netflow_search_rule_20032` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | strcat src_ip "/" user ip_user 
+                | timechart sum(denied_count) by ip_user 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Count</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_1_1">
+            <searchTemplate>
+                `netflow_search_rule_20032` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | strcat src_ip "/" user ip_user
+                | stats sum(denied_count) as sum_denied_count by ip_user 
+                | head 100 
+                | table ip_user sum_denied_count 
+                | rename ip_user as "Source IP/User"
+                | rename sum_denied_count as "Denied flows"  
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row grouping="2">
+        <chart id="chart_2_1">
+            <title>Violator "$Source IP/User$"</title>
+            <searchTemplate>
+                `netflow_search_rule_20032` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | strcat src_ip "/" user ip_user 
+                | search ip_user="$Source IP/User$" 
+                | lookup port_lookup port as dest_port OUTPUT service as dest_service 
+                | timechart sum(denied_count) by dest_service 
+                | fields - OTHER
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Count</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_2_1">
+            <searchTemplate>
+                `netflow_search_rule_20032` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | strcat src_ip "/" user ip_user 
+                | search ip_user="$Source IP/User$" 
+                | lookup port_lookup port as dest_port OUTPUT service as dest_service
+                | stats sum(denied_count) as sum_denied_count by dest_service 
+                | head 100 
+                | table dest_service sum_denied_count 
+                | rename dest_service as "Dest. port" 
+                | rename sum_denied_count as "Denied flows" 
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

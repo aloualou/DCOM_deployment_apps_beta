@@ -1,0 +1,55 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html">
+  <label>about</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>About This App</h1>
+    ]]></param>
+  </module>
+
+
+  
+  <module name="HTML" layoutPanel="panel_row2_col1">
+    <param name="html"><![CDATA[
+    <h2>About Sideview</h2>
+
+      <p>
+        This app is developed by <a href="http://sideviewapps.com">Sideview, LLC</a>. Sideview develops and sells its own Splunk apps, and does a little bit of Splunk consulting on the side sometimes. 
+      </p>
+      <p>
+        Sideview was founded by Nick Mealy in September 2010.   Nick was the 7th employee at Splunk although this depends a bit on how you count. At any rate he worked there between 2005 and 2010.  He held various titles over those 5 years like Principal User Interface Engineer, User Interface Manager, and Mad Scientist.  You may also have run into him on <a href="http://answers.splunk.com/users/136/nick">answers.splunk.com</a>.   And if you're reading this you've probably read quite a lot of his copy already. Feel free to <a href="mailto:nick@sideviewapps.com">email me at nick@sideviewapps.com</a> for any reason whatsoever. Also you can check out my <a href="http://sideviewapps.com">website</a> for more information.
+      </p>
+      
+    ]]></param>
+  </module>
+
+  <module name="HTML" layoutPanel="panel_row2_col2">
+    <param name="html"><![CDATA[
+
+
+      <h2>Disclaimers</h2>
+
+      <p>
+        This library is very widely adopted in the Splunk field and it gets updated about once every few weeks.   However this is the older 1.3 branch that is distributed under the LGPL and this older branch is NOT UPDATED VERY OFTEN, and it may well never be updated again.   The latest and greatest version of the app is now available from the <a href="http://sideviewapps.com">Sideview Site</a>.   Nonetheless, if while using this older version you find something that seems like a bug, we'd still love to know about it. Feel free to <a href="http://sideviewapps.com/contact">contact us to tell us about it</a>. 
+      </p>
+      <p>
+        And in addition to the conditions set out in the LGPL....   The software is provided "as is", without warranty of any kind, express or implied. in no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software. Phew.
+      </p>
+    ]]></param>
+  </module>
+
+  
+
+
+</view>

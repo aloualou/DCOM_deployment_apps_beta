@@ -1,0 +1,101 @@
+<script type="text/template">
+    <table id="fields" class="field-list table table-chrome table-striped table-hover" style="margin-top: 10px;">
+    <thead>
+        <tr>
+            <th>
+                Enable
+            </th>
+            <th class="conditional">Agg. Type</th>
+            <th>
+                Name
+                <span class="chevron-grouping">
+                    <span class="icon-chevron-down"/>
+                    <span class="icon-chevron-up"/>
+                </span>
+            </th>
+            <th>
+                Description
+                <span class="chevron-grouping">
+                    <span class="icon-chevron-down"/>
+                    <span class="icon-chevron-up"/>
+                </span>
+            </th>
+            <th>
+                Term
+                <span class="chevron-grouping">
+                    <span class="icon-chevron-down"/>
+                    <span class="icon-chevron-up"/>
+                </span>
+            </th>
+<!--
+            <% if (!stream.locked) {%>
+                <th class="remove-field-column">Action</th>
+            <% } %>
+-->
+            <th class="add-to-filters">Add to filter</th>
+        </tr>
+    </thead>
+    <tbody id="field-rows">
+        <% var regex = new RegExp(searchString, "i"); %>
+        <% for (var i = 0; i < stream.fields.length; i++) { %>
+
+            <% var field = stream.fields[i]; %>
+            <% if (regex.test(field.name) || regex.test(field.desc) || regex.test(field.term) ) { %> 
+
+                <tr data-name="<%= field.name %>" 
+                    data-desc="<%= field.desc %>" 
+                    data-agg-type="<%= field.aggType %>" 
+                    data-term="<%= field.term %>"
+                    data-enabled="<%= field.enabled %>">
+
+                    <td class="enabled">
+                        <input class="field-status regular-checkbox
+                                <% if (field.required_by) {%> required <% } %>
+                                <% if (! streamIsOurs) {%> not-our-stream <% } %>
+                                "
+                                type="checkbox"
+                                id="<%= field.name %>"
+                                <% if (field.enabled) { %> checked <% } %>
+                        />
+                    </td>
+
+                    <td class="conditional agg-type">
+                        <% if (field.enabled) { %>
+                            <div class="btn-group btn-group-radio btn-toggle">
+                           <% if (terms.get(field.term).get('category') == 'numeric') { %>
+                                <button type="button" class="key btn btn-mini <% if (field.aggType != 'sum') { %> active  <% } %>">Key</button>
+                                <button type="button" class="sum btn btn-mini <% if (field.aggType == 'sum') { %> active  <% } %>">Sum</button>
+                            <% } else { %>
+                                <button type="button" class="key btn btn-mini active">Key</button>
+                                <button type="button" disabled class="sum btn btn-mini">Sum</button>
+                            <% } %>
+                            </div>
+                        <% } else { %>
+                            <div class="btn-group btn-group-radio field-disabled btn-toggle">
+                                <button type="button" disabled class="key btn btn-mini active">Key</button>
+                                <button type="button" disabled class="sum btn btn-mini">Sum</button>
+                            </div>
+                        <% } %>
+                    </td>
+
+                    <td><%= field.name %></td>
+                    <td><%= field.desc %></td>
+                    <td class="term"><%= field.term %></td>
+        <!--
+                    <% if (!stream.locked) {%>
+                        <td><button class="btn delete-field">Delete</button></td>
+                    <% } %>
+        -->
+                    <td>
+                        <% if (streamIsOurs) { %>
+                            <a class="add-to-filters">Add</a>
+                        <% } %>
+                    </td>
+
+                </tr>
+            <% } %>
+
+        <% } %>
+    </tbody>
+    </table>
+</script>

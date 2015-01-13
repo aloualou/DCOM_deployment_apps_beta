@@ -1,0 +1,96 @@
+<form onunloadCancelJobs="True" script="search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Service Response Time</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="text" token="dest_ip" searchWhenChanged="False">
+            <label>Service IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_port" searchWhenChanged="False">
+            <label>Service Port</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="protocol_name" searchWhenChanged="False">
+            <label>Service Protocol</label>
+            <default>*</default>
+        </input>
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2">
+        <chart>
+            <title>Average Response Time by Service</title>
+            <searchTemplate>
+                `netflow_search_rule_20017` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" dest_ip="$dest_ip$" dest_port="$dest_port$" 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `format_port_column(dest_port_string, dest_port)` 
+                | strcat dest_ip ":" dest_port_string dest_port_name_port
+                | timechart avg(avg_time) by dest_port_name_port useother="f"
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Response Time, msec</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">default</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table>
+            <searchTemplate>
+                `netflow_search_rule_20017` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" dest_ip="$dest_ip$" dest_port="$dest_port$" 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$" 
+                | `format_port_column(dest_port_string, dest_port)` 
+                | strcat dest_ip ":" dest_port_string dest_port_name_port 
+                | `sampling(bytes_in)` 
+                | `sampling(bytes_out)` 
+                | `sampling(flow_count)` 
+                | stats sum(bytes_in) AS TrafficAmountIn 
+                        sum(bytes_out) AS TrafficAmountOut 
+                        sum(flow_count) AS Connections 
+                        avg(avg_time) AS AvgTime 
+                            by exp_ip dest_port_name_port 
+                | `average_speed(TrafficSpeedIn, TrafficAmountIn*8)` 
+                | `average_speed(TrafficSpeedOut, TrafficAmountOut*8)` 
+                | sort - AvgTime 
+                | head 100 
+                | eval AvgTime = `formatmsec(AvgTime)` 
+                | `format_traffic_column(TrafficIn, TrafficAmountIn, TrafficSpeedIn)` 
+                | `format_traffic_column(TrafficOut, TrafficAmountOut, TrafficSpeedOut)` 
+                | `get_exporter_name(exp_ip_name)`
+                | table dest_port_name_port exp_ip_name AvgTime TrafficIn TrafficOut Connections 
+                | rename dest_port_name_port as "Service" 
+                | rename exp_ip_name as "Device" 
+                | rename AvgTime as "Average Resp. Time" 
+                | rename TrafficIn as "Average Traffic Rate (Total Traffic) received" 
+                | rename TrafficOut as "Average Traffic Rate (Total Traffic) sent" 
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

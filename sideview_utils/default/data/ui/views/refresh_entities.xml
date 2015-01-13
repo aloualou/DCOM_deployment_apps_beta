@@ -1,0 +1,157 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>the FreshMaker</label>
+  
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Sideview Utils - the FreshMaker</h1>
+    ]]></param>
+  </module>
+
+  
+
+  <module name="URLLoader" layoutPanel="panel_row1_col1" autoRun="True">
+    
+    <module name="Pulldown">
+      <param name="name">entity</param>
+      <param name="label">1. Choose something to refresh</param>
+      <param name="float">left</param>
+      <param name="staticFieldsToDisplay">
+        <list><param name="value">commandsconf</param></list>
+        <list><param name="value">conf-inputs</param></list>
+        <list><param name="value">conf-times</param></list>
+        <list><param name="value">conf-wmi</param></list>
+        <list><param name="value">cooked</param></list>
+        <list><param name="value">deploymentserver</param></list>
+        <list><param name="value">deploymenttenants</param></list>
+        <list><param name="value">eventtypes</param></list>
+        <list><param name="value">fifo</param></list>
+        <list><param name="value">fvtags</param></list>
+        <list><param name="value">indexes</param></list>
+        <list><param name="value">lookup-table-files</param></list>
+        <list><param name="value">macros</param></list>
+        <list><param name="value">manager</param></list>
+        <list><param name="value">monitor</param></list>
+        <list><param name="value">nav</param></list>
+        <list><param name="value">raw</param></list>
+        <list><param name="value">savedsearch</param></list>
+        <list><param name="value">scheduledviews</param></list>
+        <list><param name="value">script</param></list>
+        <list><param name="value">tcpout-default</param></list>
+        <list><param name="value">tcpout-group</param></list>
+        <list><param name="value">tcpout-server</param></list>
+        <list><param name="value">transforms-extract</param></list>
+        <list><param name="value">transforms-lookup</param></list>
+        <list><param name="value">udp</param></list>
+        <list><param name="value">views</param><param name="selected">True</param></list>
+        <list><param name="value">viewstates</param></list>
+        <list><param name="value">win-admon</param></list>
+        <list><param name="value">win-eventlogs</param></list>
+        <list><param name="value">win-regmon</param></list>
+        <list><param name="value">win-wmi-collections</param></list>
+        <list><param name="value">win-wmi-wql</param></list>
+        <list><param name="value">workflow-actions</param></list>
+      </param>
+
+      <module name="SubmitButton">
+        <param name="allowSoftSubmit">True</param>
+        <param name="label">Refresh</param>
+
+        <module name="ValueSetter">
+          <param name="name">encodedEntity</param>
+          <param name="urlEncodeKeys">entity</param>
+          <param name="value">$entity$</param>
+
+          <module name="HTML" layoutPanel="panel_row1_col2">
+            <param name="html"><![CDATA[
+              <iframe id="theFreshMaker" name="theFreshMaker" src="/debug/refresh?entity=/admin/$encodedEntity$" height="500px" width="100%" style="border:0px;"></iframe>
+            ]]></param>
+
+          </module>
+        </module>
+      </module>
+    </module>
+  </module>
+
+
+  <module name="HTML" layoutPanel="panel_row1_col1">
+    <param name="html"><![CDATA[
+      <p>2. Or if you prefer to click links you can do that.</p>
+      <h3>Most Common</h3>
+      <ul>
+        <li><a href="/debug/refresh?entity=admin%2Fviews" target="theFreshMaker">views</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fnav" target="theFreshMaker">nav</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fmacros" target="theFreshMaker">macros</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fsavedsearch" target="theFreshMaker">savedsearch</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Feventtypes" target="theFreshMaker">eventtypes</a></li>
+      </ul>
+
+      <h3>Everything Else</h3>
+      <ul>
+        <li><a href="/debug/refresh?entity=admin%2Fconf-times" target="theFreshMaker">conf-times</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fcommandsconf" target="theFreshMaker">commandsconf</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fconf-inputs" target="theFreshMaker">conf-inputs</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fconf-times" target="theFreshMaker">conf-times</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fconf-wmi" target="theFreshMaker">conf-wmi</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fcooked" target="theFreshMaker">cooked</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fdeploymentserver" target="theFreshMaker">deploymentserver</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fdeploymenttenants" target="theFreshMaker">deploymenttenants</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Ffifo" target="theFreshMaker">fifo</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Ffvtags" target="theFreshMaker">fvtags</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Findexes" target="theFreshMaker">indexes</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Flookup-table-files" target="theFreshMaker">lookup-table-files</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fmanager" target="theFreshMaker">manager</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fmonitor" target="theFreshMaker">monitor</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fraw" target="theFreshMaker">raw</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fscheduledviews" target="theFreshMaker">scheduledviews</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fscript" target="theFreshMaker">script</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Ftcpout-default" target="theFreshMaker">tcpout-default</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Ftcpout-group" target="theFreshMaker">tcpout-group</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Ftcpout-server" target="theFreshMaker">tcpout-server</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Ftransforms-extract" target="theFreshMaker">transforms-extract</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Ftransforms-lookup" target="theFreshMaker">transforms-lookup</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fudp" target="theFreshMaker">udp</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fviewstates" target="theFreshMaker">viewstates</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fwin-admon" target="theFreshMaker">win-admon</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fwin-eventlogs" target="theFreshMaker">win-eventlogs</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fwin-regmon" target="theFreshMaker">win-regmon</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fwin-wmi-collections" target="theFreshMaker">win-wmi-collections</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fwin-wmi-wql" target="theFreshMaker">win-wmi-wql</a></li>
+        <li><a href="/debug/refresh?entity=admin%2Fworkflow-actions" target="theFreshMaker">workflow-actions</a></li>
+      </ul>
+
+      <h3>The Bump Endpoint</h3>
+      <p>
+        <a href="/en-US/_bump">/en-US/_bump</a>  Click this after changing any files in /appserver/static or /appserver/modules. If you don't click this at such times then Splunk's aggressive cacheing on static files will cause problems in your deployment. Specifically, other users of this Splunk instance may continue to see the out-of-date versions previously cached by their browsers.
+      </p>
+    ]]></param>
+  </module>
+
+    
+  
+  <module name="HTML" layoutPanel="panel_row2_col1">
+    <param name="html"><![CDATA[
+      <p>
+        Ah. So refreshing.  
+      </p>
+      <p>
+        If you have no idea what you're looking at,  this is a tool to make it slightly easier to refresh Splunk entities while you're developing your splunk apps.   If you dont know what that means, that's ok;  it's probably not your cup of tea anyway.
+      </p>
+
+    ]]></param>
+  </module>
+
+  
+ 
+
+
+</view>

@@ -1,0 +1,60 @@
+<script id="add-stream-dialog-template" type="text/template">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title add-stream-title">Clone Stream</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                <form>
+                    <div class="alert alert-error" style="display:none">
+                        <strong>Ooops!</strong> Please correct the errors below.
+                    </div>
+                    <fieldset>
+                        <div class="control-group">
+                            <label class="control-label add-stream-label" for="id">Name</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="id" name="id" data-error-style="inline">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label add-stream-label" for="name">Description</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" id="name" name="name" data-error-style="inline">
+                            </div>
+                        </div>
+                        <% if (userHasChanges) { %>
+                            <div class="caution-subtext">
+                                CAUTION: You have unsaved changes. The cloned stream will include these changes but
+                                the original stream will not have these changes automatically saved. 
+                            </div>
+                        <% } %>
+                        <% if (showStreamsList || !selectedStream) { %>
+                        <div class="control-group">
+                            <label class="control-label add-stream-label" for="streamId">Stream</label>
+                            <div class="controls">
+                                <select id="streamId" name="streamId">
+                                    <% streams.each(function(stream) { %>
+                                        <option value="<%= stream.get('id') %>" 
+                                                <% if (selectedStream && selectedStream.id == stream.get('id')) { %> 
+                                                    selected
+                                                <% } %> >
+
+                                                <%= stream.get('id') %> : <%= stream.get('name') %>
+
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                        <% } %>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#" id="btnYes" class="btn btn-primary yes">OK</a>
+            <a href="#" data-dismiss="modal" aria-hidden="true" class="btn secondary cancel">Cancel</a>
+        </div>
+    </div>
+    </div>
+</script>

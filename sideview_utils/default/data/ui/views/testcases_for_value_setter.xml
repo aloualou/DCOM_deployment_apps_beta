@@ -1,0 +1,243 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="False" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Testcases for ValueSetter</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Testcases for ValueSetter</h1>
+    ]]></param>
+  </module>
+
+  <module name="URLLoader" layoutPanel="panel_row1_col1" autoRun="True">
+    
+    
+    <module name="Pulldown">
+      <param name="name">untemplated</param>
+      <param name="label">untemplated</param>
+
+      <param name="staticFieldsToDisplay">
+        <list>
+          <param name="label">Null value</param>
+          <param name="value"></param>
+        </list>
+        <list>
+          <param name="label">backslash value</param>
+          <param name="value">foo\bar</param>
+        </list>
+        <list>
+          <param name="label">url-unsafe value</param>
+          <param name="value">foo#bar?baz</param>
+        </list>
+      </param>
+
+
+      <module name="Pulldown">
+        <param name="name">templated</param>
+        <param name="label">templated</param>
+        <param name="template">someField="$value$"</param>
+
+        <param name="staticFieldsToDisplay">
+          <list>
+            <param name="label">Null value</param>
+            <param name="value"></param>
+          </list>
+          <list>
+            <param name="label">backslash value</param>
+            <param name="value">foo\bar</param>
+          </list>
+          <list>
+            <param name="label">url-unsafe value</param>
+            <param name="value">foo#bar?baz</param>
+          </list>
+        </param>
+
+        <module name="Search">
+          <param name="search"><![CDATA[
+            $untemplated$ $templated$
+          ]]></param>
+          
+          <module name="ValueSetter">
+            <param name="name">redundantlyEscapedRawValue</param>
+            <param name="backslashEscapeKeys">untemplated.rawValue</param>
+            <param name="value">$untemplated.rawValue$</param>
+
+            <module name="ValueSetter">
+              <param name="name">urlEncodedValue</param>
+              <param name="urlEncodeKeys">untemplated.rawValue</param>
+              <param name="value">$untemplated.rawValue$</param>
+
+              <module name="ValueSetter">
+                <param name="name">combinedValue</param>
+                <param name="requiredKeys">untemplated.rawValue,templated.rawValue</param>
+                <param name="value">( received both $untemplated.rawValue$ and $templated.rawValue$ )</param>
+
+                <module name="HTML">
+                  <param name="html"><![CDATA[
+                   untemplated = $untemplated$<br>
+                   untemplated.rawValue = $untemplated.rawValue$<br>
+                   <br>
+
+
+                   templated = $templated$<br>
+                   templated.rawValue = $templated.rawValue$<br>
+
+                   <br>
+
+                   redundantlyEscapedRawValue = $redundantlyEscapedRawValue$<br>
+                   urlEncodedValue = $urlEncodedValue$<br>
+                   <br>
+                   <br>
+                   $combinedValue$
+                  
+                   
+                  ]]></param>
+                </module>
+              </module>
+            </module>
+          </module>
+
+        </module>
+      </module>
+    </module>
+
+    <module name="Search" layoutPanel="panel_row2_col1">
+      <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | head 100</param>
+      <param name="earliest">-24h</param>
+
+      <module name="JobProgressIndicator" />
+      
+      <module name="ValueSetter">
+        <param name="name">customSid</param>
+        <param name="value">$results.sid$</param>
+
+        <module name="ValueSetter">
+          <param name="name">customTimeRangeKey</param>
+          <param name="value">$search.timeRange.earliest$</param>
+
+
+          <module name="HTML">
+            <param name="html"><![CDATA[
+            can ValueSetter retrieve our sid? <br>
+            $$customSid$$=$customSid$<br>
+            <br>
+            How about a timerange key?<br>
+            $$customTimeRangeKey$$ = $customTimeRangeKey$
+
+            ]]></param>
+          </module>
+        </module>
+
+        <module name="ValueSetter">
+          <param name="urlEncodeKeys">search,search.timeRange.earliest,search.timeRange.latest</param>
+          <param name="name">rawURL</param>
+          <param name="value">flashtimeline?q=search $search$&amp;earliest=$search.timeRange.earliest$&amp;latest=$search.timeRange.latest$</param>
+          <module name="HTML">
+            <param name="html"><![CDATA[
+            how about when we're also urlEncoding the search? <br>
+            $$customSid$$=$customSid$<br>
+            <br>
+            $$search.timeRange.earliest$$= $search.timeRange.earliest$<br>
+            <br>
+            rawURL?<br>
+            $$rawURL$$ = $rawURL$
+
+            ]]></param>
+          </module>
+        </module>
+      </module>
+    </module>
+    
+    <module name="TimeRangePicker" layoutPanel="panel_row3_col1">
+      <param name="default">Last 24 hours</param>
+      <module name="Search">
+        <param name="search">search #1</param>
+
+        <module name="ValueSetter">
+          <param name="name">rawEventsURL</param>
+          <param name="urlEncodeKeys">search</param>
+          <param name="value">flashtimeline?q=search $search$&amp;earliest=$search.timeRange.earliest$&amp;latest=$search.timeRange.latest$</param>
+
+          <module name="HTML">
+            <param name="html"><![CDATA[
+              OLDSCHOOL URL (No SideviewUtils module in the "flashtimeline" view)
+              <a href="$rawEventsURL$">test link #1</a>
+            ]]></param>
+          </module>
+        </module>
+      </module>
+    </module>
+
+
+    <module name="TimeRangePicker" layoutPanel="panel_row4_col1">
+      <param name="default">Last 24 hours</param>
+      <module name="Search">
+        <param name="search">search #2</param>
+
+        <module name="PostProcess">
+          <param name="search">| search postprocess #1 (has leading pipe)</param>
+
+          <module name="ValueSetter">
+            <param name="name">rawEventsURL</param>
+            <param name="urlEncodeKeys">search,postProcess</param>
+            <param name="value">flashtimeline?q=search $search$ $postProcess$&amp;earliest=$search.timeRange.earliest$&amp;latest=$search.timeRange.latest$</param>
+
+            <module name="HTML">
+              <param name="html"><![CDATA[
+                OLDSCHOOL URL (No SideviewUtils module in the "flashtimeline" view)
+                <a href="$rawEventsURL$">test link #2</a>
+              ]]></param>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+
+
+    <module name="TimeRangePicker" layoutPanel="panel_row5_col1">
+      <param name="default">Last 24 hours</param>
+      <module name="Search">
+        <param name="search">I am test search #3</param>
+
+        <module name="PostProcess">
+          <param name="search">search postprocess #2 (has NO leading pipe)</param>
+
+          <module name="ValueSetter">
+            <param name="name">postProcessWithGuaranteedPipe</param>
+            <param name="requiredKeys">postProcess</param>
+            <param name="value">| $postProcess$</param>
+
+            <module name="ValueSetter">
+              <param name="name">rawEventsURL</param>
+              <param name="urlEncodeKeys">search,postProcessWithGuaranteedPipe</param>
+              <param name="value">flashtimeline?q=search $search$ $postProcessWithGuaranteedPipe$&amp;earliest=$search.timeRange.earliest$&amp;latest=$search.timeRange.latest$</param>
+
+              <module name="HTML">
+                <param name="html"><![CDATA[
+                  OLDSCHOOL URL (No SideviewUtils module in the "flashtimeline" view)
+                  <a href="$rawEventsURL$">test link #3</a>
+                ]]></param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+    
+
+
+
+  </module>
+    
+
+</view>

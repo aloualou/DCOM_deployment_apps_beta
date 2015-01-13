@@ -1,0 +1,190 @@
+{
+  "app": "Stream", 
+  "category": "Networking", 
+  "enabled": false, 
+  "extras": {
+    "eventType": "dhcp.event"
+  }, 
+  "fields": [
+    {
+      "aggType": "value", 
+      "desc": "Client Hardware address", 
+      "enabled": true, 
+      "name": "chaddr", 
+      "term": "dhcp.client-mac"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Client IP address", 
+      "enabled": true, 
+      "name": "ciaddr", 
+      "term": "dhcp.current-client-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "DNS server ip", 
+      "enabled": true, 
+      "name": "dns_server", 
+      "term": "dhcp.dns-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Name of boot file used during initialization", 
+      "enabled": true, 
+      "name": "file", 
+      "term": "dhcp.filename"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "IP addr of the gateway", 
+      "enabled": true, 
+      "name": "router", 
+      "term": "dhcp.gateway-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Specifies lease time DHCP server is willing to offer", 
+      "enabled": true, 
+      "name": "ip_lease_time", 
+      "term": "dhcp.lease-time"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Type of DHCP message", 
+      "enabled": true, 
+      "name": "opcode", 
+      "term": "dhcp.message-type"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "New ip address attributed to the client", 
+      "enabled": true, 
+      "name": "yiaddr", 
+      "term": "dhcp.new-client-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Subnet mask assigned to the client", 
+      "enabled": true, 
+      "name": "subnetmask", 
+      "term": "dhcp.new-client-subnet"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Relay agent IP address", 
+      "enabled": true, 
+      "name": "giaddr", 
+      "term": "dhcp.relay-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "IP address of the next server (used when booting via a server)", 
+      "enabled": true, 
+      "name": "siaddr", 
+      "term": "dhcp.server-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Host name of next server", 
+      "enabled": true, 
+      "name": "sname", 
+      "term": "dhcp.server-name"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The total number of bytes transferred", 
+      "enabled": true, 
+      "name": "bytes", 
+      "term": "flow.bytes"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Client IP Address", 
+      "enabled": true, 
+      "name": "src_ip", 
+      "term": "flow.c-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Client packets MAC address in hexadecimal format", 
+      "enabled": true, 
+      "name": "src_mac", 
+      "term": "flow.c-mac"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Client port number", 
+      "enabled": true, 
+      "name": "src_port", 
+      "term": "flow.c-port"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The number of bytes sent from client to server", 
+      "enabled": true, 
+      "name": "bytes_in", 
+      "term": "flow.cs-bytes"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The total number of packets sent from client to server", 
+      "enabled": false, 
+      "name": "packets_in", 
+      "term": "flow.cs-packets"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Server IP Address", 
+      "enabled": true, 
+      "name": "dest_ip", 
+      "term": "flow.s-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Server packets MAC address in hexadecimal format", 
+      "enabled": true, 
+      "name": "dest_mac", 
+      "term": "flow.s-mac"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Server port number", 
+      "enabled": true, 
+      "name": "dest_port", 
+      "term": "flow.s-port"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The number of bytes sent from server to client", 
+      "enabled": true, 
+      "name": "bytes_out", 
+      "term": "flow.sc-bytes"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The total number of packets sent from server to client", 
+      "enabled": false, 
+      "name": "packets_out", 
+      "term": "flow.sc-packets"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Number of microseconds that it took to complete a flow event, from the end user's perspective", 
+      "enabled": true, 
+      "name": "time_taken", 
+      "term": "flow.time-taken"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Transport level protocol", 
+      "enabled": true, 
+      "name": "transport", 
+      "term": "flow.transport"
+    }
+  ], 
+  "id": "dhcp", 
+  "locked": true, 
+  "name": "DHCP Protocol Events", 
+  "sourcetype": "stream:dhcp", 
+  "streamType": "event"
+}

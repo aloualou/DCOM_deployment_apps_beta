@@ -1,0 +1,161 @@
+<script type="text/template">
+    <div class="dashboard-row" >
+        <div class="dashboard-cell span-full">
+
+            <form id="stream">
+
+                <!-- ========================== -->
+                <!-- Header/Controls/Attributes -->
+                <!-- ========================== -->
+                <div class="panel-head stream-header">
+
+                    <!-- Header -->
+                    <div class="stream-title-wrapper">
+                        <div class="stream-title">Stream Config - <%= stream.id %></div>
+                        <div class="stream-description"><%=stream.name%></div>
+                        <div class="streams-list-link">< Back to streams</div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="stream-config-button-panel">
+                        <div>
+
+                            <!-- disable controls if external stream -->
+                            <% if (streamIsOurs) { %>                                
+                                <button class="btn" id="addStream">Clone</button>
+                                <% if (!stream.locked) { %>
+                                <button class="btn" id="delete">Delete</button>
+                                <% } %>
+                                <button class="btn" id="cancel">Cancel</button>
+                                <button class="btn btn-primary"
+                                        id="save"
+                                        <% if (!userHasChanges) { %> disabled <% } %> >
+                                        Save
+                                </button>
+                            <% } %>
+
+                        </div>
+                        <% if (streamIsOurs) { %>
+                            <% if (userHasChanges) { %>
+                                <div id="has-changes">you have unsaved changes</div>
+                            <% } %>
+                        <% } %>
+                    </div>
+
+                    <!-- Begin Attributes -->
+
+                    <!-- Stream Type -->
+                    <div class="row" style="margin-top: 10px;clear:both;">
+                        <div class="span2 field-label">Stream Type:</div>
+                        <div id="stream-type" class="span2"><%=stream.streamType%></div>
+                    </div>
+
+                    <!-- Enabled/Disabled -->
+                    <div class="row" style="margin-top: 10px;clear:both;">
+                        <div class="span2 field-label">Status:</div>
+                        <div class="span2">
+                            <% if (streamIsOurs) { %>
+                            <div class="btn-group btn-toggle enable-stream-button-group btn-group-radio">
+                                <button type="button" id="stream-enabled"
+                                        class="btn btn-lg <% if(stream.enabled) { %> active <% } %>">Enabled
+                                </button>
+                                <button type="button" id="stream-disabled"
+                                        class="btn btn-lg
+                                            <% if(stream.required_by) { %> disabled <% } %>
+                                            <% if(!stream.enabled) { %> active <% } %>
+                                        ">Disabled
+                                </button>
+                            </div>
+                            <% } else { if (stream.enabled) { %>
+                                    Enabled
+                                <% } else { %>
+                                    Disabled
+                                <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+                    <!-- Splunk Index -->
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="span2 field-label">Splunk Index:</div>
+                        <div id="indexSelectionWrapper" class="span2">
+                            <select id="splunkIndicesSelection"  <% if (! streamIsOurs) { %> disabled <% } %>>
+                                <option value="default"></option>
+                                <% for (var i = 0; i < splunkIndices.length; i++) { %>
+                                <option value=<%= splunkIndices
+                                [i] %> >
+                                <%= splunkIndices[i] %>
+                                </option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Aggregated -->
+                    <% if (!stream.locked) {%>
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="span2 field-label">Aggregated:</div>
+
+                        <div class="span2">
+                            <input type="checkbox" 
+                                   id="aggregated" 
+                                   class="regular-checkbox"
+                                   <% if (stream.streamType == 'agg_event') { %> checked <% } %> 
+                                   <% if (! streamIsOurs) { %> disabled <% } %> >
+
+                        </div>
+                    </div>
+
+                    <!-- Time Interval -->
+                    <div class="row conditional" style="margin-top: 10px;">
+                        <div class="span2 field-label">Time Interval (seconds):</div>
+                        <div class="span2"><input type="text" class="time-interval"/></div>
+                    </div>
+                    <% } %>
+
+                    <!-- Event Type-->
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="span2 field-label">Event Type:</div>
+                        <div class="span2"><%=stream.extras.eventType%></div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="span2 field-label">Filters:</div>
+                        <div class="span2 filter-count"><%=stream.filters.comparisons.length%> filters configured
+                        </div>
+                        <a class="edit-filters">View Filters</a>
+                    </div>
+
+                    <!-- end attributes -->
+
+                </div>
+
+                <!-- ====================== -->
+                <!-- List of Configurations -->
+                <!-- ====================== -->
+
+                <div class="dashboard-panel stream-fields-panel">
+                    <div class="dashboard-element">
+                        <div class="panel-body">
+
+                            <!-- Fields Search-->
+                            <div class="row field-search" style="ma rgin-top: 10px;">
+                                <div class="span1 field-search-label">Fields</div>
+                                <div class="search field-search-control">
+                                    <input type="text" class="input-medium search-query" value="<%=searchString%>"/>
+                                    <a class="clear"><i class="icon-x-circle"></i></a>
+                                </div>
+                            </div>
+
+                            <!-- The Big Table of Streams -->
+                            <table class="field-list"/>
+
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+        </div> <!-- end dashboard cell -->
+    </div><!-- end dashboard row -->
+</script>

@@ -1,0 +1,153 @@
+<form onunloadCancelJobs="True" script="search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Connections by Protocol</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="text" token="src_ip" searchWhenChanged="False">
+            <label>Source IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_ip" searchWhenChanged="False">
+            <label>Destination IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="protocol_name" searchWhenChanged="False">
+            <label>Protocol</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="src_port" searchWhenChanged="False">
+            <label>Src. Port</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_port" searchWhenChanged="False">
+            <label>Dest. Port</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="src_dscp" searchWhenChanged="False">
+            <label>Src. DSCP</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_dscp" searchWhenChanged="False">
+            <label>Dest. DSCP</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="input_iface" searchWhenChanged="False">
+            <label>Input Int.</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="output_iface" searchWhenChanged="False">
+            <label>Output Int.</label>
+            <default>*</default>
+        </input>
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2">
+        <chart>
+            <title>Connections by Protocol</title>
+            <earliestTime>$earliest$</earliestTime>
+            <latestTime>$latest$</latestTime>
+            <searchTemplate>
+                `netflow_search_rule_20063` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                                (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                                           src_port="$src_port$" dest_port="$dest_port$" 
+                                           (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                           (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | `get_iface_name(input_iface, input_snmp)`
+                | `get_iface_name(output_iface, output_snmp)`
+                | search protocol_name="$protocol_name$" input_iface="$input_iface$" output_iface="$output_iface$" 
+                | strcat protocol " (" protocol_name ")" proto_string
+                | `sampling(flow_count)`
+                | timechart sum(flow_count) by proto_string useother="f" 
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option> 
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Connections</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table>
+            <earliestTime>$earliest$</earliestTime>
+            <latestTime>$latest$</latestTime>
+            <searchTemplate>
+                `netflow_search_rule_20063` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                                (dest_ip="$dest_ip$" OR dest_host="$dest_ip$")
+                                           src_port="$src_port$" dest_port="$dest_port$" 
+                                            (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                            (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | `get_iface_name(input_iface, input_snmp)`
+                | `get_iface_name(output_iface, output_snmp)`
+                | search protocol_name="$protocol_name$" input_iface="$input_iface$" output_iface="$output_iface$" 
+                | strcat protocol " (" protocol_name ")" proto_string
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | stats sum(bytes_in) AS TrafficAmount 
+                    sum(packets_in) AS PacketsAmount 
+                    sum(flow_count) AS Connections 
+                    by exp_ip proto_string
+                | sort 0 - Connections
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)`
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name proto_string Traffic Packets Connections
+                | rename exp_ip_name as "Device" 
+                | rename proto_string as "Protocol"
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>
+

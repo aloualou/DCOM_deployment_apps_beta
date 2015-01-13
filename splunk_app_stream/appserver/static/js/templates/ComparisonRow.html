@@ -1,0 +1,42 @@
+<script type="text/template">
+    <tr class="comp<%=index%>" data-ident="comp<%=index%>" data-term="<%= comparison.term %>" data-type="<%= comparison.type %>" data-value="<%= comparison.value %>">
+        <td class="term"><%= comparison.term %></td>
+
+<% if (useSsc) { %>
+
+        <td class="synth">
+        </td>
+        <td class="comp-value"><input type="text" class="value" value="<%= comparison.value %>"
+            <% var arity = comparisonTypes.get(comparison.type).get('arity'); %>
+            <% if (arity == 1) { %>
+                disabled="disabled" /><i />
+            <% } else { %>
+                    /><i class="icon-pencil" />
+            <% } %>
+        </td>
+
+<% } else { %>
+
+        <td>
+            <select class="type">
+                <% var termCategory = terms.get(comparison.term).get('category'); %>
+                <% comparisonTypes.each(function(type) { %>
+                    <% var id = type.get('id'); %>
+                    <% var categories = type.get('categories'); %>
+                    <% if (categories.indexOf(termCategory) != -1) { %>
+                        <option value="<%= id %>"<% if (comparison.type == id) { %> selected<% } %>><%= id %></option>
+                    <% } %>
+                <% }); %>
+            </select>
+        </td>
+        <td><input type="text" class="value" value="<%= comparison.value %>"
+            <% var arity = comparisonTypes.get(comparison.type).get('arity'); %>
+            <% if (arity == 1) { %> disabled="disabled" <% } %> />
+        </td>
+
+<% } %>
+
+        <td><input type="checkbox" class="match-all-values" /></td>
+        <td class="delete-comparison-column"><i class="icon-trash delete-comparison"></td>
+    </tr>
+</script>

@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved. -->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Cluster Detail</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="maxSize">2</param>
+		<param name="clearOnJobDispatch">False</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="viewHeader" autoRun="true">
+		<module name="HiddenSavedSearch">
+			<param name="savedSearch">
+				<![CDATA[
+				SelectorHierarchy 
+				]]>
+			</param>
+			<module name="SOLNPostProcess">
+				<param name="search">search type!="VirtualMachine" type!="HostSystem"</param>
+				<module name="SOLNSelector">
+					<param name="varName">selectedCluster</param>
+					<param name="limitSelectionCount">1</param>
+					<param name="idFields">host,moid</param>
+					<param name="pathFields">host,grandParentName,parentName</param>
+					<param name="varTemplate">"$moid$" AND host="$host$"</param>
+					<param name="types">ClusterComputeResource</param>
+					<module name="TimeRangePicker">
+						<param name="searchWhenChanged">True</param>
+						<param name="selected">Last 4 hours</param>
+						<!-- Gather information about the selected cluster in the given timerange -->
+						<!-- Start of Warning Panel 1 -->
+						<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+							<param name="search">
+								<![CDATA[
+								| `tstats` avg(p_none_mem_vmmemctl_kiloBytes) avg(p_average_mem_vmmemctl_kiloBytes) avg(p_maximum_mem_vmmemctl_kiloBytes)  avg(p_minimum_mem_vmmemctl_kiloBytes) avg(p_none_mem_swapped_kiloBytes) avg(p_average_mem_swapped_kiloBytes) avg(p_maximum_mem_swapped_kiloBytes)  avg(p_minimum_mem_swapped_kiloBytes) avg(p_none_mem_usage_percent) avg(p_average_mem_usage_percent) avg(p_maximum_mem_usage_percent)  avg(p_minimum_mem_usage_percent) first(ccr) first(host) dc(moid) from vmw_perf_mem_virtualmachine where * ccr=$selectedClusterComputeResource$ | stats avg(p_none_mem_vmmemctl_kiloBytes) as none_vmmemctl_kb avg(p_average_mem_vmmemctl_kiloBytes) as avg_vmmemctl_kb avg(p_maximum_mem_vmmemctl_kiloBytes) as max_vmmemctl_kb avg(p_minimum_mem_vmmemctl_kiloBytes) as min_vmmemctl_kb avg(p_none_mem_swapped_kiloBytes) as none_swapped_kb avg(p_average_mem_swapped_kiloBytes) as avg_swapped_kb avg(p_maximum_mem_swapped_kiloBytes) as max_swapped_kb avg(p_minimum_mem_swapped_kiloBytes) as min_swapped_kb avg(p_none_mem_usage_percent) as none_usg_pct avg(p_average_mem_usage_percent) as avg_usg_pct avg(p_maximum_mem_usage_percent) as max_usg_pct avg(p_minimum_mem_usage_percent) as min_usg_pct dc(moid) as num_vms first(ccr) as ccr first(host) as host  | eval p_average_mem_vmmemctl_kiloBytes=coalesce(avg_vmmemctl_kb, max_vmmemctl_kb, min_vmmemctl_kb, none_vmmemctl_kb) | eval p_average_mem_swapped_kiloBytes=coalesce(avg_swapped_kb, max_swapped_kb, min_swapped_kb, none_swapped_kb) | eval p_average_mem_usage_percent=coalesce(avg_usg_pct, max_usg_pct, min_usg_pct, none_usg_pct) | table host ccr p_average_mem_vmmemctl_kiloBytes p_average_mem_swapped_kiloBytes, p_average_mem_usage_percent, num_vms | thresholdlookup entitytype=VirtualMachine perftype=mem metric=p_average_mem_usage_percent match=false | rename threshold_severity as AvgUsgMemThreshold p_average_mem_usage_percent as AvgUsg_pct_mem | thresholdlookup entitytype=VirtualMachine perftype=mem metric=p_average_mem_vmmemctl_kiloBytes match=false | eval BalloonedMemory=`format_bytes(p_average_mem_vmmemctl_kiloBytes*1024*num_vms)`| rename threshold_severity as BalloonedThreshold | thresholdlookup entitytype=VirtualMachine perftype=mem metric=p_average_mem_swapped_kiloBytes match=false | eval SwappedMemory=`format_bytes(p_average_mem_swapped_kiloBytes*1024*num_vms)` | rename threshold_severity as SwappedThreshold | fillnull value="Not Available" BalloonedMemory SwappedMemory AvgUsg_pct_mem | fillnull value="Unknown" SwappedThreshold BalloonedThreshold AvgUsgMemThreshold | table AvgUsg_pct_mem AvgUsgMemThreshold BalloonedMemory BalloonedThreshold SwappedMemory SwappedThreshold num_vms
+								]]>
+							</param>
+							<module name="JobProgressIndicator"/>
+							<module name="SOLNNullSwapper">
+								<param name="search">
+									<![CDATA[
+									| stats count | eval SwappedThreshold="Unknown" | eval BalloonedThreshold="Unknown" | eval BalloonedMemory="Not Available" | eval SwappedMemory="Not Available" | eval AvgUsg_pct_mem="Not Available" | eval AvgUsgMemThreshold="Unknown" | fields - count
+									]]>
+								</param>
+								<module name="SOLNResultsLoader">
+									<param name="displayName">clusterthreshold</param>
+									<module name="SOLNSearch">
+										<param name="search">
+											<![CDATA[
+											| `tstats` avg(p_none_cpu_usage_percent) avg(p_average_cpu_usage_percent) avg(p_maximum_cpu_usage_percent) avg(p_minimum_cpu_usage_percent) first(ccr) first(host) from vmw_perf_cpu_virtualmachine where * ccr=$selectedClusterComputeResource$ | stats avg(p_none_cpu_usage_percent) as none_usg_pct avg(p_average_cpu_usage_percent) as avg_usg_pct avg(p_maximum_cpu_usage_percent) as max_usg_pct avg(p_minimum_cpu_usage_percent) as min_usg_pct first(ccr) as ccr first(host) as host | eval p_average_cpu_usage_percent=coalesce(avg_usg_pct, max_usg_pct, min_usg_pct, none_usg_pct) | thresholdlookup entitytype=VirtualMachine perftype=cpu metric=p_average_cpu_usage_percent match=false | rename p_average_cpu_usage_percent as AvgUsg_pct_cpu threshold_severity as AvgUsgCpuThreshold | table host ccr AvgUsg_pct_cpu AvgUsgCpuThreshold
+											]]>
+										</param>
+										<module name="JobProgressIndicator"/>
+										<module name="SOLNNullSwapper">
+											<param name="search">
+												<![CDATA[
+												| stats count | eval AvgUsg_pct_cpu="Not Available" | eval AvgUsgCpuThreshold="Unknown" | fields - count
+												]]>
+											</param>
+											<module name="SOLNResultsLoader">
+												<param name="displayName">clusterthreshold</param>
+												<module name="SOLNContent" layoutPanel="warnings">
+													<param name="content">
+														<![CDATA[
+														<table class="propertyTable">
+																<tr>
+																	<td class="warningIcon $clusterthreshold[0].BalloonedThreshold$ $clusterthreshold[0].SwappedThreshold$ $clusterthreshold[0].AvgUsgCpuThreshold$ $clusterthreshold[0].AvgUsgMemThreshold$"></td>
+																	<td style="vertical-align:top">
+																		<table class="propertyTable">
+																			<tr>
+																				<th>Total Reclamation of Memory By Balloon Driver:</th>
+																				<td class="$clusterthreshold[0].BalloonedThreshold$">$clusterthreshold[0].BalloonedThreshold$</td>
+																				<td>$clusterthreshold[0].BalloonedMemory$</td>
+																			</tr>
+																			<tr>
+																				<th>Total Memory Swapping:</th>
+																				<td class="$clusterthreshold[0].SwappedThreshold$">$clusterthreshold[0].SwappedThreshold$</td>
+																				<td>$clusterthreshold[0].SwappedMemory$</td>
+																			</tr>
+																			<tr>
+																				<th>Average CPU Usage (Percentage):</th>
+																				<td class="$clusterthreshold[0].AvgUsgCpuThreshold$">$clusterthreshold[0].AvgUsgCpuThreshold$</td>
+																				<td>$clusterthreshold[0].AvgUsg_pct_cpu$</td>
+																			</tr>
+																			<tr>
+																				<th>Average Memory Usage (Percentage):</th>
+																				<td class="$clusterthreshold[0].AvgUsgMemThreshold$">$clusterthreshold[0].AvgUsgMemThreshold$</td>
+																				<td>$clusterthreshold[0].AvgUsg_pct_mem$</td>
+																			</tr>
+																			<tr>
+																				<th>Number of Virtual Machines:</th>
+																				<td colspan="2" >$clusterthreshold[0].num_vms$</td>
+																			</tr>
+																		</table>
+																	</td>
+																</tr>
+															</table>
+														]]>
+													</param>
+												</module>
+												<module name="SOLNPanelClasser" layoutPanel="warnings">
+													<param name="class">$clusterthreshold[0].BalloonedThreshold$,$clusterthreshold[0].SwappedThreshold$,$clusterthreshold[0].AvgUsgCpuThreshold$,$clusterthreshold[0].AvgUsgMemThreshold$</param>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+						<!-- End of Warning Panel 1 -->
+						<!-- Start of Information - Panel 2.1 -->
+						<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+							<param name="search">
+								<![CDATA[
+								| stats count | eval moid=$selectedClusterComputeResource.moid$ | eval host=$selectedClusterComputeResource.host$ | `HandleInfoMaxTimeNow` | eval _time=info_max_time | lookup TimeClusterServicesAvailability moid, host OUTPUT p_average_clusterServices_effectivecpu_megaHertz p_average_clusterServices_effectivemem_megaBytes | lookup FullHierarchy moid, host OUTPUT  name | rename p_average_clusterServices_effectivecpu_megaHertz as AvgEffCpu_MHz | eval AvgEffMem=`format_bytes(p_average_clusterServices_effectivemem_megaBytes*1024*1024)` | eval AvgEffCpu_MHz=if(isnull(AvgEffCpu_MHz),"Unavailable",AvgEffCpu_MHz) | fields AvgEffCpu_MHz AvgEffMem name
+								]]>
+							</param>
+							<module name="JobProgressIndicator"/>
+							<module name="SOLNNullSwapper">
+								<param name="search">
+									<![CDATA[
+									| stats count | eval AvgEffCpu_MHz="Not Available" | eval AvgEffMem="Not Available" | eval name="Not Available" | fields - count
+									]]>
+								</param>
+								<module name="SOLNResultsLoader">
+									<param name="displayName">cluster</param>
+									<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+										<param name="search">
+											<![CDATA[
+											| loadjob savedsearch="admin:SA-VMW-HierarchyInventory:CurrentHostDetail" | search ClusterMoid=$selectedClusterComputeResource$ | eval MaxCpuMhz=MhzPerCore*CPUCores | eval MemUsgB=((MemUsg*1024)*1024) | eval FreeMemB=(MaxMemMB*1024*1024)-MemUsgB | eval FreeCpuMHz=MaxCpuMhz-CpuUsg | stats sum(FreeCpuMHz) as FreeCpuMHz sum(FreeMemB) as FreeMemB avg(MhzPerCore) as AvgMHzPerCore sum(CPUCores) as NumCores | eval FreeMem=`format_bytes(FreeMemB)` | eval AvgMHzPerCore=floor(AvgMHzPerCore) | fillnull value="Not Available" FreeCpuMHz, FreeMemB, AvgMHzPerCore, NumCores, FreeMem
+											]]>
+										</param>
+										<module name="JobProgressIndicator"/>
+										<module name="SOLNNullSwapper">
+											<param name="search">
+												<![CDATA[
+												| stats count | eval FreeCpuMHz="Not Available" | eval FreeMemB="Not Available" | eval AvgMHzPerCore="Not Available" | eval NumCores="Not Available" | eval FreeMem="Not Available" | fields - count
+												]]>
+											</param>
+											<module name="SOLNResultsLoader">
+												<param name="displayName">cluster</param>
+												<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+													<param name="content">
+														<![CDATA[
+														$cluster[0].name$ Configuration and Status
+														]]>
+													</param>
+												</module>
+												<module name="SOLNContent" layoutPanel="panel_row1_col1">
+													<param name="content">
+														<![CDATA[
+														<p>
+																<table class="propertyTable">
+																	<tr>
+																		<td style="vertical-align:top">
+																			<table class="propertyTable">
+																				<tr>
+																					<th>Available Processing (MHZ)</th>
+																					<td>$cluster[0].FreeCpuMHz$</td>
+																				</tr>
+																				<tr>
+																					<th>Total Effective Processing (MHZ)</th>
+																					<td>$cluster[0].AvgEffCpu_MHz$</td>
+																				</tr>
+																			</table>
+																		</td>
+																		<td style="vertical-align:top">
+																			<table class="propertyTable">
+																				<tr>
+																					<th>Available Memory</th>
+																					<td>$cluster[0].FreeMem$</td>
+																				</tr>
+																				<tr>
+																					<th>Total Effective Memory</th>
+																					<td>$cluster[0].AvgEffMem$</td>
+																				</tr>
+																			</table>
+																		</td>
+																	</tr>
+																</table>
+																<br>
+																	<hr style="clear: both;border:0;height:1px;"></hr>
+																</br>
+																<table>
+																	<tr>
+																		<td style="vertical-align:top">
+																			<table class="propertyTable">
+																				<tr>
+																					<th>Total Cores</th>
+																					<td>$cluster[0].NumCores$</td>
+																				</tr>
+																			</table>
+																		</td>
+																		<td style="width:75px">&nbsp;</td>
+																		<td style="vertical-align:top">
+																			<table class="propertyTable">
+																				<tr>
+																					<th>Average MHZ Per Core</th>
+																					<td>$cluster[0].AvgMHzPerCore$</td>
+																				</tr>
+																			</table>
+																		</td>
+																	</tr>
+																</table>
+															</p>
+														]]>
+													</param>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+						<!-- Start of Information - Panel 2.2 -->
+						<module name="SOLNSearch" layoutPanel="panel_row1_col2">
+							<param name="search">
+								<![CDATA[
+								sourcetype="vmware:inv:hostsystem" source="VMInv:HostSystem"| spath moid | spath changeSet.name output=hsname | spath changeSet.parent.moid output=clustermoid| search clustermoid=$selectedClusterComputeResource$ | spath changeSet.datastore.ManagedObjectReference{}.moid  output=dsmoid | spath changeSet.name output=moname  | search dsmoid=* | table _time moid dsmoid host hsname | mvexpand dsmoid | lookup TimeDatastoreSummary host, moid as dsmoid OUTPUT name | stats first(name) as DSName values(hsname) as AttachedHostSystems by dsmoid, host | rename DSName as Datastore dsmoid as HIDE-Datastore-moid host as HIDE-host
+								]]>
+							</param>
+							<module name="JobProgressIndicator"/>
+							<module name="SOLNContent" layoutPanel="panel_row1_col2_header">
+								<param name="style">float:left;clear:both;</param>
+								<param name="content">
+									<![CDATA[
+									Connected Datastores
+									]]>
+								</param>
+							</module>
+							<module name="Paginator" layoutPanel="panel_row1_col2">
+								<param name="entityName">results</param>
+								<param name="count">5</param>
+								<param name="maxPages">20</param>
+								<module name="SimpleResultsTable">
+									<param name="drilldown">all</param>
+									<module name="SOLNRedirect">
+										<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+										<param name="paramList">click.name2,click.HIDE-host,click.HIDE-Datastore-moid,search.sid</param>
+										<param name="renameList">Type,host,Datastore-moid,sid</param>
+									</module>
+								</module>
+							</module>
+						</module>
+						<!-- End of Information - Panel 2 -->
+						<!-- Start of host member - Panel 3 -->
+						<module name="SOLNSearch" layoutPanel="panel_row2_col1">
+							<param name="search">
+								<![CDATA[
+								sourcetype="vmware:inv:hostsystem" earliest=-6h | spath moid output=moid | spath changeSet.name output=name | spath collectionVersion output=collectionVersion | spath changeSet.summary.overallStatus output=overallStatus | spath changeSet.parent.moid output=HostSystemParent | spath changeSet.parent.type output=HostSystemParentType | spath changeSet.vm.ManagedObjectReference{}.moid output=vms | eval num_vms=mvcount(vms) | eval vms=mvjoin(vms,";") | stats first(overallStatus) As overallStatus first(name) As Host first(HostSystem) AS HostSystem first(HostSystemParent) As HostSystemParent first(HostSystemParentType) As HostSystemParentType first(num_vms) as num_vms by moid, host | eval ClusterMoid=if(HostSystemParentType="ClusterComputeResource", HostSystemParent, "N/A") | addinfo | eval _time=info_max_time | lookup FullHierarchy host, moid AS ClusterMoid OUTPUT name AS Cluster | search ClusterMoid=$selectedClusterComputeResource$ | table host moid Host overallStatus num_vms
+								]]>
+							</param>
+							<module name="JobProgressIndicator"/>
+							<module name="SOLNPostProcess">
+								<param name="search">
+									<![CDATA[
+									| stats count as TotalHosts count(eval(overallStatus=="green")) as GreenCount count(eval(overallStatus=="yellow")) as YellowCount count(eval(overallStatus=="red")) as RedCount
+									]]>
+								</param>
+								<module name="SOLNResultsLoader">
+									<param name="displayName">hosts</param>
+									<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+										<param name="content">
+											<![CDATA[
+											Host System Members Information
+											]]>
+										</param>
+									</module>
+									<module name="SOLNContent" layoutPanel="panel_row2_col1">
+										<param name="useTemplate">False</param>
+										<param name="style">clear:both;</param>
+										<param name="content">
+											<![CDATA[
+											<script type="text/javascript">$("#openTotalHosts").click(function() {$(document).trigger("openContextGate",["hostgate","d_cluster_detail_row3_TotalHosts"]);});
+													$("#openGreenHosts").click(function() {$(document).trigger("openContextGate",["hostgate","d_cluster_detail_row3_GreenHosts"]);});
+													$("#openYellowHosts").click(function() {$(document).trigger("openContextGate",["hostgate","d_cluster_detail_row3_YellowHosts"]);});
+													$("#openRedHosts").click(function() {$(document).trigger("openContextGate",["hostgate","d_cluster_detail_row3_RedHosts"]);});</script>
+												<p>
+													<table>
+														<td style="vertical-align:top">
+															<table class="propertyTable">
+																<tr>
+																	<th>Total Hosts:</th>
+																	<td>
+																		<a class="soln-link-button" id="openTotalHosts">$hosts[0].TotalHosts$</a>
+																	</td>
+																</tr>
+															</table>
+														</td>
+														<td style="vertical-align:top">
+															<table class="propertyTable">
+																<tr>
+																	<th>Green Status:</th>
+																	<td>
+																		<a class="soln-link-button" id="openGreenHosts" style="color:green">$hosts[0].GreenCount$</a>
+																	</td>
+																</tr>
+															</table>
+														</td>
+														<td style="vertical-align:top">
+															<table class="propertyTable">
+																<tr>
+																	<th>Yellow Status:</th>
+																	<td>
+																		<a class="soln-link-button" id="openYellowHosts" style="color:DarkGoldenRod">$hosts[0].YellowCount$</a>
+																	</td>
+																</tr>
+															</table>
+														</td>
+														<td style="vertical-align:top">
+															<table class="propertyTable">
+																<tr>
+																	<th>Red Status:</th>
+																	<td>
+																		<a class="soln-link-button" id="openRedHosts" style="color:red">$hosts[0].RedCount$</a>
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</table>
+												</p>
+											]]>
+										</param>
+									</module>
+								</module>
+							</module>
+							<module name="SOLNContextGate">
+								<param name="key">hostgate</param>
+								<module name="SOLNSavedSearchLookup" layoutPanel="panel_row2_col1">
+									<param name="savedSearch">$hostgate$</param>
+									<param name="setPostProcess">true</param>
+									<module name="Paginator">
+										<param name="entityName">results</param>
+										<param name="count">10</param>
+										<param name="maxPages">20</param>
+										<module name="SimpleResultsTable">
+											<param name="drilldown">all</param>
+											<module name="SOLNRedirect">
+												<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+												<param name="paramList">click.name2,click.HIDE-HostSystem-moid,click.HostSystem,search.sid,click.HIDE-host</param>
+												<param name="renameList">Type,HostSystem-moid,HostSystem,sid,host</param>
+											</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+						<!-- End of host member - Panel 3 -->
+						<!-- Start of Row 4 -->
+						<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+							<!-- Start of Tasks and events - Panel 4.1 -->
+							<param name="search">
+								<![CDATA[
+								(sourcetype="vmware:events" OR sourcetype="vmware:tasks") | spath host.host.moid output=emoid | spath entity.moid output=tmoid | eval moid=coalesce(tmoid, emoid) | spath reason.name output=reason | eval Message=if(isnull(tmoid), fullFormattedMessage, reason ) | eval Message=coalesce(Message, descriptionId) | eval User=replace(source,"Username:","") | lookup FullHierarchy host, moid OUTPUT name as EntityName type as EntityType parent parentType | lookup FullHierarchy host, moid as parent OUTPUT parent as grandparent parentType as grandparentType | table host moid _time Message User EntityName EntityType parent parentType grandparent grandparentType | eval clustermoid=if(parentType=="HostSystem", grandparent, if(parentType=="ClusterComputeResource", parent, "PYSCH!")) | search clustermoid=$selectedClusterComputeResource$ | rename moid as HIDE-moid host as HIDE-host | table HIDE-host HIDE-moid _time Message User EntityName EntityType | head 150
+								]]>
+							</param>
+							<module name="JobProgressIndicator"/>
+							<module name="SOLNContent" layoutPanel="panel_row3_col1_header">
+								<param name="content">
+									<![CDATA[
+									Recent Tasks and Events
+									]]>
+								</param>
+							</module>
+							<module name="Paginator" layoutPanel="panel_row3_col1">
+								<param name="entityName">results</param>
+								<param name="count">10</param>
+								<param name="maxPages">15</param>
+								<module name="SimpleResultsTable">
+									<param name="drilldown">all</param>
+									<module name="SOLNRedirect">
+										<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+										<param name="paramList">click.EntityType,click.HIDE-host,click.HIDE-moid,search.sid</param>
+										<param name="renameList">Type,host,nid,sid</param>
+									</module>
+								</module>
+							</module>
+						</module>
+						<!-- End of tasks - Panel 4.1 -->
+						<!-- Start of Logs - Panel 4.2 -->
+						<module name="SOLNSearch" layoutPanel="panel_row3_col2">
+							<param name="search">
+								<![CDATA[
+								sourcetype="vmware:esxlog:*" error [loadjob savedsearch="admin:SA-VMW-HierarchyInventory:CurrentHostDetail" | search ClusterMoid=$selectedClusterComputeResource$ | eval host=Host + "*" | table host] | head 150 | eval Time=_time | convert ctime(Time) | table Time, host, Message
+								]]>
+							</param>
+							<module name="JobProgressIndicator"/>
+							<module name="SOLNContent" layoutPanel="panel_row3_col2_header" >
+								<param name="content" >
+									<![CDATA[
+									Recent ESX/i Log Errors
+									]]>
+								</param>
+							</module>
+							<module name="Paginator" layoutPanel="panel_row3_col2">
+								<param name="entityName">results</param>
+								<param name="count">10</param>
+								<param name="maxPages">15</param>
+								<module name="SimpleResultsTable">
+									<param name="drilldown">all</param>
+									<module name="SOLNRedirect">
+										<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+										<param name="paramList">search.sid</param>
+										<param name="renameList">sid</param>
+									</module>
+								</module>
+							</module>
+						</module>
+						<!-- End of Logs - Panel 4.2 -->
+						<!-- End of Row 4 -->
+						<!-- Start of Row 5 -->
+						<module name="SOLNSearch" layoutPanel="panel_row4_col1">
+							<param name="search">
+								<![CDATA[
+								| inputlookup ACFields
+								]]>
+							</param>
+							<module name="SOLNDropdown">
+								<param name="varName">aggregatedClusterPerfField</param>
+								<param name="displayField">displaymetric</param>
+								<param name="valueField">displaymetric,savedsearch</param>
+								<module name="SOLNDropdown">
+									<param name="displayField">chartfun</param>
+									<param name="valueField">chartfun,chartfunval</param>
+									<param name="staticOnly">True</param>
+									<param name="staticItem">Average,Average,avg;Minimum,Minimum,min;Maximum,Maximum,max;95th Percentile,95th Percentile,perc95;5th Percentile,5th Percentile,perc5;Count,Count,count;Distinct Count,Distinct Count,dc</param>
+									<module name="SOLNSavedSearchLookup">
+										<param name="savedSearch">
+											<![CDATA[
+											$displaymetric.savedsearch$
+											]]>
+										</param>
+										<module name="JobProgressIndicator"/>
+										<module name="HiddenChartFormatter">
+											<param name="chart">line</param>
+											<param name="charting.chart.showMarkers">false</param>
+											<param name="charting.axisTitleX.text">Time</param>
+											<param name="charting.chart.nullValueMode">connect</param>
+											<module name="JSChart">
+												<param name="width">100%</param>
+												<param name="height">360px</param>
+												<module name="ViewRedirector">
+													<param name="viewTarget">flashtimeline</param>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+						<!-- End Panel 5 -->
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>

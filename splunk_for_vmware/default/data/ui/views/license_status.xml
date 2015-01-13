@@ -1,0 +1,130 @@
+<dashboard script="license_status.js" stylesheet="license_status.css">
+    <label>App License Status</label>
+    <row>
+        <html>
+            <h2>License Status</h2>
+            <ul id="licensestatus-status" class="licensestatus-alerts">
+                <li><div class="alert alert-error"><i class="icon-alert"></i> Unexpected error while loading page. Please contact Support.</div></li>
+            </ul>
+            <a id="licensestatus-refresh-btn" class="btn" href="#">Refresh
+            </a><span id="licensestatus-last-updated"></span>
+        </html>
+    </row>
+    <row>
+        <html>
+            <h2>License Monitor Messages</h2>
+            <ul id="licensestatus-messages" class="licensestatus-alerts">
+                <li><div class="alert alert-error"><i class="icon-alert"></i> Unexpected error while loading page. Please contact Support.</div></li>
+            </ul>
+            <p class="licensestatus-links">
+                <a href="/manager/system/licensing">Add or inspect licenses</a>
+            </p>
+            
+            <!-- License Master Credentials Modal -->
+            <div class="modal fade" id="licensestatus-lmc-modal" tabindex="-1"
+                 role="dialog" aria-labelledby="licensestatus-lmc-modal-title"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span aria-hidden="true"><![CDATA[&times;]]></span>
+                                <span class="sr-only">Close</span>
+                            </button>
+                            <h4 class="modal-title" id="licensestatus-lmc-modal-title">
+                                Enter Remote License Master Credentials
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="licensestatus-lmc-alerts" style="display: none">
+                                <div class="alert alert-error"><i class="icon-alert"></i> <span></span></div>
+                            </div>
+                            <p>
+                                To apply a demo license to your remote license master,
+                                please enter credentials for an administrative user
+                                of that license master.
+                            </p>
+                            <form role="form">
+                                <div class="form-group">
+                                    <label for="licensestatus-lmc-input-email">Username</label>
+                                    <input type="email" class="form-control"
+                                           id="licensestatus-lmc-input-email"
+                                           placeholder="ex: admin"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="licensestatus-lmc-input-password">Password</label>
+                                    <input type="password" class="form-control"
+                                           id="licensestatus-lmc-input-password"
+                                           placeholder="ex: changeme"/>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                Close
+                            </button>
+                            <button type="button" class="btn btn-primary" id="licensestatus-apply-demo-license">
+                                Apply Demo License
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wait For License Master Modal -->
+            <div class="modal fade" id="licensestatus-wlm-modal" tabindex="-1"
+                 role="dialog" aria-labelledby="licensestatus-wlm-modal-title"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span aria-hidden="true"><![CDATA[&times;]]></span>
+                                <span class="sr-only">Close</span>
+                            </button>
+                            <h4 class="modal-title" id="licensestatus-wlm-modal-title">
+                                Waiting for License Master
+                            </h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                Checking remote license master for new license...
+                            </p>
+                            <div id="licensestatus-wlm-spinner"></div>
+                            <p id="licensestatus-wlm-text-bottom">
+                                This can take from 1 to 2 minutes.
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </html>
+    </row>
+    <row>
+        <html>
+            <h2>Days Remaining</h2>
+            <span id="licensestatus-days-remaining">∞</span> day(s) until next app license expires
+            <div id="licensestatus-days-remaining-unknown-explanation" style="display: none">
+                Unable to determine days remaining because you are using a remote license master.<br/>
+                Please connect to the remote license master directly to inspect app licenses manually.
+            </div>
+        </html>
+        <html>
+            <h2>Data Usage</h2>
+            <div id="licensestatus-usage-bar-outer">
+                <div id="licensestatus-usage-bar-inner"></div>
+            </div>
+            <div id="licensestatus-usage-description">
+                0.0 GB used out of ∞ GB maximum (0%)
+            </div>
+            <p class="licensestatus-links">
+                <a href="vmware_license_health">Explore data usage</a>
+            </p>
+        </html>
+    </row>
+</dashboard>

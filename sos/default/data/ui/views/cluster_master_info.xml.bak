@@ -1,0 +1,267 @@
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" stylesheet="application.css">
+  <label>Cluster Master View</label>
+  <module name="AccountBar" layoutPanel="appHeader"/>
+  <module name="AppBar" layoutPanel="appHeader"/>
+  <module name="SideviewUtils" layoutPanel="appHeader"/>
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="clearOnJobDispatch">False</param>
+    <param name="maxSize">1</param>
+  </module>
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">splunk.search.job</param>
+    <param name="clearOnJobDispatch">True</param>
+    <param name="maxSize">1</param>
+  </module>
+ 
+  <module name="BreadCrumb" layoutPanel="viewHeader">
+    <param name="options">
+      <list>
+        <param name="view">home</param>
+        <param name="label">S.o.S - Splunk on Splunk</param>
+      </list>
+      <list>
+        <param name="label">Cluster Master View</param>
+      </list>
+    </param>
+  </module>
+ 
+  <module name="Button" layoutPanel="viewHeader">
+    <param name="label">&#9658; Learn more</param>
+    <param name="customBehavior">helpButton</param>
+    <module name="ServerSideInclude" layoutPanel="viewHeader">
+      <param name="src">cluster_master_info.html</param>
+    </module>
+  </module>
+ 
+  <module name="URLLoader" layoutPanel="viewHeader" autoRun="True">
+ 
+  <!-- COMMON CONTROLS END   -->
+        
+    <module name="Search" layoutPanel="panel_row1_col1" group="Cluster replication info">
+      <param name="search"><![CDATA[
+      | rest splunk_server=local /services/cluster/config
+      ]]></param>
+      <module name="ResultsValueSetter">
+        <param name="fields">replication_factor, search_factor</param>
+        <module name="Search">
+          <param name="search"><![CDATA[
+          | rest /services/cluster/master/info 
+          | append [stats count]
+          | eval cluster_initialization=case(initialized_flag==1,"Initialized",initialized_flag==0,"Not Initialized",isnull(initialized_flag),"Index replication not enabled")
+          | eval cluster_indexing=case(indexing_ready_flag==1,"Ready",indexing_ready_flag==0,"Not Ready",isnull(indexing_ready_flag),"Index replication not enabled")
+          | stats first(cluster_initialization) AS cluster_initialization first(cluster_indexing) AS cluster_indexing
+          ]]></param>
+          <module name="ResultsValueSetter">
+            <param name="fields">cluster_initialization, cluster_indexing</param>
+            <module name="HTML">
+              <param name="html"><![CDATA[
+              <div class="single_values_list">
+              <br>
+              <ul>
+                <li>Replication factor: <b>$replication_factor$</b></li><br>
+                <li>Search factor: <b>$search_factor$</b></li><br>
+                <li>Cluster initialization state: <b>$cluster_initialization$</b></li><br>
+                <li>Cluster indexing state: <b>$cluster_indexing$</b></li>
+              </ul>
+              </div>
+              ]]></param>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+
+
+    <module name="Pulldown" layoutPanel="panel_row2_col1" group="Bucket count">
+      <param name="name">splitBy</param>
+      <param name="label">Split by</param>
+      <param name="staticFieldsToDisplay">  
+        <list>
+          <param name="value">
+          | stats first(bucket_count) AS "Bucket count" by Peer
+          </param>
+          <param name="label">peer</param>
+        </list>
+        <list>
+          <param name="value">
+          | stats first(primary_count) AS "Primary bucket count" by Peer
+          </param>
+          <param name="label">peer (primary buckets only)</param>
+        </list>
+        <list>
+          <param name="value">
+          | fields Peer bucket_count_by_index.*
+          | untable Peer index_name bucket_count
+          | replace "bucket_count_by_index.*" with "*" in index_name
+          | stats sum(bucket_count) AS "Bucket count" by index_name
+          </param>
+          <param name="label">index</param>
+        </list>
+      </param>
+      <module name="Search">
+        <param name="search"><![CDATA[
+        | rest /services/cluster/master/peers
+        | rename label AS Peer
+        $splitBy$
+        ]]></param>
+        <module name="HiddenChartFormatter">
+          <param name="chart">pie</param>
+          <module name="JSChart"/>
+        </module>
+        <module name="ViewRedirectorLink">
+          <param name="viewTarget">flashtimeline</param>
+          <param name="popup">true</param>
+        </module>
+      </module>
+    </module>
+
+
+    <module name="Pulldown" layoutPanel="panel_row2_col2" group="Peer bucket count by status">
+      <param name="name">splitBy</param>
+      <param name="label">Split by</param>
+      <param name="float">left</param>
+      <param name="staticFieldsToDisplay">  
+        <list>
+          <param name="value">search_state_counter.*</param>
+          <param name="label">searchable status</param>
+        </list>
+        <list>
+          <param name="value">status_counter.*</param>
+          <param name="label">replication status</param>
+        </list>
+      </param>
+      <module name="Search">
+        <param name="search"><![CDATA[
+        | rest /services/cluster/master/peers
+        | rename label AS Peer
+        | stats max($splitBy$) AS * by Peer
+        ]]></param>
+        <module name="LinkSwitcher">
+          <param name="mode">independent</param>
+          <param name="label">X-axis scale:</param>
+          <module name="HiddenChartFormatter" group="linear">
+            <param name="chart">bar</param>
+            <param name="chart.stackMode">stacked</param>
+            <module name="JSChart"/>
+          </module>
+          <module name="HiddenChartFormatter" group="logarithmic">
+            <param name="chart">bar</param>
+            <param name="chart.stackMode">stacked</param>
+            <param name="charting.axisY.scale">log</param>
+            <module name="JSChart"/>
+          </module>
+        </module>
+        <module name="ViewRedirectorLink">
+          <param name="viewTarget">flashtimeline</param>
+          <param name="popup">true</param>
+        </module>
+      </module>
+    </module>
+
+ 
+    <module name="Search" layoutPanel="panel_row3_col1" group="Bucket information">
+      <param name="search"><![CDATA[
+      | rest /services/cluster/master/buckets 
+      | rex field=title "^(?<index_name>[^\~]+)" 
+      | table index_name 
+      | dedup index_name ]]>
+      </param>
+      <module name="Pulldown">
+        <param name="name">index_name</param>
+        <param name="label">Select Index:</param>
+        <param name="searchFieldsToDisplay">
+          <list>
+            <param name="value">index_name</param>
+            <param name="label">index_name</param>
+         </list>
+        </param>
+        <param name="staticFieldsToDisplay"/>  
+
+        <module name="Search">
+          <param name="search">*</param>
+          <module name="SearchBar">
+            <param name="label">Filter your results using either a full or wildcarded bucketID</param>
+            <module name="Search">
+              <param name="search"><![CDATA[
+              | rest /services/cluster/master/buckets
+              | rename title AS bucketID
+              | search bucketID=$searchBar$
+              | rex field=bucketID "^(?<repl_index>[^\~]+)"
+              | search repl_index="$index_name$" standalone=0
+              | fields bucketID peers.*.search_state peers.*.bucket_flags
+              | untable bucketID peer_GUID value
+              | rex field=peer_GUID "peers\.(?<peer_GUID>[^\.]*?)\.(?:search_state|bucket_flags)"
+              | eval bucket_primary=if(value=="0xffffffffffffffff",1,0)
+              | eval bucket_state=if(like(value,"0x%"),"",value)
+              | stats max(bucket_primary) AS bucket_primary max(bucket_state) AS bucket_state by bucketID, peer_GUID
+              | join type=outer max=0 [
+                rest /services/cluster/master/peers
+                | rename label AS peer title AS peer_GUID
+                | fields peer_GUID peer]
+              | eval peer=case(bucket_state=="Searchable" AND bucket_primary==1,"[ ".peer." ]",bucket_state=="Searchable" AND bucket_primary==0,"{ ".peer." }",bucket_state=="Unsearchable",peer)
+              | join type=outer max=0 [
+                rest /services/cluster/master/buckets
+                | rename title AS bucketID
+                | search bucketID=$searchBar$
+                | rex field=bucketID "^(?<repl_index>[^\~]+)"
+                | search repl_index="$index_name$" standalone=0
+                | fields bucketID bucket_size]
+              | eval peersort=case(like(peer,"[%"),1,like(peer,"{%"),2,NOT like(peer,"[%") OR NOT like(peer,"{%"),3)
+              | sort 0 bucketID, bucket_state, peersort, peer
+              | stats list(peer) AS peers max(bucket_size) AS bucket_size by bucketID, bucket_state
+              | eval bucket_state=if(isint(bucket_size),"warm/cold","hot")
+              | stats max(eval(ceiling(bucket_size/1024/1024))) AS bucket_size list(peers) AS peers values(bucket_state) AS bucket_state by bucketID
+              | eval bucket_size=if(isint(bucket_size),bucket_size,"Unavailable")
+              | sort + bucket_state bucketID
+              | rename bucket_size AS "Compressed raw data size (MB)" bucket_state AS "Bucket state" peers AS "Peer bucket status"
+              ]]></param>        
+
+              <module name="SimpleResultsHeader">
+                <param name="entityName">results</param>
+                <param name="headerFormat">Found $count$ bucket IDs</param>
+                <module name="Count">
+                  <param name="options">
+                    <list>
+                      <param name="text">10</param>
+                      <param name="value">10</param>
+                    </list>
+                    <list>
+                      <param name="text">20</param>
+                      <param name="value">20</param>
+                    </list>
+                    <list>
+                      <param name="text">50</param>
+                      <param name="value">50</param>
+                    </list>
+                  </param>
+
+                  <module name="Pager">
+                    <param name="count">10</param>
+                    <param name="entityName">results</param>
+                    <param name="maxPages">5</param>
+                    <module name="SimpleResultsTable">
+                      <param name="displayRowNumbers">off</param>
+                    </module>
+                    <module name="ViewRedirectorLink">
+                      <param name="viewTarget">flashtimeline</param>
+                    </module>
+                  </module>
+                </module>
+                <module name="HTML">
+                  <param name="html"><![CDATA[
+                  <br>
+                  <p><b>Peer bucket status key</b>: <span class="primary">primary bucket holder</span>; <span class="searchable">searchable copy holder</span>; <span class="unsearchable">unsearchable (raw data only) copy holder</span></p>
+                  ]]></param>
+                </module>
+              </module>
+            </module>
+          </module>
+        </module>
+        
+      </module>
+    </module>
+
+  </module>
+</view> 
+

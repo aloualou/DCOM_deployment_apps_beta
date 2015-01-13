@@ -1,0 +1,1 @@
+"_time",meid,isvc,vc,path,Datacenter,Cluster,HostSystem,physicalhost,datacentermoid,clustermoid,hostsystemmoid,instanceUuid,uuid,typeduipath,uipath,moid,type,datacentermeid,clustermeid,hostsystemmeid, moname, name, guestFullName, powerState, guestState, toolsRunningStatus, ipAddress, connectionState, bootTime, hostmor, hostmeid, numCpu, toolsStatus, memorySizeMB

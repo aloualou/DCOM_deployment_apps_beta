@@ -1,0 +1,115 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>CanvasChart</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>fred</h1>
+    ]]></param>
+  </module>
+
+
+
+  <module name="SearchBar" layoutPanel="splSearchControls-inline" autoRun="True">
+    <!-- index=_internal source="*metrics.log" metrics group="per_sourcetype_thruput" | top series showperc=f -->
+    <!-- index=_internal source="*metrics.log" metrics group="per_sourcetype_thruput" | chart count over date_minute by series -->
+    <!-- index=_internal source="*metrics.log" metrics group="per_sourcetype_thruput" | timechart count by series limit=5 -->
+    <param name="default">index=_internal source="*metrics.log" metrics group="per_sourcetype_thruput" | timechart count by series </param>
+    <param name="useOwnSubmitButton">False</param>
+    
+    <module name="TimeRangePicker">
+      <param name="default">Last 15 minutes</param>
+      <param name="searchWhenChanged">True</param>
+
+      <module name="SubmitButton">
+        <param name="allowSoftSubmit">True</param>
+
+        <module name="JobProgressIndicator" layoutPanel="panel_row1_col1"></module>
+
+        <module name="Pulldown" layoutPanel="mainSearchControls">
+          <param name="name">charting.chart</param>
+          <param name="label">Chart Type:</param>
+          <param name="float">left</param>
+          <param name="staticFieldsToDisplay">
+            <list><param name="value">column</param></list>
+            <list><param name="value">line</param></list>
+            <list><param name="value">area</param></list>
+          </param>
+
+          <module name="Pulldown" layoutPanel="mainSearchControls">
+            <param name="name">charting.chart.stackMode</param>
+            <param name="label">Stacked:</param>
+            <param name="float">left</param>
+            <param name="staticFieldsToDisplay">
+              <list><param name="value">stacked</param></list>
+              <list><param name="value">none</param></list>
+            </param>
+
+
+            <module name="Pulldown" layoutPanel="mainSearchControls">
+              <param name="name">charting.chart.showMarkers</param>
+              <param name="label">Show Markers:</param>
+              <param name="float">left</param>
+              <param name="staticFieldsToDisplay">
+                <list><param name="value">false</param></list>
+                <list><param name="value">true</param></list>
+              </param>
+
+
+              <module name="Pulldown" layoutPanel="mainSearchControls">
+                <param name="name">charting.legend.placement</param>
+                <param name="label">Legend Placement:</param>
+                <param name="staticFieldsToDisplay">
+                  <list><param name="value">right</param></list>
+                  <list><param name="value">left</param></list>
+                  <list><param name="value">top</param></list>
+                  <list><param name="value">bottom</param></list>
+                </param>
+
+                <module name="CanvasChart"  layoutPanel="panel_row1_col1">
+
+                  <module name="HTML">
+                    <param name="html"><![CDATA[
+                    click.name = $click.name$<br>
+                    click.value = $click.value$<br>
+                    click.name2 = $click.name2$<br>
+                    click.value2 = $click.value2$<br>
+
+                    click.fields.date_minute = $click.fields.date_minute$<br>
+                    
+
+                    ]]></param>
+                  </module>
+                </module>
+                
+              </module>
+
+            </module>
+            
+
+            <module name="SimpleResultsTable"  layoutPanel="panel_row1_col1">
+              <param name="displayRowNumbers">False</param>
+            </module>
+
+            <!-- 
+            <module name="FlashChart"  layoutPanel="panel_row2_col1"></module>
+            -->
+            
+          </module>
+
+        </module>
+      </module>
+    </module>
+  </module>
+
+  
+</view>

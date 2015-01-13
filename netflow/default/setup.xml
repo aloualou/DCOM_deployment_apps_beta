@@ -1,0 +1,113 @@
+<setup>
+	<block title="Let's Get Started..." endpoint="configs/conf-nfi_device_monitor_setup" entity="setupentity">
+		<text>
+			<![CDATA[
+<style>
+.jmFormActions .splButton-primary {
+    float: left;
+}
+.admin-dialog-tray .splButton-secondary, .jmFormActions .splButton-secondary {
+    display: none;
+}
+pre {
+    background-color:#f5f5f5;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #d0d0d0;
+    border-radius: 5px;
+}
+</style>
+<script>
+function doSubmit(event)
+{
+    doSetup(function(){});
+}
+
+function doSetup(callback)
+{
+    var url = Splunk.util.make_url('custom', Splunk.util.getCurrentApp(), 'netflow_csv_handler', 'check');
+    $.get(url, false, false).always(callback);
+}
+
+function doSetupAndGoTo(view)
+{
+    doSetup(function(){
+        var url = Splunk.util.make_url('app', Splunk.util.getCurrentApp(), view);
+        window.open(url, '_blank', 'menubar=1,resizable=1,scrollbars=1,status=1,titlebar=1,toolbar=1');
+    });
+}
+
+var prepareForm = function()
+{
+	$('button[class="splButton-primary"]').find('span').text('Enable');
+    $('div[id$="hidden"]').hide();
+};
+
+$(document).ready(function() {
+	$('#eaiform').submit(doSubmit);
+	prepareForm();
+});
+</script>
+<p>
+	Welcome to the Splunk App by NetFlow Logic!
+</p>
+<br>
+<p>
+This app creates a UDP data input sourcetype=flowintegrator, which receives syslog messages on UDP port 10514, and index=flowintegrator when you install it.
+</p>
+<br>
+<p>
+If you need to alter the index, please follow these steps:
+    <p>
+    <br>
+        <ol>
+            <li>Create directory $SPLUNK_ROOT/etc/apps/netflow/local/ if it doesn't exist</li>
+            <li>Create file $SPLUNK_ROOT/etc/apps/netflow/local/macros.conf with following lines:<br><br>
+                <pre>
+                
+[netflow_index]
+definition = index=your_index sourcetype=flowintegrator
+
+</pre>
+            </li>
+            <li>Save $SPLUNK_ROOT/etc/apps/netflow/local/macros.conf and restart Splunk to changes take effect</li>
+        </ol>
+    </p>
+</p>
+<br>
+<p>
+You can setup this app by following the steps below. Once you have reviewed the setup steps, click on the "Enable" button.
+</p>
+<h3>Step 1</h3>
+<p>
+    This App relies on NetFlow Integrator software. To download a free trial of NetFlow Integrator, please register 
+    at <a target="_blank" href="https://netflowlogic.com/user/register">https://netflowlogic.com/user/register</a>.
+</p>
+<h3>Step 2</h3>
+<p>
+    Once you have downloaded and setup NetFlow Integrator software, you can enrich your data with 
+    network interface name and speed information from auto SNMP polling. Follow the setup under 
+    Settings &gt; <a href="javascript:doSetupAndGoTo('exporters_snmp_config');">Exporters and SNMP Polling</a>.
+</p>
+<h3>Step 3</h3>
+<p>
+    Get more value out of NetFlow by enabling additional inline analytics in NetFlow Integrator and
+    enabling the corresponding Splunk App panels under Settings &gt; <a href="javascript:doSetupAndGoTo('configuration');">Configuration</a>. 
+</p>
+<br>
+<p>
+    Ready to continue or already have NetFlow Integrator software installed? Click on the "Enable" button below.
+</p>
+<br>
+<p>
+   	<a target="_blank" href="https://netflowlogic.zendesk.com/home">Have questions or need assistance? We are here to help!</a>
+</p>
+			]]>
+		</text>
+		<input field="hidden">
+			<label>Hidden</label>
+			<type>text</type>
+		</input>
+	</block>
+</setup>
+

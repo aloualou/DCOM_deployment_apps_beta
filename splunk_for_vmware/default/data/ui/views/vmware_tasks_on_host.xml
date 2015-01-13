@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/sidebar_dashboard.html">
+	<label>ESX/i Host Task Overview</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">1</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="mainSearchControls" autoRun="True">
+		<module name="HiddenSavedSearch" layoutPanel="sidebar">
+			<param name="savedSearch">CurrentHierarchy</param>
+			<module name="SOLNPostProcess">
+				<param name="search">search type!="VirtualMachine"</param>
+				<module name="SOLNTreeNav" layoutPanel="sidebar">
+					<param name="varName">taskesx</param>
+					<param name="rootType">RootFolder</param>
+					<param name="limitSelectionType">HostSystem</param>
+					<param name="idFields">host,moid</param>
+					<param name="varTemplate">(moid="$moid$" AND host="$host$")</param>
+					<param name="parentFields">host,uiparent</param>
+					<param name="typeField">type</param>
+					<param name="types">HostSystem</param>
+					<module name="TimeRangePicker" layoutPanel="mainSearchControls">
+						<param name="searchWhenChanged">True</param>
+						<param name="selected">Last 4 Hours</param>
+							<!-- User Selection -->
+
+							<module name="SOLNTextInput">
+								<param name="varName">taskesxuser</param>
+								<param name="template">User="$text$"</param>
+								<param name="label">User</param>
+								<!-- State Selection -->
+								<module name="SOLNTextInput">
+									<param name="varName">taskesxstate</param>
+									<param name="template">State="$text$"</param>
+									<param name="label">State</param>
+									<!-- Task Type Selection -->
+									<module name="SOLNTextInput">
+										<param name="varName">taskesxdesc</param>
+										<param name="template">Description="$text$"</param>
+										<param name="label">Description</param>
+										<module name="SubmitButton">
+											<!-- START VIEW BODY-->
+											<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+												<param name="content"><![CDATA[
+																Tasks performed on selected host(s) $search.timerange$
+															]]></param>
+											</module>
+											<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+												<param name="search"><![CDATA[
+														sourcetype="vmware:tasks" "entity.type"=HostSystem | dedup key | spath entity.moid output=moid | search $selectedHostSystem$ |spath entity.type output=type | spath entityName output="ESX/i Host" | spath reason.userName output=User | spath reason.scheduledTask output=ScheduleTask | spath completeTime output=CompleteTime | spath startTime output=StartTime| spath state output=State | spath descriptionId output=Description| spath name output=Task | eval Task=if(isnull(Task),"Internal Task",Task) | spath error.localizedMessage output=ErrorMessage | eval ErrorMessage=if(isnull(ErrorMessage), "N/A", ErrorMessage) | eval ScheduleTask=if(isnull(ScheduleTask), "No", "Yes") | eval User=if(isnull(User), "N/A", User) | search $taskesxuser$ $taskesxstate$ $taskesxdesc$ | rename host AS VC type AS HIDE-type moid AS HIDE-moid | sort -startTime | table VC "ESX/i Host" Description Task User StartTime CompleteTime State ScheduleTask ErrorMessage HIDE-type HIDE-moid
+													]]></param>
+												<module name="Paginator">
+													<param name="count">15</param>
+													<param name="entityName">results</param>
+													<module name="JobProgressIndicator"/>
+													<module name="SimpleResultsTable">
+														<param name="drilldown">none</param>
+														<param name="entityName">results</param>
+														<module name="ConvertToDrilldownSearch">
+															<module name="ViewRedirector">
+																<param name="viewTarget">flashtimeline</param>
+															</module>
+														</module>
+													</module>
+												</module>
+												<module name="ViewRedirectorLink">
+													<param name="viewTarget">flashtimeline</param>
+													<param name="label">View Results</param>
+												</module>
+											</module>
+											<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+												<param name="content"><![CDATA[
+																	Tasks performed on VMs associated with selected host(s) $search.timerange$
+															]]></param>
+											</module>
+											<module name="SOLNContent" layoutPanel="panel_row2_col1">
+												<param name="content"><![CDATA[
+													Click an internal task to see its root task and related tasks.
+												]]></param>
+											</module>
+											<module name="SOLNSearch" layoutPanel="panel_row2_col1">
+												<param name="search"><![CDATA[
+													sourcetype="vmware:tasks" "entity.type"=VirtualMachine | dedup key | spath key output=rootTaskKey | spath entity.moid output=moid | spath entity.type output=type | spath reason.userName output=User | spath reason.scheduledTask output=ScheduleTask | spath completeTime output=CompleteTime | spath startTime output=StartTime| spath state output=State | spath entityName output="VM Name" | spath descriptionId output=Description| spath name output=Task | eval Task=if(isnull(Task),"Internal Task",Task) | spath error.localizedMessage output=ErrorMessage | eval ErrorMessage=if(isnull(ErrorMessage), "N/A", ErrorMessage) | eval ScheduleTask=if(isnull(ScheduleTask), "No", "Yes") | eval User=if(isnull(User), "N/A", User) | `HandleInfoMaxTimeNow` | eval _time=info_max_time | lookup FullHierarchy moid host OUTPUT name parent | eval moid=parent | search $selectedHostSystem$ $taskesxuser$ $taskesxstate$ $taskesxdesc$  | fields - _time, info_max_time info_min_time info_search_time info_sid parent | rename host AS VC type AS HIDE-type moid AS HIDE-moid rootTaskKey AS HIDE-rootTaskKey | sort -startTime | table VC "VM Name" Description Task User StartTime CompleteTime State ScheduleTask ErrorMessage HIDE-type HIDE-moid HIDE-rootTaskKey
+												]]></param>
+												<module name="Paginator">
+													<param name="count">15</param>
+													<param name="entityName">results</param>
+													<module name="JobProgressIndicator"/>
+													<module name="SimpleResultsTable">
+														<param name="drilldown">all</param>
+														<param name="entityName">results</param>
+														<module name="SOLNSearch">
+															<param name="search"><![CDATA[
+																			sourcetype="vmware:tasks" | spath entity.moid output=moid  | spath entity.type output=type | spath name output=Task | spath entityName output=name | spath reason.name output=Description | spath name output=Task | search key=$click.HIDE-rootTaskKey$ | eval Task=if(isnull(Task),"Internal Task",Task) | eval Description=if(isnull(Description), descriptionId, Description) | eval User=replace(source,"^Username\:","") | sort -startTime | rename state as State key as rootTaskKey | table Description name User startTime completeTime State cancelled host Task rootTaskKey eventChainId queueTime
+																		]]></param>
+															<module name="JobProgressIndicator"/>
+															<module name="SOLNRedirect">
+																<param name="url">flashtimeline</param>
+																<param name="paramList">search.sid</param>
+																<param name="renameList">sid</param>
+															</module>
+														</module>
+													</module>
+												</module>
+												<module name="ViewRedirectorLink">
+													<param name="viewTarget">flashtimeline</param>
+													<param name="label">View Results</param>
+												</module>
+											</module>
+											<!-- End Search (VM) -->
+										</module>
+										<!-- End Button -->
+									</module>
+									<!-- End TextField (task name)-->
+								</module>
+								<!-- End TextField (state)-->
+							</module>
+							<!-- End TextField (User)-->
+					</module>
+					<!-- End TimeRangePicker-->
+				</module> <!-- End SOLNTreeNav -->
+			</module> <!-- SOLNPostProcess -->
+		</module>
+	</module>
+	<!-- End SOLNCommon -->
+</view>

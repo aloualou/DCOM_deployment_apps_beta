@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="true" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Security Overview</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon"  layoutPanel="mainSearchControls" autoRun="True">
+		<module name="TimeRangePicker">
+			<param name="searchWhenChanged">True</param>
+			<param name="selected">Last 4 hours</param>
+			<module name="SOLNSearch">
+				<param name="search">| inputlookup FullHierarchy | search type=RootFolder OR type=HostSystem | dedup host, moid | table name | rename name as host</param>
+				<module name="SOLNDropdown">
+					<param name="varName">securityhostname</param>
+					<param name="label">Server:</param>
+					<param name="displayField">host</param>
+					<param name="valueField">host</param>
+					<param name="staticItem">All,*</param>
+					<module name="SubmitButton">
+						<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+							<param name="content"><![CDATA[
+								Added/Removed/Changed Roles $search.timerange$
+							]]></param>
+						</module>
+						<module name="SOLNDropdown" layoutPanel="panel_row1_col1">
+							<param name="varName">securityaddremover</param>
+							<param name="label">Action type:</param>
+							<param name="staticOnly">True</param>
+							<param name="displayField">addremover</param>
+							<param name="valueField">val</param>
+							<param name="staticItem">All,sourcetype="vmware:events" | spath eventClass output=class | search class=RoleUpdatedEvent OR class=PermissionAddedEvent OR class=PermissionRemovedEvent OR class=PermissionUpdatedEvent OR class=RoleRemovedEvent OR class=RoleAddedEvent; Added,sourcetype="vmware:events" | spath eventClass output=class | search class=RoleAddedEvent; Removed,sourcetype="vmware:events" | spath eventClass output=class | search class=RoleRemovedEvent; Changed,sourcetype="vmware:events" | spath eventClass output=class | search class=RoleUpdatedEvent OR class=PermissionAddedEvent OR class=PermissionRemovedEvent OR class=PermissionUpdatedEvent</param>
+							<module name="SOLNDropdown" layoutPanel="panel_row1_col1">
+								<param name="varName">securitytimeranger</param>
+								<param name="label">Hours:</param>
+								<param name="staticOnly">True</param>
+								<param name="displayField">addremover</param>
+								<param name="valueField">val</param>
+								<param name="staticItem">Both,*;Off Hours,| `OffHours` | search subtime=1;Business Hours,| `BusinessHours` | search subtime=1</param>
+								<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+									<param name="search">$securityaddremover$ $securitytimeranger$ | spath host.name output=TargetHostMaybe | spath userName output=By | spath eventClass output=class | spath fullFormattedMessage output=Message | spath role.name output=RolenameMaybe | spath chainId | eval Action=case(class=="RoleAddedEvent", "CreateRole", class=="RoleRemovedEvent", "RemoveRole", 1=1, "UpdateRole") | eval Host=coalesce(TargetHostMaybe, host) | search Host=$securityhostname$ | eval Rolename=coalesce(RolenameMaybe, "N/A") | table _time, Action, Rolename, Message, By, Host, chainId</param>
+									<module name="JobProgressIndicator"/>
+									<module name="EnablePreview">
+										<param name="enable">True</param>
+										<param name="display">False</param>
+									</module>
+									<module name="Paginator">
+										<param name="entityName">results</param>
+										<module name="SimpleResultsTable" layoutPanel="panel_row1_col1">
+											<param name="displayMenu">true</param>
+											<param name="count">100</param>
+											<param name="drilldown">none</param>
+											<param name="entityName">results</param>
+											<param name="displayRowNumbers">False</param>
+										</module>
+									</module>
+									<module name="ViewRedirectorLink">
+										<param name="viewTarget">flashtimeline</param>
+									</module>
+								</module>
+							</module>
+						</module>
+						<module name="SOLNContent" layoutPanel="panel_row4_col1_header">
+							<param name="content"><![CDATA[
+								Repeated Login Attempts $search.timerange$
+							]]></param>
+						</module>
+						<module name="SOLNSearch" layoutPanel="panel_row4_col1">
+							<param name="search"><![CDATA[
+                            sourcetype="vmware:events" | spath eventClass output=class | spath host.name output=TargetHostMaybe | search class=BadUsernameSessionEvent OR class=UserLoginSessionEvent | dedup chainId | eval isFailedLogin=if(class="BadUsernameSessionEvent",1,0) | eval isSuccessfulLogin=if(class="UserLoginSessionEvent",1,0) | eval successTime=if(class="UserLoginSessionEvent",_time,null) | eval failureTime=if(class="BadUsernameSessionEvent",_time,null) | eval TargetHost=coalesce(TargetHostMaybe, host) | search TargetHost=$securityhostname$ | stats sum(isFailedLogin) as fails sum(isSuccessfulLogin) as successes first(successTime) as lastSuccessTime last(logoutTime) as lastTime first(failureTime) as lastFailureTime last(vc) as vc by ipAddress, userName, TargetHost | search successes>-1 fails>=20 | convert ctime(lastFailureTime) ctime(lastSuccessTime) | table ipAddress userName TargetHost fails successes lastSuccessTime lastFailureTime
+							]]></param>
+							<module name="JobProgressIndicator"/>
+							<module name="Paginator">
+								<param name="count">10</param>
+								<param name="entityName">results</param>
+								<module name="SOLNContent">
+									<param name="content"><![CDATA[
+										<p>Click a userName to see the user's actions.</p>
+									]]></param>
+								</module>
+								<module name="SimpleResultsTable">
+									<param name="drilldown">all</param>
+									<param name="entityName">results</param>
+									<module name="SOLNSearch">
+										<param name="search">sourcetype="vmware:events" | spath host.name output=TargetHostMaybe | eval TargetHost=coalesce(TargetHostMaybe, host) | search TargetHost=$securityhostname$ | spath eventClass output=class | search NOT class=UserLogoutSessionEvent userName=$click.userName$ | spath fullFormattedMessage output=Message | dedup chainId | eval loginResult=if(class=="BadUsernameSessionEvent","fail",if(class=="UserLoginSessionEvent","success",null)) | table _time, Message, loginResult, userName, class, chainId | rename class AS Event</param>
+										<module name="JobProgressIndicator"/>
+										<module name="Paginator">
+											<param name="count">10</param>
+											<param name="entityName">results</param>
+											<module name="SimpleResultsTable">
+												<param name="drilldown">none</param>
+												<param name="entityName">results</param>
+											</module>
+										</module>
+									</module>
+								</module>
+								<module name="ViewRedirectorLink" layoutPanel="panel_row4_col1">
+									<param name="viewTarget">flashtimeline</param>
+									<param name="label">View Results</param>
+								</module>
+							</module>
+						</module>
+						<module name="SOLNContent" layoutPanel="panel_row5_col1_header">
+							<param name="content"><![CDATA[
+								Attempted Actions Outside Permissions $search.timerange$
+							]]></param>
+						</module>
+						<module name="SOLNSearch">
+							<param name="search">sourcetype="vmware:events" | spath host.name output=TargetHostMaybe | spath eventClass output=class |  eval TargetHost=coalesce(TargetHostMaybe, host) | search class=NoAccessUserEvent TargetHost="$securityhostname$" | stats count by ipAddress</param>
+							<module name="SOLNDropdown" layoutPanel="panel_row5_col1">
+								<param name="varName">securityip2</param>
+								<param name="label">IP address:</param>
+								<param name="displayField">ipAddress</param>
+								<param name="valueField">ipAddress</param>
+								<param name="staticItem">All,*</param>
+								<module name="SOLNSearch" layoutPanel="panel_row5_col1">
+									<param name="search">sourcetype="vmware:events" ipAddress=$securityip2$| spath eventClass output=class | spath host.name output=TargetHostMaybe | spath fullFormattedMessage output=Message | search class=NoAccessUserEvent | dedup chainId | eval TargetHost=coalesce(TargetHostMaybe, host) | search TargetHost=$securityhostname$ | rename class AS Event | table _time, ipAddress, TargetHost, Message, Event, chainId </param>
+									<module name="Paginator">
+										<param name="count">15</param>
+										<param name="entityName">results</param>
+										<module name="JobProgressIndicator"/>
+										<module name="SimpleResultsTable">
+											<param name="drilldown">none</param>
+											<param name="entityName">results</param>
+											<module name="ConvertToDrilldownSearch">
+												<module name="ViewRedirector">
+													<param name="viewTarget">flashtimeline</param>
+												</module>
+											</module>
+										</module>
+									</module>
+									<module name="ViewRedirectorLink" layoutPanel="panel_row5_col1">
+										<param name="viewTarget">flashtimeline</param>
+										<param name="label">View Results</param>
+									</module>
+								</module>
+							</module>
+						</module>
+						<module name="SOLNContent" layoutPanel="panel_row6_col1_header">
+							<param name="content"><![CDATA[
+								Potentially Harmful Logins $search.timerange$
+							]]></param>
+						</module>
+						<module name="SOLNSearch" layoutPanel="panel_row6_col1">
+							<param name="search">sourcetype="vmware:events" | spath host.name output=TargetHostMaybe | eval TargetHost=coalesce(TargetHostMaybe, host) | search TargetHost="$securityhostname$" | spath eventClass output=class | search class=UserLoginSessionEvent OR class=NoAccessUserEvent OR class=HostCnxFailedBadUsernameEvent OR class=HostCnxFailedNoAccessEvent | stats count by ipAddress</param>
+							<!-- Select IP addresses which has potential harmful events -->
+							<module name="SOLNDropdown">
+								<param name="varName">securityip</param>
+								<param name="label">From:</param>
+								<param name="displayField">ipAddress</param>
+								<param name="valueField">ipAddress</param>
+								<param name="staticItem">All,*</param>
+								<module name="SOLNSearch" layoutPanel="panel_row6_col1">
+									<param name="search">sourcetype="vmware:events" | spath host.name output=TargetHostMaybe | eval TargetHost=coalesce(TargetHostMaybe, host) | search TargetHost="$securityhostname$" ipAddress="$securityip$" | spath eventClass output=class | search class=UserLoginSessionEvent OR class=BadUsernameSessionEvent OR class=NoAccessUserEvent OR class=HostCnxFailedBadUsernameEvent OR class=HostCnxFailedNoAccessEvent | stats count by userName</param>
+									<module name="SOLNTextInput">
+										<param name="varName">securityexcludeuser</param>
+										<param name="label">Exclude user:</param>
+										<param name="template">| regex userName!="$text$"</param>
+										<module name="SOLNDropdown">
+											<param name="varName">securityexcludeevent</param>
+											<param name="label">Exclude event:</param>
+											<param name="staticOnly">True</param>
+											<param name="displayField">excludeevent</param>
+											<param name="valueField">val</param>
+											<param name="staticItem">None,foobar;UserLoginSessionEvent,UserLoginSessionEvent;BadUsernameSessionEvent,BadUsernameSessionEvent;NoAccessUserEvent,NoAccessUserEvent;HostCnxFailedBadUsernameEvent,HostCnxFailedBadUsernameEvent;HostCnxFailedNoAccessEvent,HostCnxFailedNoAccessEvent</param>
+											<module name="SOLNSearch" layoutPanel="panel_row6_col1">
+												<param name="search">sourcetype="vmware:events"  $securityip$ (userName=Admin* OR userName=root) $securityexcludeuser$ | spath eventClass output=class | spath host.name output=TargetHostMaybe | search (NOT class="$securityexcludeevent$") AND (class=UserLoginSessionEvent OR class=BadUsernameSessionEvent OR class=NoAccessUserEvent OR class=HostCnxFailedBadUsernameEvent OR class=HostCnxFailedNoAccessEvent) | eval TargetHost=coalesce(TargetHostMaybe, host) | search TargetHost=$securityhostname$ | regex ipAddress="^\d" | rename class AS Event, TargetHost AS To, ipAddress AS From | table _time, Event, From, To, userName, chainId</param>
+												<module name="SimpleResultsHeader">
+													<param name="headerFormat">Admin/root logins</param>
+													<param name="entityName">results</param>
+												</module>
+												<module name="Paginator">
+													<param name="count">10</param>
+													<param name="entityName">results</param>
+													<module name="JobProgressIndicator"/>
+													<module name="SimpleResultsTable">
+														<param name="drilldown">none</param>
+														<param name="entityName">results</param>
+														<module name="ConvertToDrilldownSearch">
+															<module name="ViewRedirector">
+																<param name="viewTarget">flashtimeline</param>
+															</module>
+														</module>
+													</module>
+												</module>
+												<module name="ViewRedirectorLink" layoutPanel="panel_row6_col1">
+													<param name="viewTarget">flashtimeline</param>
+													<param name="label">View Results</param>
+												</module>
+											</module>
+											<module name="SOLNSearch" layoutPanel="panel_row6_col1">
+												<param name="search">sourcetype="vmware:events" $securityip$ (NOT `nonroutableIP`) $securityexcludeuser$ | spath eventClass output=class | spath host.name output=TargetHostMaybe | search (NOT class="$securityexcludeevent$")  AND (class=UserLoginSessionEvent OR class=BadUsernameSessionEvent OR class=NoAccessUserEvent OR class=HostCnxFailedBadUsernameEvent OR class=HostCnxFailedNoAccessEvent) | regex ipAddress="^\d" | eval TargetHost=coalesce(TargetHostMaybe, host) | search TargetHost=$securityhostname$ | rename class AS Event, TargetHost AS To, ipAddress AS From | table _time, Event, From, To, userName, chainId</param>
+												<module name="SimpleResultsHeader">
+													<param name="headerFormat">Routable IP logins</param>
+													<param name="entityName">results</param>
+												</module>
+												<module name="Paginator">
+													<param name="count">10</param>
+													<param name="entityName">results</param>
+													<module name="JobProgressIndicator"/>
+													<module name="SimpleResultsTable">
+														<param name="drilldown">none</param>
+														<param name="entityName">results</param>
+														<module name="ConvertToDrilldownSearch">
+															<module name="ViewRedirector">
+																<param name="viewTarget">flashtimeline</param>
+															</module>
+														</module>
+													</module>
+												</module>
+												<module name="ViewRedirectorLink" layoutPanel="panel_row6_col1_grp1">
+													<param name="viewTarget">flashtimeline</param>
+													<param name="label">View Results</param>
+												</module>
+											</module>
+										</module>
+									</module>
+								</module>
+							</module>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>

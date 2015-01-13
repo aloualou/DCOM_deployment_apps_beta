@@ -1,0 +1,8 @@
+
+pour faire le template : 
+
+http://vbyron.com/blog/30-minute-deploy-001-centos-6-5-vm-template/
+
+attention 
+https://peterpap.net/index.php/Creating_a_CentOS%5CRed_Hat_VMware_template
+

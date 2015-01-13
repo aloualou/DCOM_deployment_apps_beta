@@ -1,0 +1,197 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="False" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>Testcases for Checkbox</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Testcases for Checkbox</h1>
+    ]]></param>
+  </module>
+
+  
+
+
+  <module name="URLLoader" layoutPanel="panel_row1_col1" autoRun="True">
+
+    <module name="Checkbox" group="S/B checked">
+      <param name="name">test1</param>
+      <param name="label">should be checked by default</param>
+      <param name="onValue">value_when_checked</param>
+      <param name="offValue">value_when_unchecked</param>
+      <param name="checked">True</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         $test1$
+        ]]></param>
+      </module>
+    </module>
+
+    <module name="Checkbox" layoutPanel="panel_row1_col2" group="S/B unchecked">
+      <param name="name">test2</param>
+      <param name="label">should be unchecked by default</param>
+      <param name="onValue">value_when_checked</param>
+      <param name="offValue">value_when_unchecked</param>
+      <param name="checked">False</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         $test2$
+        ]]></param>
+      </module>
+    </module>
+
+    <module name="Checkbox" layoutPanel="panel_row1_col3" group="prepopulation">
+      <param name="name">test3</param>
+      <param name="label">populated from URL</param>
+      <param name="onValue">value_when_checked</param>
+      <param name="offValue">value_when_unchecked</param>
+      <param name="checked">False</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         $test3$
+
+         <br>
+         <br>
+          Set up a testcase: <br>
+          <a href="testcases_for_checkbox?test3=false">hard link, false</a><br>
+          <a href="testcases_for_checkbox?test3=true">hard link, true</a><br>
+          <a href="testcases_for_checkbox#test3=false">soft link, false</a><br>
+          <a href="testcases_for_checkbox#test3=true">soft link, true</a><br>
+      
+        ]]></param>
+      </module>
+    </module>
+
+
+    <module name="Checkbox" layoutPanel="panel_row2_col1" group="S/B displaying a red error">
+      <param name="name">test4</param>
+      <param name="label">has neither onValue nor offValue</param>
+      <param name="checked">False</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         $test4$
+        ]]></param>
+      </module>
+    </module>
+
+
+    
+
+
+    <module name="Checkbox" layoutPanel="panel_row3_col1" group="S/B showing label on the left">
+      <param name="name">test5</param>
+      <param name="label">left-side label</param>
+      <param name="onValue">FAIL. THIS IS THE CHECKED VALUE</param>
+      <param name="offValue">Yep. All is well.</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         'checked' param not specified.  So this should default to unchecked:  <br>
+         $test5$
+        ]]></param>
+      </module>
+    </module>
+
+    <module name="Checkbox" layoutPanel="panel_row3_col2" group="S/B showing label on the right">
+      <param name="name">test6</param>
+      <param name="label">right-side label</param>
+      <param name="labelPosition">right</param>
+      <param name="onValue">FAIL</param>
+      <param name="offValue">=)</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         $test6$
+        ]]></param>
+      </module>
+    </module>
+
+
+    <module name="Checkbox" layoutPanel="panel_row4_col1" group="S/B displaying no label">
+      <param name="name">test7</param>
+      <param name="onValue">hello</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         $test7$
+        ]]></param>
+      </module>
+    </module>
+
+    <module name="Checkbox" layoutPanel="panel_row4_col2" group="S/B displaying no label">
+      <param name="name">test8</param>
+      <param name="onValue">hello</param>
+      <param name="label"></param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+         $test8$
+        ]]></param>
+      </module>
+    </module>
+
+
+
+    <module name="Search" layoutPanel="panel_row5_col1" group="race condition between POST and subsequent pushes">
+      <param name="search">index=_internal source=*metrics.log group="per_sourcetype_thruput" | stats count by series</param>
+      <param name="earliest">-3h</param>
+      <param name="latest">now</param>
+
+      <module name="Pulldown">
+        <param name="name">sourcetypePulldown</param>
+        <param name="label">sourcetype</param>
+        <param name="template">series="$value$"</param>
+        
+        <param name="searchFieldsToDisplay">
+          <list>
+            <param name="label">series</param>
+            <param name="value">series</param>
+          </list>
+        </param>
+
+        <module name="Checkbox">
+          <param name="name">epsCheckbox</param>
+          <param name="label">show EPS</param>
+          <param name="checked">False</param>
+          <param name="onValue">avg(eps)</param> 
+
+          <module name="Checkbox">
+            <param name="name">kbCheckbox</param>
+            <param name="label">show sum(KB)</param>
+            <param name="checked">True</param>
+            <param name="onValue">sum(kb)</param> 
+
+            
+
+            <module name="Search">
+              <param name="search">index=_internal source=*metrics.log group="per_sourcetype_thruput" $sourcetypePulldown$ | stats first(series) as series count $epsCheckbox$ $kbCheckbox$</param>
+              <module name="HTML">
+                <param name="html"><![CDATA[
+                 sourcetypePulldown = $sourcetypePulldown$<br>
+                 epsCheckbox = $epsCheckbox$<br>
+                 kbCheckbox = $kbCheckbox$<br>
+                 <br>
+                 search = $search$<br>
+
+                ]]></param>
+              </module>
+              <module name="SimpleResultsTable">
+              </module>
+            </module>
+          </module>
+          
+
+        </module>
+      </module>
+    </module>
+
+  </module>
+    
+
+</view>

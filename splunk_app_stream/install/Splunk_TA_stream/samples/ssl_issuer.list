@@ -1,0 +1,9 @@
+C=US,O=\"GeoTrust, Inc.\",CN=RapidSSL CA
+C=US,O=GeoTrust Inc.,CN=GeoTrust Global CA
+C=SE,O=AddTrust AB,OU=AddTrust External TTP Network,CN=AddTrust External CA Root
+C=US,O=\"VeriSign, Inc.\",OU=VeriSign Trust Network,OU=\"(c) 2006 VeriSign, Inc. - For authorized use only\",CN=VeriSign Class 3 Public Primary Certification Authority - G5
+C=US,O=DigiCert Inc,OU=www.digicert.com,CN=DigiCert High Assurance EV Root CA
+C=US,ST=CA,L=San Francisco,O=Splunk,CN=SplunkCommonCA,E=support@splunk.com
+C=US,ST=CA,L=Santa Clara,O=DevCreations Inc,OU=BD,CN=devc,E=devc@devc.com
+C=US,ST=Arizona,L=Scottsdale,O=\"GoDaddy.com, Inc.\",CN=Go Daddy Root Certificate Authority - G2
+C=US,O=\"VeriSign, Inc.\",OU=VeriSign Trust Network,OU=Terms of use at https://www.verisign.com/rpa (c)06,CN=VeriSign Class 3 Extended Validation SSL SGC CA

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isPersistable="true" isSticky="true" isVisible="true" objectMode="viewconf" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>App Data Volume</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="panel_row1_col1" autoRun="true">
+		<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+			<param name="content">
+				<![CDATA[
+				Overall Data Volume, over the last 24 hours
+				]]>
+			</param>
+		</module>
+		<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+			<param name="content">
+				<![CDATA[
+				Detailed Data Volume, over the last 24 hours
+				]]>
+			</param>
+		</module>
+		<module name="SOLNSearch" layoutPanel="panel_row1_col1" >
+			<param name="search">
+				<![CDATA[
+				index=_internal source=*license_usage.log* type=Usage st=vmware:* earliest=-24h latest=now | stats sum(b) as totB by st | rename st as series
+				]]>
+			</param>
+			<module name="SOLNNullSwapper">
+				<param name="search">
+					<![CDATA[
+					| stats count | eval series="Not Available" | eval totB=0
+					]]>
+				</param>
+				<module name="JobProgressIndicator"></module>
+				<module name="SOLNPostProcess">
+					<param name="search">
+						<![CDATA[
+						| stats sum(totB) as totB | eval "TotVolume"=`format_bytes(totB)`
+						]]>
+					</param>
+					<module name="SOLNResultsLoader" layoutPanel="panel_row1_col1">
+						<param name="displayName">overall</param>
+						<module name="SOLNContent" layoutPanel="panel_row1_col1">
+							<param name="content">
+								<![CDATA[
+								<table style="float:left;font-size:14px;text-align:left;padding:5;">
+								<tr>
+								<th style="padding: 5px;">Total Volume Indexed</th>
+								<td style="padding: 5px;">$overall[0].TotVolume$</td>
+								</tr>
+								</table>
+								]]>
+							</param>
+							<param name="style">clear:both;</param>
+						</module>
+						<!-- license searches -->
+						<module name="SOLNSearch" layoutPanel="panel_row3_col1">
+							<param name="search">
+								<![CDATA[
+								| rest /services/licenser/licenses | search label=App-VMWare*   | fields + add_ons.vmware*, creation_time, expiration_time, features, group_id, label, quota, relative_expiration*, status, type| convert num(add_ons.vmware.size) as vmware_license_size | eval vmware_license_size_pp=vmware_license_size + " GB" | eval "License Volume"=case(vmware_license_size==101, "Unlimited", 1==1, vmware_license_size_pp) | eval expiration_human=case(label=="App-VMWare Perpetual" AND status=="VALID", "Valid in perpetuity", 1==1, "Expires on " + strftime(expiration_time,"%+")) | eval "License Status"=case(status=="VALID", expiration_human, status=="EXPIRED", "Expired") | rename label AS "License Name"
+								]]>
+							</param>
+							<!-- start license view pp 1 -->
+							<module name="SOLNPostProcess">
+								<param name="search">
+									<![CDATA[
+									| table "License Name", "License Volume", "License Status"
+									]]>
+								</param>
+								<module name="SOLNContent" layoutPanel="panel_row3_col1_header">
+									<param name="content">
+										<![CDATA[
+										Installed VMware App Licenses
+										]]>
+									</param>
+								</module>
+								<module name="SimpleResultsTable" layoutPanel="panel_row3_col1">
+									<module name="SOLNRedirect">
+										<param name="url">flashtimeline</param>
+										<param name="paramList">search.sid</param>
+										<param name="renameList">sid</param>
+									</module>
+								</module>
+							</module>
+							<!-- end license view pp 1 -->
+							<!-- start license view pp 2 -->
+							<module name="SOLNPostProcess">
+								<param name="search">
+									<![CDATA[
+									| search status="VALID"  | stats sum(eval(if(vmware_license_size==101, 1, 0))) as unl_licenses, sum(vmware_license_size) as total_license_size, first(*) as * | eval remaining_data_volume=total_license_size*1024*1024*1024-$overall[0].totB$ | eval remaining_pp=`format_bytes(remaining_data_volume)` | eval "Remaining Data"=if(unl_licenses>0, "Unlimited", remaining_pp) | append  [| stats count | eval "Remaining Data"=0] | table "Remaining Data" | head 1
+									]]>
+								</param>
+								<module name="SOLNContent" layoutPanel="panel_row4_col1_header">
+									<param name="content">
+										<![CDATA[
+										Daily Data Volume Remaining
+										]]>
+									</param>
+								</module>
+								<module name="SimpleResultsTable" layoutPanel="panel_row4_col1">
+									<module name="SOLNRedirect">
+										<param name="url">flashtimeline</param>
+										<param name="paramList">search.sid</param>
+										<param name="renameList">sid</param>
+									</module>
+								</module>
+							</module>
+							<!-- end license view pp 2 -->
+						</module>
+						<!-- end license searches -->
+					</module><!--end results loader-->
+				</module><!-- end postprocess defining sum(totB) as totB -->
+				<module name="SOLNPostProcess" layoutPanel="panel_row2_col1">
+					<param name="search">
+						<![CDATA[
+						| eval formatted_bytes=`format_bytes(totB)` | rex field="series" "^vmware:(?<Datatype>[^:]+):?.*$" | stats list(series) as "Unique Sourcetypes" list(formatted_bytes) as "Volume per Sourcetype" sum(totB) as totB by Datatype | eval "Total Volume"=`format_bytes(totB)` | table Datatype, "Unique Sourcetypes", "Volume per Sourcetype", "Total Volume"
+						]]>
+					</param>
+					<module name="SimpleResultsTable" layoutPanel="panel_row2_col1">
+						<module name="SOLNRedirect">
+							<param name="url">flashtimeline</param>
+							<param name="paramList">search.sid</param>
+							<param name="renameList">sid</param>
+						</module>
+					</module>
+				</module>
+			</module>
+		</module>
+	</module>
+</view>

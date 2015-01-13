@@ -1,0 +1,197 @@
+<h3>Step 3</h3>
+<p>
+    Get more value out of NetFlow by enabling additional inline analytics in NetFlow 
+    Integrator and enabling the corresponding Splunk App panels below. Place a checkbox 
+    for the selected panel and click on the "Save" button below.  
+</p>
+
+<form id="sections" action="javascript:void(0);">
+    <p>
+        <h3>Cyber Threat Dashboard Settings</h3>
+        <input type="checkbox" id="cyber_threat_enabled"></input><label for="cyber_threat_enabled">Enable Cyber Threat Dashboard</label><br><br>
+        This dashboard shows cyber threat traffic based on Security Rule Set of NetFlow Integrator. 
+        Make sure you have the following Rules enabled:
+        <ul>
+            <li>10050: Botnet Command and Control Traffic Monitor</li>
+            <li>10051: APT1 Traffic Monitor</li>
+            <li>10052: Host Reputation Monitor</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Cisco ASA Monitor Settings</h3>
+        <input type="checkbox" id="cisco_asa_enabled"></input><label for="cisco_asa_enabled">Enable Cisco ASA Monitor Dashboards</label><br><br>
+        
+        These dashboards provide visibility into your network traffic passing through your 
+        Cisco ASA devices. It allows you to view the top bandwidth consumers, violators, connectors, 
+        and destinations during the time interval which is configurable through each rule. (e.g. 30 seconds)
+        
+        <br><br>
+        
+        These dashboards show traffic based on Cisco ASA NSEL NetFlow. Make sure you have the following
+        Rules enabled:<br><br>
+        <ul>
+            <li>10018: Top Bandwidth Consumers for Cisco ASA</li>
+            <li>10019: Top Traffic Destinations for Cisco ASA</li>
+            <li>10020: Top Policy Violators for Cisco ASA</li>
+            <li>10021: Top Hosts with most Connections for Cisco ASA</li>
+        </ul>
+        <br>
+    </p>
+    
+    <p>
+        <h3>Palo Alto Networks Settings</h3>
+        <input type="checkbox" id="palo_enabled"></input>
+        <label for="palo_enabled">Enable Palo Alto Networks Dashboards</label>
+        <br><br>
+        NetFlow views are based on NetFlow data produced by Palo Alto Networks devices and converted to 
+        syslog messages by 3rd party software - NetFlow Integrator.
+        <br><br>
+        
+        These dashboards show traffic based on Palo Alto Networks devices. 
+        Make sure you have the following
+        Rules enabled:<br><br>
+        <ul>
+            <li>
+                Enable NetFlow Integrator Palo Alto Networks Rules (10030 through 10035) 
+                and Converter (20093)
+            </li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Network Traffic by CBQoS Settings</h3>
+        <input type="checkbox" id="traffic_by_qos_enabled"></input><label for="traffic_by_qos_enabled">Enable Network Traffic by CBQoS Dashboard</label><br><br>
+        This dashboard shows traffic by Differentiated Service (DSCP) on your network. 
+        Make sure you have the following Rule enabled:
+        <ul>
+            <li>10065: Traffic by CBQoS</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Traffic by Subnets Settings</h3>
+        <input type="checkbox" id="traffic_by_subnets_enabled"></input><label for="traffic_by_subnets_enabled">Enable Traffic by Subnets Dashboard</label><br><br>
+        This dashboard reports top bandwidth consumers for each monitored subnet. 
+        Make sure you have the following Rule enabled:
+        <ul>
+            <li>10011: Network Subnets Monitor</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Traffic by Autonomous Systems Settings</h3>
+        <input type="checkbox" id="traffic_by_as_enabled"></input><label for="traffic_by_as_enabled">Enable Traffic by Autonomous Systems Dashboard</label><br><br>
+        This dashboard reports traffic by all Autonomous Systems. 
+        Make sure you have the following Rule enabled:
+        <ul>
+            <li>10066: Traffic by Autonomous Systems</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Traffic by Host Pairs Settings</h3>
+        <input type="checkbox" id="top_host_pairs_enabled"></input><label for="top_host_pairs_enabled">Enable Traffic by Host Pairs Dashboard</label><br><br>
+        This dashboard shows top traffic conversations between host pairs. 
+        Make sure you have the following Rule enabled in Network traffic and device monitoring Rule Set:
+        <ul>
+            <li>10064: Top Host Pairs Monitor</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Traffic by Connections Settings</h3>
+        <input type="checkbox" id="traffic_by_connections_enabled"></input><label for="traffic_by_connections_enabled">Enable Connections Dashboards</label><br><br>
+        This is a group of dashboards that shows top traffic by the number of connections. 
+        Make sure you have the following Rule enabled in Network traffic and device monitoring Rule Set:
+        <ul>
+            <li>10063: Top Connections Monitor</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Services Response Time Settings</h3>
+        <input type="checkbox" id="services_response_time_enabled"></input><label for="services_response_time_enabled">Enable Services Response Time Dashboard</label><br><br>
+        This dashboard shows an average response time of each monitored service. 
+        Make sure you have the following Rule enabled:
+        <ul>
+            <li>10017: Services Performance Monitor</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>DNS Security Settings</h3>
+        <input type="checkbox" id="dns_monitor_enabled"></input><label for="dns_monitor_enabled">Enable DNS Security Dashboard</label><br><br>
+        This dashboard shows an average response time and top 10 users of each monitored DNS server. 
+        Make sure you have the following Rule enabled:
+        <ul>
+            <li>10004: DNS Monitor</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>GEO IP Monitor Settings</h3>
+        <input type="checkbox" id="geo_ip_monitor_enabled"></input><label for="geo_ip_monitor_enabled">Enable GEO IP Monitor Dashboard</label><br><br>
+        This dashboard shows geographical locations of monitored hosts, and traffic statistics.
+        Make sure you have the following Rule enabled:
+        <ul>
+            <li>10040: Hosts Geographical Location Monitor</li>
+        </ul>
+        <br>
+    </p>
+
+    <p>
+        <h3>Watched Interfaces</h3>
+        <input type="checkbox" id="watched_interfaces_enabled"></input><label for="watched_interfaces_enabled">Enable Watched Interfaces Utilization Dashboard</label><br><br>
+        Create watched-interfaces.csv file for the Watched Interfaces Utilization dashboard (see watched-interfaces.csv.sample), where
+        <table>
+            <tr>
+                <td>management_ip</td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td>is the management IP address of the device</td>
+            </tr>
+            <tr>
+                <td>if_name</td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td>is the name of the interface (received from SNMP polling)</td>
+            </tr>
+        </table>
+        <br>
+    </p>
+
+    <p>
+        <h3>Interface Groups</h3>
+        <input type="checkbox" id="interface_groups_enabled"></input><label for="interface_groups_enabled">Enable Interface Groups Dashboard</label><br><br>
+        Create interface-groups.csv file for the Interface Groups dashboard. Specify Interface groups to view the aggregated traffic for grouped interfaces (see interface-groups.csv.sample), where
+        <table>
+            <tr>
+                <td>management_ip</td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td>is the management IP address of the device</td>
+            </tr>
+            <tr>
+                <td>if_name</td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td>is the name of the interface (received from SNMP polling)</td>
+            </tr>
+            <tr>
+                <td>if_group</td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td>is the name of the group where the interface belongs</td>
+            </tr>
+        </table>
+        <br>
+    </p>
+    <br>
+    <input type="submit" value="Save" class="btn btn-primary submit"></input>&nbsp;&nbsp;<span id="saving_text"></span>
+</form>
+

@@ -1,0 +1,193 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Traffic by Autonomous Systems</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="direction" searchWhenChanged="false">
+            <label>Direction</label>
+            <default>In</default>
+            <choice value="src_as_full">In</choice>
+            <choice value="dest_as_full">Out</choice>
+        </input>
+        <input type="dropdown" token="ipv4_and_or_v6" searchWhenChanged="false">
+            <label>IPv4/IPv6</label>
+            <default>IPv4</default>
+            <choice value="ipv4">IPv4</choice>
+            <choice value="ipv6">IPv6</choice>
+            <choice value="both">Both</choice>
+        </input>
+        <input type="time" searchWhenChanged="false">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2">
+        <chart id="chart_1_1">
+            <title>Autonomous System Statistics</title>
+            <searchString>
+                `netflow_search_rule_20066` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | fillnull value=0 bytes bytes6
+                | `sampling(bytes)`
+                | `sampling(bytes6)`
+                | eval bytes_calculated=case(
+                    "$ipv4_and_or_v6$" == "ipv4" , bytes,
+                    "$ipv4_and_or_v6$" == "ipv6" , bytes6,
+                    "$ipv4_and_or_v6$" == "both" , (bytes+bytes6) )
+                | eval gb=bytes_calculated/1024/1024/1024
+                | lookup asn_lookup asn AS src_asn OUTPUT asname as src_asn_name
+                | lookup asn_lookup asn AS dest_asn OUTPUT asname as dest_asn_name
+                | strcat src_asn ": " src_asn_name src_as_full
+                | strcat dest_asn ": " dest_asn_name dest_as_full
+                | `get_exporter_name(exp_ip_name)`
+                | chart sum(gb) over $direction$ by exp_ip_name
+                | addtotals fieldname=Total *.*.*.*
+                | sort by -Total
+                | fields - Total
+                | rename $direction$ as "Autonomous System"
+                | head 20
+            </searchString>
+            <option name="charting.chart">bar</option>
+            <option name="charting.axisTitleX.text">Autonomous System</option>
+            <option name="charting.axisTitleY.text">GB</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_1_1">
+            <searchString>`netflow_search_rule_20066` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | fillnull value=0 bytes bytes6 packets packets6
+                | lookup asn_lookup asn AS src_asn OUTPUT asname as src_asn_name
+                | lookup asn_lookup asn AS dest_asn OUTPUT asname as dest_asn_name
+                | strcat src_asn ": " src_asn_name src_as_full
+                | strcat dest_asn ": " dest_asn_name dest_as_full
+                | `sampling(bytes)` 
+                | `sampling(bytes6)` 
+                | `sampling(packets)` 
+                | `sampling(packets6)` 
+                | `sampling(flow_count)`
+                | eval bytes_calculated=case(
+                    "$ipv4_and_or_v6$" == "ipv4" , bytes,
+                    "$ipv4_and_or_v6$" == "ipv6" , bytes6,
+                    "$ipv4_and_or_v6$" == "both" , (bytes+bytes6) )
+                | eval packets_calculated=case(
+                    "$ipv4_and_or_v6$" == "ipv4" , packets,
+                    "$ipv4_and_or_v6$" == "ipv6" , packets6,
+                    "$ipv4_and_or_v6$" == "both" , (packets+packets6) )
+                | stats sum(bytes_calculated) AS TrafficAmount 
+                    sum(packets_calculated) AS PacketsAmount 
+                    sum(flow_count) AS Connections 
+                    by exp_ip $direction$
+                | sort 0 - TrafficAmount 
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)`
+                | `average_speed(PacketsSpeed, PacketsAmount)`
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)`
+                | `get_exporter_name(exp_ip_name)`
+                | table $direction$ exp_ip_name Traffic Packets Connections
+                | rename exp_ip_name as "Device" 
+                | rename $direction$ as "Autonomous System" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"
+            </searchString>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row  grouping="2">
+        <chart id="chart_2_1">
+            <title>Autonomous System: $submitted:Autonomous System$</title>
+            <searchString>`netflow_search_rule_20066`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | fillnull value=0 bytes bytes6
+                | lookup asn_lookup asn AS src_asn OUTPUT asname as src_asn_name
+                | lookup asn_lookup asn AS dest_asn OUTPUT asname as dest_asn_name
+                | strcat src_asn ": " src_asn_name src_as_full
+                | strcat dest_asn ": " dest_asn_name dest_as_full
+                | search  $direction$="$Autonomous System$"
+                | `sampling(bytes)` 
+                | `sampling(bytes6)` 
+                | eval bytes_calculated=case(
+                    "$ipv4_and_or_v6$" == "ipv4" , bytes,
+                    "$ipv4_and_or_v6$" == "ipv6" , bytes6,
+                    "$ipv4_and_or_v6$" == "both" , (bytes+bytes6) )
+                | eval gb=bytes_calculated/1024/1024/1024
+                | `get_exporter_name(exp_ip_name)`
+                | timechart sum(gb) by exp_ip_name
+            </searchString>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">GB</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_2_1">
+            <searchString>`netflow_search_rule_20066`
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | fillnull value=0 bytes bytes6 packets packets6
+                | lookup asn_lookup asn AS src_asn OUTPUT asname as src_asn_name
+                | lookup asn_lookup asn AS dest_asn OUTPUT asname as dest_asn_name
+                | strcat src_asn ": " src_asn_name src_as_full
+                | strcat dest_asn ": " dest_asn_name dest_as_full
+                | search $direction$="$Autonomous System$"
+                | `sampling(bytes)` 
+                | `sampling(bytes6)` 
+                | `sampling(packets)` 
+                | `sampling(packets6)` 
+                | `sampling(flow_count)`
+                | eval bytes_calculated=case(
+                    "$ipv4_and_or_v6$" == "ipv4" , bytes,
+                    "$ipv4_and_or_v6$" == "ipv6" , bytes6,
+                    "$ipv4_and_or_v6$" == "both" , (bytes+bytes6) )
+                | eval packets_calculated=case(
+                    "$ipv4_and_or_v6$" == "ipv4" , packets,
+                    "$ipv4_and_or_v6$" == "ipv6" , packets6,
+                    "$ipv4_and_or_v6$" == "both" , (packets+packets6) )
+                | stats sum(bytes_calculated) AS TrafficAmount 
+                    sum(packets_calculated) AS PacketsAmount 
+                    sum(flow_count) AS Connections 
+                    by exp_ip $direction$
+                | sort 0 - TrafficAmount 
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)`
+                | `average_speed(PacketsSpeed, PacketsAmount)`
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)`
+                | `get_exporter_name(exp_ip_name)`
+                | table $direction$ exp_ip_name Traffic Packets Connections
+                | rename exp_ip_name as "Device" 
+                | rename $direction$ as "Autonomous System" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"
+            </searchString>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

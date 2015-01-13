@@ -1,0 +1,159 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>embedding HTML and including search results</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Embedding HTML and including values from your search results</h1>
+    ]]></param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="panel_row1_col1">
+    <param name="html"><![CDATA[
+    <p>
+      OK that's pretty cool but it gets better because the HTML module can also display field values from your search results. 
+    </p>
+    <p>
+      Say you have some search results and you want to write out the 'userName' field from the first row.  All you have to do is put this into your HTML module anywhere:<br>  
+      <br>
+      <b>$$results[0].userName$$</b>.<br>  
+      <br>
+      Here are some examples.
+    </p>
+    ]]></param>
+  </module>
+
+  <module name="Search" layoutPanel="panel_row2_col1" autoRun="True">
+    <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | head 1000 | stats sum(kb) as kb by series | sort - kb</param>
+    
+    <module name="HTML">
+      <param name="html"><![CDATA[
+        <h2>A simple example</h2>
+        We'll run this search<br>
+        $search$<br>
+        <br>
+        And then right here we print out the throughput value of the top sourcetype in KB: <br>
+        <br>
+        <b>$results[0].series$ ($results[0].kb$ KB)</b><br>
+        ]]></param>
+    </module>
+    
+    <module name="HTML" layoutPanel="panel_row3_col1">
+      <param name="html"><![CDATA[
+        
+        <p>
+          Say we want a table of the top 5. OK this is kind of a lame example because it's a lot better to use a Paginator module and a SimpleResultsTable module, but whatever. 
+        </p>
+
+        <table class="splTable">
+        <tr>
+          <th>Sourcetype</th>
+          <th>KB</th>
+        </tr>
+        <tr>
+          <td>$results[0].series$</td>
+          <td>$results[0].kb$ &nbsp;</td>
+        </tr>
+        <tr>
+          <td>$results[1].series$</td>
+          <td>$results[1].kb$  &nbsp;</td>
+        </tr>
+        <tr>
+          <td>$results[2].series$</td>
+          <td>$results[2].kb$ &nbsp;</td>
+        </tr>
+        <tr>
+          <td>$results[3].series$</td>
+          <td>$results[3].kb$ &nbsp;</td>
+        </tr>
+        <tr>
+          <td>$results[4].series$</td>
+          <td>$results[4].kb$ &nbsp;</td>
+        </tr>
+      </table>
+        ]]></param>
+    </module>
+
+  </module>
+
+  <!--  ******************************************************************* -->
+
+
+  <module name="HTML" layoutPanel="panel_row2_col2">
+    <param name="html"><![CDATA[
+      <h3>Notes</h3>
+      <ol class="notesList">
+        <li>
+          This really is cool.   
+        </li>
+        <li>
+          As a practical matter this means that there's not much reason to use the SingleValue module anymore which is good.  Two pages from now (counting by the "Next" button at the top right),  you'll see a view that shows you step by step how to replace SingleValue with HTML.
+        </li>
+        <li>
+          read the specification for the Sideview module <a href="/modules#Splunk.Module.HTML" target="_blank">HTML and its params</a>.
+        </li>
+        
+      </ol>
+      ]]></param>
+  </module>
+
+
+
+
+  
+  <module name="Search" layoutPanel="panel_row4_col1" autoRun="True">
+    <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | head 100000 | stats sum(kb) as kb by series | sort - kb</param>
+    
+    <module name="HTML">
+      <param name="html"><![CDATA[
+        <h2>Now a longer running search, with preview enabled</h2>
+        We'll run this search<br>
+        $search$<br>
+        <br>
+        And then right here we'll print out the throughput value of the top sourcetype in KB:<br>
+        <br>
+        
+        ]]></param>
+    </module>
+
+    <module name="SubmitButton">
+      <param name="label">Search</param>
+      
+      
+      <module name="EnablePreview">
+        <param name="enable">True</param>
+        <param name="display">False</param>
+      </module>
+      
+      <module name="HTML">
+        <param name="html"><![CDATA[
+          <b>$results[0].series$ ($results[0].kb$ KB)</b><br>
+          <br>
+          (btw, if you just want the resultCount and scanCount you can do that too)<br>
+          results.count = $results.count$<br>
+          results.eventCount = $results.eventCount$<br>
+          results.scanCount = $results.scanCount$<br>
+          results.eventAvailableCount = $results.eventAvailableCount$<br>
+          results.sid = $results.sid$<br>
+          
+          
+          ]]></param>
+      </module>
+
+      <module name="JobProgressIndicator" />
+
+    </module>
+  </module>
+
+
+</view>

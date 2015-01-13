@@ -1,0 +1,88 @@
+<form>
+    <label>SSL Activity</label>
+    <fieldset submitButton="false">
+        <input type="time" token="time">
+            <label>Time Range</label>
+            <default>
+                <earliestTime>-7d@h</earliestTime>
+                <latestTime>now</latestTime>
+            </default>
+        </input>
+    </fieldset>
+    <row>
+        <panel>
+            <chart>
+                <title>SSL Activity by Commonname/Domain</title>
+                <searchString>sourcetype=stream:tcp ssl_subject_common_name!=NULL | stats count by ssl_subject_common_name</searchString>
+                <earliestTime>$earliest$</earliestTime>
+                <latestTime>$latest$</latestTime>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleX.visibility">visible</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.axisY2.enabled">false</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart">pie</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">default</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">all</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.placement">right</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+            </chart>
+        </panel>
+        <panel>
+            <chart>
+                <title>Cloud Activity Visibility</title>
+                <searchString>sourcetype=stream:tcp| table  src_ip, ssl_subject_common_name,  ssl_issuer_organization,  ssl_validity_start,  ssl_validity_end, ssl_hash | search ssl_subject_common_name="*box.com" OR  ssl_subject_common_name="*google*" OR ssl_subject_common_name="*aws*" OR ssl_subject_common_name="*ymail*" OR  ssl_subject_common_name="*amazon*" |  chart count over src_ip by ssl_subject_common_name</searchString>
+                <earliestTime>$earliest$</earliestTime>
+                <latestTime>$latest$</latestTime>
+                <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+                <option name="charting.axisTitleX.visibility">visible</option>
+                <option name="charting.axisTitleY.visibility">visible</option>
+                <option name="charting.axisTitleY2.visibility">visible</option>
+                <option name="charting.axisX.scale">linear</option>
+                <option name="charting.axisY.scale">linear</option>
+                <option name="charting.axisY2.enabled">false</option>
+                <option name="charting.axisY2.scale">inherit</option>
+                <option name="charting.chart">column</option>
+                <option name="charting.chart.nullValueMode">gaps</option>
+                <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+                <option name="charting.chart.stackMode">default</option>
+                <option name="charting.chart.style">shiny</option>
+                <option name="charting.drilldown">all</option>
+                <option name="charting.layout.splitSeries">0</option>
+                <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+                <option name="charting.legend.placement">right</option>
+                <option name="charting.axisTitleY.text">Sessions</option>
+                <option name="charting.chart.bubbleMaximumSize">50</option>
+                <option name="charting.chart.bubbleMinimumSize">10</option>
+                <option name="charting.chart.bubbleSizeBy">area</option>
+            </chart>
+        </panel>
+    </row>
+    <row>
+        <panel>
+            <table>
+                <title>SSL Sessions</title>
+                <searchString>sourcetype=stream:tcp| table  src_ip, ssl_subject_common_name, ssl_subject_email, ssl_subject_organization, ssl_issuer_common_name, ssl_issuer_organization,  ssl_serial, ssl_validity_start,  ssl_validity_end,  ssl_hash | search ssl_subject_common_name!=NULL</searchString>
+                <earliestTime>$earliest$</earliestTime>
+                <latestTime>$latest$</latestTime>
+                <option name="wrap">true</option>
+                <option name="rowNumbers">false</option>
+                <option name="dataOverlayMode">none</option>
+                <option name="drilldown">cell</option>
+                <option name="count">15</option>
+            </table>
+        </panel>
+    </row>
+</form>

@@ -1,0 +1,77 @@
+<nav>
+    <collection label="NetFlow Logic">
+        <view name="overview" default="true"/>
+    </collection>
+    <collection label="Bandwidth by Hosts">
+        <view name="traffic_by_source"/>
+        <view name="traffic_by_destination"/>
+        <view name="traffic_by_application"/>
+        <view name="top_host_pairs"/>
+        <view name="traffic_by_subnets"/>
+        <view name="traffic_by_protocol"/>
+        <view name="connections_by_source"/>
+        <view name="connections_by_destination"/>
+        <view name="connections_by_application"/>
+        <view name="connections_by_protocol"/>
+        <collection label="Reports">
+            <view name="simple_top_talkers"/>
+            <view name="simple_top_listeners"/>
+            <view name="simple_top_host_pairs"/>
+        </collection>
+    </collection>
+    <collection label="Bandwidth by Network Devices">
+        <view name="devices_traf"/>
+        <view name="devices_packets"/>
+        <view name="interfaces_traffic"/>
+        <view name="watched_interfaces"/>
+        <view name="interface_groups"/>
+    </collection>
+    <collection label="Services">
+        <view name="serv_perf"/>
+    </collection>
+    <collection label="Security Events">
+        <view name="cyber_threat"/>
+        <view name="dns_monitor"/>
+    </collection>
+    <collection label="Supplemental Traffic Statistics">
+        <view name="geoip_monitor"/>
+        <view name="traffic_by_as"/>
+        <view name="traffic_by_qos"/>
+    </collection>
+    <collection label="Cisco ASA Monitor">
+        <view name="cisco_overview" />
+        <view name="cisco_top_bandwidth_consumers"/>
+        <view name="cisco_top_destinations"/>
+        <view name="cisco_top_violators"/>
+        <view name="cisco_top_connectors"/>
+    </collection>
+    <collection label="Palo Alto Networks">
+        <view name="palo_overview" />
+        <view name="palo_top_consumers" />
+        <view name="palo_top_destinations" />
+        <view name="palo_top_violators" />
+        <view name="palo_top_connectors" />
+        <view name="palo_top_apps" />
+        <view name="palo_top_apps_users" />
+        <collection label="Searches">
+            <view name="palo_search_consumers" />
+            <view name="palo_search_destinations" />
+            <view name="palo_search_violators" />
+            <view name="palo_search_connectors" />
+            <view name="palo_search_apps" />
+            <view name="palo_search_apps_users" />
+        </collection>
+    </collection>
+    <collection label="Search">
+        <a href="/app/netflow/flashtimeline?q=search%20`netflow_search_traffic_rules`">Traffic Timeline</a>
+        <a href="/app/netflow/flashtimeline?q=search%20`netflow_search_cisco_rules`">Cisco ASA Timeline</a>
+        <a href="/app/netflow/flashtimeline?q=search%20`netflow_search_palo_rules`">Palo Alto Networks Timeline</a>
+        <saved source="unclassified" />
+    </collection>
+    <collection label="Settings">
+        <a href="/manager/netflow/apps/local/netflow/setup?action=edit">Setup</a>
+        <view name="exporters_snmp_config"/>
+        <view name="configuration"/>
+    </collection>
+</nav>
+

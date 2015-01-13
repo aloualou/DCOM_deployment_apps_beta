@@ -1,0 +1,309 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js" stylesheet="inputs_layout.css">
+    <label>Network Traffic by CBQoS</label>
+    <fieldset autoRun="True">
+        <input type="dropdown" token="exp_group" searchWhenChanged="False">
+            <label>Device group</label>
+            <default>*</default>
+            <choice value="*">All devices</choice>
+            <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">
+                | `populate_exporter_group_list`
+            </populatingSearch>
+        </input>
+        <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+            <label>Device</label>
+            <default>*</default>
+            <choice value="*">All</choice>
+            <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">
+                `populate_exporter_list($exp_group$)`
+            </populatingSearch>
+        </input>
+        <input type="text" token="src_ip" searchWhenChanged="False">
+            <label>Source IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_ip" searchWhenChanged="False">
+            <label>Destination IP/mask</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="protocol_name" searchWhenChanged="False">
+            <label>Protocol</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="src_port" searchWhenChanged="False">
+            <label>Src. Port</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_port" searchWhenChanged="False">
+            <label>Dest. Port</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="src_dscp" searchWhenChanged="False">
+            <label>Src. DSCP</label>
+            <default>*</default>
+        </input>
+        <input type="text" token="dest_dscp" searchWhenChanged="False">
+            <label>Dest. DSCP</label>
+            <default>*</default>
+        </input>
+        <input type="time" searchWhenChanged="False">
+            <label>Time Range</label>
+            <default>Last 60 minutes</default>
+        </input>
+    </fieldset>
+    <row grouping="2,2">
+        <chart>
+            <title>Inbound Traffic</title>
+            <searchTemplate>
+                `netflow_search_rule_20065`
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal OUTPUT bitmap AS src_bitmap DSCP AS src_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group 
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$")
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | `sampling(bytes_in)` 
+                | strcat src_bitmap " (" src_dscp ")" qos_string 
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by qos_string)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_1_1">
+            <searchTemplate>                
+                `netflow_search_rule_20065`
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal OUTPUT bitmap AS src_bitmap DSCP AS src_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group 
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$")
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | strcat src_bitmap " (" src_dscp ")" qos_string 
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)` 
+                | stats sum(bytes_in) AS TrafficAmount 
+                        sum(packets_in) AS PacketsAmount 
+                        sum(flow_count) AS Connections 
+                        by exp_ip qos_string 
+                | sort 0 - TrafficAmount 
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)`
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name qos_string Traffic Packets Connections
+                | rename exp_ip_name as "Device" 
+                | rename qos_string as "Source Diff. Services" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">row</option>
+        </table>
+        <chart>
+            <title>Outbound Traffic</title>
+            <searchTemplate>
+                `netflow_search_rule_20065`
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval dest_decimal=floor((dest_tos)/4) 
+                | lookup diffserv_lookup decimal AS dest_decimal OUTPUT bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$")
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | `sampling(bytes_in)` 
+                | strcat dest_bitmap " (" dest_dscp ")" qos_string 
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by qos_string)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_1_2">
+            <searchTemplate>
+                `netflow_search_rule_20065`
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval dest_decimal=floor((dest_tos)/4) 
+                | lookup diffserv_lookup decimal AS dest_decimal OUTPUT bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$")
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | strcat dest_bitmap " (" dest_dscp ")" qos_string
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | stats sum(bytes_in) AS TrafficAmount 
+                        sum(packets_in) AS PacketsAmount 
+                        sum(flow_count) AS Connections 
+                        by exp_ip qos_string 
+                | sort 0 - TrafficAmount 
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)`
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name qos_string Traffic Packets Connections
+                | rename exp_ip_name as "Device" 
+                | rename qos_string as "Destination Diff. Services" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">row</option>
+        </table>
+    </row>
+    <row grouping="2,2">
+        <chart id="chart_2_1">
+            <title>CBQoS for $DeviceIn$</title>
+            <searchTemplate>
+                `netflow_search_rule_20067` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `get_exporter_name(exp_ip_name)`
+                | search exp_ip_name="$DeviceIn$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                               (dest_ip="$dest_ip$" OR dest_host="$dest_ip$") 
+                                               (src_port="$src_port$" AND dest_port="$dest_port$") 
+                                               (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                               (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | `sampling(bytes_in)`
+                | `format_ip_column(dest_ip,dest_ip,dest_host)`
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by dest_ip)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_2_1">
+            <searchTemplate>
+                `netflow_search_rule_20067` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `get_exporter_name(exp_ip_name)`
+                | search exp_ip_name="$DeviceIn$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                               (dest_ip="$dest_ip$" OR dest_host="$dest_ip$") 
+                                               (src_port="$src_port$" AND dest_port="$dest_port$") 
+                                               (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                               (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | `conversation` 
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+        <chart id="chart_2_2">
+            <title>CBQoS for $DeviceOut$</title>
+            <searchTemplate>
+                `netflow_search_rule_20067` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `get_exporter_name(exp_ip_name)`
+                | search exp_ip_name="$DeviceOut$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                                (dest_ip="$dest_ip$" OR dest_host="$dest_ip$") 
+                                                (src_port="$src_port$" dest_port="$dest_port$") 
+                                                (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                                (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$") 
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | `sampling(bytes_in)`
+                | `format_ip_column(src_ip,src_ip,src_host)`
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by src_ip)`
+            </searchTemplate>
+            <option name="charting.chart">area</option>
+            <option name="charting.chart.nullValueMode">zero</option>
+            <option name="charting.axisTitleX.text">Time</option>
+            <option name="charting.axisTitleY.text">Mbps</option>
+            <option name="charting.legend.placement">right</option>
+            <option name="charting.chart.stackMode">stacked</option>
+            <option name="charting.drilldown">none</option>
+            <option name="height">200px</option>
+        </chart>
+        <table id="table_2_2">
+            <searchTemplate>
+                `netflow_search_rule_20067` 
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | eval dest_decimal=floor((dest_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal output bitmap AS src_bitmap DSCP AS src_dscp 
+                | lookup diffserv_lookup decimal AS dest_decimal output bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `get_exporter_name(exp_ip_name)`
+                | search exp_ip_name="$DeviceOut$" (src_ip="$src_ip$" OR src_host="$src_ip$") 
+                                                (dest_ip="$dest_ip$" OR dest_host="$dest_ip$") 
+                                                (src_port="$src_port$" AND dest_port="$dest_port$") 
+                                                (src_bitmap="$src_dscp$" OR src_dscp="$src_dscp$") 
+                                                (dest_bitmap="$dest_dscp$" OR dest_dscp="$dest_dscp$")
+                | lookup protocol_lookup protocol AS protocol 
+                | search protocol_name="$protocol_name$"
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | `conversation` 
+            </searchTemplate>
+            <option name="count">10</option>
+            <option name="showPager">true</option>
+            <option name="drilldown">none</option>
+        </table>
+    </row>
+</form>

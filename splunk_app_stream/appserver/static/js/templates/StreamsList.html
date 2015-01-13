@@ -1,0 +1,64 @@
+<script id="streams-list-template" type="text/template">
+   
+    <!-- Header and controls -->
+    <div class="streams-list-header">
+
+        <h3 class="title">
+            Streams<br>
+            <span class="subtitle"> ► <%=category%> ► <%=categoryItem%> </span>
+        </h3>
+
+        <span id="totalSparklineContainer">
+            <span class="loadingMsg">Loading....</span>
+            <span id="totalSparklineTitleContainer">
+                <div id="totalSparklineTitle">Avg. Traffic(60s)</div>
+                <div id="avgTraffic"></div>
+            </span>
+            <span id="totalSparkline"></span>
+        </span>
+
+    </div>
+
+    <!-- Seach and Bulk Edit-->
+    <div class="stream-search">
+        <% if (!(category === 'application' && categoryItem !== 'Stream')) { %>
+            <div class="bulk-edit btn-combo">
+                <!--<button class="btn dropdown-toggle">Bulk Edit<span class="caret"></span></button>-->
+                <a class="dropdown-toggle btn-pill" href="#">Bulk Edit<span class="caret"></span></a>
+
+                <div class="dropdown-menu dropdown-menu-narrow streams-bulk-edit-menu">
+                    <div class="arrow"></div>
+                    <ul>
+                        <li><a href="#" id="bulkEnable">Enable</a></li>
+                        <li><a href="#" id="bulkDisable">Disable</a></li>
+                        <li><a href="#" id="bulkDelete">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+        <% } %>
+
+        <span>
+            <div class="main-page-search">
+                <input type="text" class="input-medium search-query" id="reg-stream-search" value="<%= searchString %>"/>
+                <a class="clear"><i class="icon-x-circle"></i></a>
+            </div>
+        </span>
+
+    </div>
+
+    <div class="panel-body">
+
+        <!-- Table -->
+        <table class="table table-chrome table-hover streams-list-table" id="config-page-streams-table">
+
+           <!-- ~~~~~~~~~~~~~~~~~~ -->
+
+           <!-- Template goes here -->
+
+           <!-- ~~~~~~~~~~~~~~~~~~ -->
+
+        </table>
+    </div>
+
+</script>
+

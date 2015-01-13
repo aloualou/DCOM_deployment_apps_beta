@@ -1,0 +1,28 @@
+<% 
+# Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved.
+%>
+<%page args="module"/>
+
+## if the label begins and ends with $, we do $foo$ substitution, 
+## straight from the URL
+<%def name="buildLabel(module)">\
+<%
+    staticLabel  = module["params"].get("label","")
+    # ugh the python here is terrible
+    if (staticLabel == "None" or staticLabel == u"None"): staticLabel=""
+%>
+
+%if len(staticLabel)>2 and staticLabel[0]=="$" and staticLabel[-1]=="$" :
+    <label for="${module['id']}_input">${cherrypy.request.params.get(staticLabel[1:-1],"") | h}</label>
+%elif (len(staticLabel)>0) :
+    <label for="${module['id']}_input">${staticLabel|h}</label>
+%endif
+
+</%def>\
+
+<%self:buildLabel module="${module}" />
+<input type="text" id="${module['id']}_input" value="${module['default']|h}" 
+    % if module.get("width",False): 
+        style="width:${module['width']|h}" 
+    % endif
+/>

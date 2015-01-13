@@ -1,0 +1,8 @@
+[]
+access = read : [ * ], write : [ admin ]
+
+[transforms/networkservice]
+export = system
+
+[lookups/service-names-port-numbers.csv]
+export = system

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+   <label>Performance of Hosts and VMs</label>
+   <module name="AccountBar" layoutPanel="appHeader" />
+   <module name="AppBar" layoutPanel="navigationHeader" />
+   <module name="Message" layoutPanel="messaging">
+      <param name="filter" />
+      <param name="clearOnJobDispatch">False</param>
+      <param name="maxSize">2</param>
+   </module>
+   <module name="TitleBar" layoutPanel="viewHeader">
+      <param name="actionsMenuFilter">dashboard</param>
+   </module>
+   <module name="SOLNCommon" layoutPanel="viewHeader" autoRun="true">
+   <module name="SOLNContent" layoutPanel="panel_row1_col1_footer">
+        <param name="content"><![CDATA[<div class="selectionList solnselector-container" style="clear:both;"> </div>]]></param>
+        <param name="style">clear:both;padding: 12px 10px 0 15px;</param>
+	</module>
+      <module name="HiddenSavedSearch">
+         <param name="savedSearch">SelectorHierarchy</param>
+         <module name="SOLNSelector" layoutPanel="panel_row1_col1">
+            <param name="varName">leftPerfTree</param>
+            <param name="idFields">host,moid</param>
+            <param name="pathFields">host,grandParentName,parentName</param>
+            <param name="limitSelectionCount">50</param>
+            <param name="varTemplate">(moid="$moid$" AND host="$host$")</param>
+            <param name="hostVm">HostSystem,VirtualMachine</param>
+            <param name="entityTypeVar">lEntityType</param>
+            <param name="entityLabelVar">lEntityLabel</param>
+            <param name="suggestionsLimit">10</param>
+            <module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+               <param name="content"><![CDATA[Selected $lEntityLabel$ Performance]]></param>
+               <param name="style">clear:both;</param>
+            </module>
+            <module name="SOLNContent" layoutPanel="panel_row1_col1">
+       			<param name="content"><![CDATA[<br/>]]></param>
+        		<param name="style">clear:both;</param>
+	  		</module>
+    	    <module name="SOLNSearch" layoutPanel="panel_row1_col1">
+              <!--> <param name="savedSearch"><![CDATA[d_host_vm_perf_perftype_$lEntityType$]]></param>-->
+              <param name="search"><![CDATA[ | inputlookup VMWPerformanceMetrics | eval ismatch= if((entity==lower(replace("$lEntityLabel$", " ", ""))), "Y", "N") | search ismatch="Y" |dedup perftype|  eval displayperftype=replace(perftype,"vmware:perf:","")| eval tsidxnamespace="vmw_perf_" + displayperftype + "_" +entity | table perftype, tsidxnamespace,displayperftype]]>
+              	
+              </param>
+               <module name="SOLNNullSwapper">
+                  <param name="search">|stats count | eval displayperftype="None_Found" | eval perftype="None_Found" | eval tsidxnamespace="None_Found"</param>
+                  <module name="SOLNDropdown">
+                     <param name="displayField">displayperftype</param>
+                     <param name="valueField">perftype,tsidxnamespace,displayperftype</param>
+                     <module name="SOLNSearch">
+                       <!--> <param name="savedSearch"><![CDATA[d_host_vm_perf_fields_$lEntityType$]]></param>-->
+                       <param name="search"><![CDATA[| inputlookup VMWPerformanceMetrics | eval ismatch= if((entity==lower(replace("$lEntityLabel$", " ", ""))), "Y", "N") | search ismatch="Y" perftype=$displayperftype.perftype$ | eval command=replace(metric,"_.*","") | eval command=case(command=="average","avg", command=="latest","first", command=="summation", "sum") | fillnull command value="avg" | eval field= "p_" + metric | rename metric as displayfield  | table displayfield field command]]>
+                       	</param>
+                        <module name="SOLNNullSwapper">
+                           <param name="search">|stats count | eval displayfield="None_Found" | eval field="None_Found" | eval command="avg"</param>
+                           <module name="SOLNDropdown">
+                              <param name="displayField">displayfield</param>
+                              <param name="valueField">field,command</param>
+                              <module name="TimeRangePicker" layoutPanel="panel_row1_col1">
+                                 <param name="default">Last 4 hours</param>
+                                 <module name="SOLNSavedSearchLookup">
+                                    <param name="savedSearch"><![CDATA[d_host_vm_perf_20s_$lEntityType$]]></param>
+                                    <module name="JobProgressIndicator"/>
+                                    <module name="HiddenChartFormatter">
+                                       <param name="chart">line</param>
+                                       <param name="charting.axisTitleX.text">Time</param>
+                                       <module name="JSChart">
+                                          <param name="width">100%</param>
+                                       </module>
+                                    </module>
+                                 </module>
+                          
+                              </module>
+                           </module>
+                        </module>
+                     </module>
+                  </module>
+               </module>
+            </module>
+            <!-- END SOLNSavedSearchLookup -->
+         </module>
+         <!-- END HiddenSearch -->
+      </module>
+      <!-- END left panels -->
+      <!-- Begin Right panels -->
+      <module name="SOLNContent" layoutPanel="panel_row2_col1_footer">
+       	<param name="content"><![CDATA[<div class="selectionList" style="clear:both;"> </div>]]></param>
+        <param name="style">clear:both;padding: 12px 10px 0 15px;</param>
+	  </module>
+      <module name="HiddenSavedSearch">
+         <param name="savedSearch">SelectorHierarchy</param>
+         <module name="SOLNSelector" layoutPanel="panel_row2_col1">
+            <param name="varName">selectedRightPerfTree</param>
+            <param name="idFields">host,moid</param>
+            <param name="pathFields">host,grandParentName,parentName</param>
+            <param name="limitSelectionCount">50</param>
+            <param name="varTemplate">(moid="$moid$" AND host="$host$")</param>
+            <param name="hostVm">HostSystem,VirtualMachine</param>
+            <param name="entityTypeVar">rEntityType</param>
+            <param name="entityLabelVar">rEntityLabel</param>
+            <module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+               <param name="content"><![CDATA[Selected $rEntityLabel$ Performance]]></param>
+               <param name="style">clear:both;</param>
+            </module>
+            <module name="SOLNContent" layoutPanel="panel_row2_col1">
+       			<param name="content"><![CDATA[<br/>]]></param>
+        		<param name="style">clear:both;</param>
+	  		</module>
+            <module name="SOLNSearch" layoutPanel="panel_row2_col1">
+               <param name="search"><![CDATA[ | inputlookup VMWPerformanceMetrics | eval ismatch= if((entity==lower(replace("$rEntityLabel$", " ", ""))), "Y", "N") | search ismatch="Y" |dedup perftype|  eval displayperftype=replace(perftype,"vmware:perf:","")| eval tsidxnamespace="vmw_perf_" + displayperftype + "_" +entity | table perftype, tsidxnamespace,displayperftype]]>
+              	
+              </param>
+               <module name="SOLNNullSwapper">
+                  <param name="search">|stats count | eval displayperftype="None_Found" | eval perftype="None_Found" | eval tsidxnamespace="None_Found"</param>
+                  <module name="SOLNDropdown">
+                     <param name="displayField">displayperftype</param>
+                     <param name="valueField">perftype,tsidxnamespace,displayperftype</param>
+                     <module name="SOLNSearch">
+                         <param name="search"><![CDATA[| inputlookup VMWPerformanceMetrics | eval ismatch= if((entity==lower(replace("$rEntityLabel$", " ", ""))), "Y", "N") | search ismatch="Y" perftype=$displayperftype.perftype$ | eval command=replace(metric,"_.*","") | eval command=case(command=="average","avg", command=="latest","first", command=="summation", "sum") | fillnull command value="avg" | eval field= "p_" + metric | rename metric as displayfield  | table displayfield field command]]>
+                       	</param>
+                        <module name="SOLNNullSwapper">
+                           <param name="search">|stats count | eval displayfield="None_Found" | eval field="None_Found" | eval command="avg"</param>
+                           <module name="SOLNDropdown">
+                              <param name="displayField">displayfield</param>
+                              <param name="valueField">field,command</param>
+                              <module name="TimeRangePicker" layoutPanel="panel_row2_col1">
+                                 <param name="default">Last 4 hours</param>
+                                 <module name="SOLNSavedSearchLookup">
+                                    <param name="savedSearch"><![CDATA[d_host_vm_perf_20s_$rEntityType$]]></param>
+                                    <module name="JobProgressIndicator" />
+                                    <module name="HiddenChartFormatter">
+                                       <param name="chart">line</param>
+                                       <param name="charting.axisTitleX.text">Time</param>
+                                       <module name="JSChart">
+                                          <param name="width">100%</param>
+                                       </module>
+                                    </module>
+                                 </module>
+                              </module>
+                           </module>
+                        </module>
+                     </module>
+                  </module>
+               </module>
+            </module>
+         </module>
+      </module>
+      <!-- END right panels -->
+   </module>
+   <!-- SOLNCommon -->
+</view>

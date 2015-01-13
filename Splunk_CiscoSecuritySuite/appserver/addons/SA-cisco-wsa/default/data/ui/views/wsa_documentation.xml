@@ -1,0 +1,145 @@
+<dashboard stylesheet="application.css">
+	<label>Cisco WSA Configuration</label>
+
+	<row>
+		<html>
+<h2>Steps to Configuring Cisco Security Suite for Web Security</h2>
+
+<p>Configuration of the Cisco Security Suite is a multi-step process:</p>
+
+<ol>
+<li>Decide on a Log Reception Methodology</li>
+<li>Set up a Log Receiver Host</li>
+<li>Configure the Logging Settings in your Cisco WSA</li>
+<li>Set up a Role to read the Cisco WSA Logs</li>
+<li>Configure the Cisco WSA Result Code Extraction</li>
+<li>Configure the Cisco WSA Usage Lookup</li>
+</ol>
+
+<p>Please walk through the instructions below in order to properly configured the Cisco WSA reporting.  These
+instructions assume you have basic knowledge of how to commit configuration changes to your Cisco WSA appliances.
+If you do not know how to do that, then please refer to your Cisco WSA ASyncOS manual, most notably Chapter
+24, which talks about Logging.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Decide on a Log Reception Methodology</h3>
+
+<p>The Cisco Security Suite Web Security section primarily deals with the Access Logs.  These logs may be transmitted
+to a Splunk Instance via scp push, ftp push or syslog.  For the best combination of security and performance of your proxy, 
+Cisco recommends utilizing scp.  For near-real-time performance, Splunk recommends a 5-minute or less transfer time.  
+If you actually need real-time analysis of the Cisco WSA logs, you must choose syslog as a delivery mechanism.  Note,
+however, that syslog is considered unreliable and not all data may make it to Splunk, especially in high load 
+scenarios.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Set up a Log Receiver Host</h3>
+
+<p>Ideally, you should set up an independent host.  If using syslog, this host may run any operating system for 
+which Splunk has a Universal Forwarder.  If you are using scp or ftp transfers, then you should be running a Linux
+system with plenty of storage for logs.</p>
+
+<p>Splunk does NOT recommend using one of the Splunk indexer or search head hosts except in Proof of Concept or 
+extremely low load scenarios.  The device may be virtualized, however.</p>
+
+<p>Once you have a log receiver host, ensure you install the latest Splunk 6 Universal Forwarder on that host.
+In addition, you will need to configure a log reader in inputs.conf for the host.  For an scp or ftp transfer,
+use a monitor stanza.  For example, if you had arranged for your logs to be delivered to a host-specific directory 
+under /var/log/cisco-wsa (so that the logs are actually stored as /var/log/cisco-wsa/HOST/*.log), then you might
+use the following:</p>
+
+<pre>
+[monitor:///var/log/cisco-wsa/*/*.log]
+host_segment = 4
+source = cisco:wsa
+sourcetype = cisco:wsa:squid
+disabled = false
+</pre>
+
+<p>If you are utilizing TCP-based syslog, then you might use the following (where A.B.C.D is the IP
+address of your Cisco WSA appliance and HOST is the hostname to assign to the Cisco WSA appliance):</p>
+
+<pre>
+[tcp://A.B.C.D:514]
+host = HOST
+source = cisco:wsa
+sourcetype = cisco:wsa:squid
+disabled = false
+</pre>
+
+<p>Please make note of the TCP port that you utilize (in this case, 514) and ensure no software-based 
+firewalls are blocking connections.  Note that syslog messages are truncated to 1024 characters which 
+may cause problems in properly recording all the information needed.  We DO NOT RECOMMEND syslog push.</p>
+
+<p>If you wish the logs to go to an index other than main, add an index parameter to the inputs.conf
+stanza.  Ensure the index is created on your indexing tier before you continue.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Configuring Logging on your Cisco WSA</h3>
+
+<ul>
+<li>Log onto your Cisco WSA as an Administrator</li>
+<li>Navigate to System Administration -&gt; Log Subscriptions</li>
+<li>Click on "Add Log Subscription".</li>
+<li>Select Squid from the Log Type field.</li>
+<li>Enter "Splunk" in the log Name field.</li>
+<li>In Custom Fields, enter the following: <code>%u %&lt;Referer: %k %g %XF %q</code></li>
+<li>Enter a suitable name for the log file in the File Name field</li>
+<li>Enter a maximum size in bytes ( or use G for Gigabytes, M for Megabytes, K for kilobytes)</li>
+<li>Choose whether or not to compress log files (this has implications for the monitor stanza above)</li>
+<li>Choose a method - FTP on Remote Server, SCP on Remote Server or Syslog Push</li>
+<li>Enter the information specific for the method you are using.</li>
+<li>Submit and commit any changes.</li>
+</ul>
+
+<p>If you select SCP push, then the appliance displays an SSH key that you must place on the log receiver
+to receive logs.</p>
+
+<p>At this point, your Splunk instance should be receiving access log entries.  Use the search console to
+verify this before continuing.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Set up a Role to read the Cisco WSA logs</h3>
+
+<p>If you have configured Splunk to store the access logs in an alternate index, then you will need to ensure
+that users can find the logs by default.  To do this, you must create a new role. For more information on this
+subject, please see the <a href="http://docs.splunk.com/Documentation/Splunk/6.0.1/Security/SetupuserauthenticationwithSplunk">Splunk Security Manual</a>.</p>
+
+<h3 style="color:#29688A;font-weight:bold">Configure the Cisco WSA Result Code Extraction</h3>
+
+<p>The Cisco WSA Result Code can be a different format than what is configured by default.  The format we have
+defined is shown in Chapter 24 of the Cisco WSA ASyncOS for Web User Guide.  If yours differs, then you will
+need to adjust the extraction.</p>
+
+<ul>
+<li>Log onto your Splunk Search Head via the web interface as an Administrator</li>
+<li>Navigate to Settings -&gt; All Configurations.</li>
+<li>Select the Cisco Web Security Appliance (TA-cisco-wsa) app</li>
+<li>Check the box labeled "Show only objects created in this app context</li>
+<li>Click on cisco-wsa-scanverdict</li>
+<li>Alter the definition to match your specific output</li>
+<li>Click on Save</li>
+</ul>
+
+<p>In some cases, the cisco-wsa-scanverdict won't be seen.  In this case:</p>
+
+<ul>
+<li>Log onto your Splunk Search Head as a user who can edit files</li>
+<li>Go to $SPLUNK_HOME/etc/apps/TA-cisco-wsa</li>
+<li>Make a new directory called "local"</li>
+<li>Copy default/transforms.conf to local/transforms.conf</li>
+<li>Edit the local/transforms.conf and alter the FIELDS list for cisco-wsa-scanverdict</li>
+<li>Save the local/transforms.conf file, then restart the server</li>
+</ul>
+
+<h3 style="color:#29688A;font-weight:bold">Configure the Cisco WSA Usage Lookup</h3>
+
+<p>The Cisco WSA Usage Lookup defines whether each category is treated as Business, Personal, Legal Liability 
+or Other.  You can add any custom categories to this file and change the definitions as follows:</p>
+
+<ul>
+<li>Log onto your Splunk Search Head as a user who can edit files</li>
+<li>Go to $SPLUNK_HOME/etc/apps/AA-cisco-wsa/lookups</li>
+<li>Edit the file cisco_wsa_usage.csv with your favorite editor</li>
+</ul>
+
+<p>Since this file is overwritten on upgrade, take a copy of the updated file and place it somewhere safe.</p>
+
+		</html>
+	</row>
+</dashboard>

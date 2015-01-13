@@ -1,0 +1,5 @@
+management_ip,snmp_index,if_name,if_speed
+1.2.3.4,1,FastEthernet/0,100
+1.2.3.4,2,FastEthernet/1,100
+5.6.7.8,1,Interface 1,1000
+5.6.7.8,2,Interface 2,1000

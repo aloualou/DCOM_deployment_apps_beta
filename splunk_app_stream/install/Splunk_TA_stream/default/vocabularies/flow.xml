@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CmConfig xmlns="http://purl.org/cloudmeter/config" version="6.1.1">
+	<Vocabulary id="flow">
+		<Name>Flow</Name>
+		<Comment>Vocabulary for describing netflow events.</Comment>
+		<Locked>true</Locked>
+		<Term id="flow.tcp-event">
+			<Type>object</Type>
+			<Comment>Event for a TCP flow</Comment>
+		</Term>
+		<Term id="flow.udp-event">
+			<Type>object</Type>
+			<Comment>Event for a UDP flow</Comment>
+		</Term>
+		<Term id="flow.c-ip">
+			<Type>shortstring</Type>
+			<Comment>IP address of the client in dot-quad notation</Comment>
+		</Term>
+		<Term id="flow.s-ip">
+			<Type>shortstring</Type>
+			<Comment>IP address of the server in dot-quad notation</Comment>
+		</Term>
+		<Term id="flow.c-mac">
+			<Type>shortstring</Type>
+			<Comment>Client packets MAC address in hexadecimal format</Comment>
+		</Term>
+		<Term id="flow.s-mac">
+			<Type>shortstring</Type>
+			<Comment>Server packets MAC address in hexadecimal format</Comment>
+		</Term>
+		<Term id="flow.cs-packets">
+			<Type>uint32</Type>
+			<Comment>The total number of packets sent from client to server</Comment>
+		</Term>
+		<Term id="flow.sc-packets">
+			<Type>uint32</Type>
+			<Comment>The total number of packets sent from server to client</Comment>
+		</Term>
+		<Term id="flow.cs-ack-packets">
+			<Type>uint32</Type>
+			<Comment>The number of acknowledgement packets sent from client to server</Comment>
+		</Term>
+		<Term id="flow.sc-ack-packets">
+			<Type>uint32</Type>
+			<Comment>The number of acknowledgement packets sent from server to client</Comment>
+		</Term>
+		<Term id="flow.cs-missing-packets">
+			<Type>uint32</Type>
+			<Comment>The number of missing packet gaps detected within the request</Comment>
+		</Term>
+		<Term id="flow.sc-missing-packets">
+			<Type>uint32</Type>
+			<Comment>The number of missing packet gaps detected within the response</Comment>
+		</Term>
+		<Term id="flow.cs-duplicate-packets">
+			<Type>uint32</Type>
+			<Comment>The number of duplicate packets sent from client to server</Comment>
+		</Term>
+		<Term id="flow.sc-duplicate-packets">
+			<Type>uint32</Type>
+			<Comment>The number of duplicate packets sent from server to client</Comment>
+		</Term>
+		<Term id="flow.cs-data-packets">
+			<Type>uint32</Type>
+			<Comment>The number of data packets sent from client to server</Comment>
+		</Term>
+		<Term id="flow.sc-data-packets">
+			<Type>uint32</Type>
+			<Comment>The number of data packets sent from server to client</Comment>
+		</Term>
+		<Term id="flow.cs-bytes">
+			<Type>uint64</Type>
+			<Comment>The number of bytes sent from client to server</Comment>
+		</Term>
+		<Term id="flow.sc-bytes">
+			<Type>uint64</Type>
+			<Comment>The number of bytes sent from server to client</Comment>
+		</Term>
+		<Term id="flow.bytes">
+			<Type>uint64</Type>
+			<Comment>The total number of bytes transferred</Comment>
+		</Term>
+		<Term id="flow.c-port">
+			<Type>uint16</Type>
+			<Comment>Client port number</Comment>
+		</Term>
+		<Term id="flow.s-port">
+			<Type>uint16</Type>
+			<Comment>Server port number</Comment>
+		</Term>
+		<Term id="flow.time-taken">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds that it took to complete a flow event, from the end user's perspective</Comment>
+		</Term>
+		<Term id="flow.cs-content">
+			<Type>blob</Type>
+			<Comment>Payload content sent from client to server</Comment>
+		</Term>
+		<Term id="flow.sc-content">
+			<Type>zblob</Type>
+			<Comment>Payload content sent from server to client</Comment>
+		</Term>
+		<Term id="flow.cs-send-time">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds that it took the client to send a request</Comment>
+		</Term>
+		<Term id="flow.cs-ack-time">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds that it took the server to acknowledge receipt of the request</Comment>
+		</Term>
+		<Term id="flow.sc-reply-time">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds that it took the server to start replying to a request</Comment>
+		</Term>
+		<Term id="flow.sc-send-time">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds that it took the server to send a response</Comment>
+		</Term>
+		<Term id="flow.sc-ack-time">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds that it took the client to acknowledge receipt of the response</Comment>
+		</Term>
+		<Term id="flow.ssl-time">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds that it took to negotiate an SSL handshake</Comment>
+		</Term>
+		<Term id="flow.ssl-version">
+			<Type>shortstring</Type>
+			<Comment>SSL protocol version used for encryption, or undefined if not encrypted</Comment>
+		</Term>
+		<Term id="flow.data-center-time">
+			<Type>uint32</Type>
+			<Comment>Number of microseconds from the last request packet to the last response packet</Comment>
+		</Term>
+		<Term id="flow.cp-rtt">
+			<Type>uint32</Type>
+			<Comment>Average round trip time in microseconds from the client to the Pion server</Comment>
+		</Term>
+		<Term id="flow.ps-rtt">
+			<Type>uint32</Type>
+			<Comment>Average round trip time in microseconds from the Pion server to the protocol server</Comment>
+		</Term>
+		<Term id="flow.cp-rtt-sum">
+			<Type>uint64</Type>
+			<Comment>Sum of all round trip time measurements from the client to the Pion server</Comment>
+		</Term>
+		<Term id="flow.ps-rtt-sum">
+			<Type>uint64</Type>
+			<Comment>Sum of all round trip time measurements from the Pion server to the protocol server</Comment>
+		</Term>
+		<Term id="flow.cp-rtt-packets">
+			<Type>uint32</Type>
+			<Comment>Number of round trip time measurements from the client to the Pion server</Comment>
+		</Term>
+		<Term id="flow.ps-rtt-packets">
+			<Type>uint32</Type>
+			<Comment>Number of round trip time measurements from the Pion server to the protocol server</Comment>
+		</Term>
+		<Term id="flow.refused">
+			<Type>uint32</Type>
+			<Comment>Number of requests that were refused by the server</Comment>
+		</Term>
+		<Term id="flow.canceled">
+			<Type>uint32</Type>
+			<Comment>Number of HTTP responses that were canceled early by the client</Comment>
+		</Term>
+		<Term id="flow.connection">
+			<Type>shortstring</Type>
+			<Comment>TPC session server endpoint (IP address and TCP port)</Comment>
+		</Term>
+		<Term id="flow.request-status">
+			<Type>uint8</Type>
+			<Comment>HTTP request status (0=NONE, 1=TRUNCATED, 2=PARTIAL, 3=OK)</Comment>
+		</Term>
+		<Term id="flow.response-status">
+			<Type>uint8</Type>
+			<Comment>HTTP response status (0=NONE, 1=TRUNCATED, 2=PARTIAL, 3=OK)</Comment>
+		</Term>
+		<Term id="flow.tcp-status">
+			<Type>uint8</Type>
+			<Comment>TCP handshake status (0=OK, 1=RESET, 2=IGNORED)</Comment>
+		</Term>
+		<Term id="flow.protocol">
+			<Type>shortstring</Type>
+			<Comment>Level 7 protocol name (http, ftp, etc.)</Comment>
+		</Term>
+		<Term id="flow.transport">
+			<Type>shortstring</Type>
+			<Comment>Transport layer protocol (udp or tcp)</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-md5">
+			<Type>shortstring</Type>
+			<Comment>md5 of SSL certificate</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-subject">
+			<Type>shortstring</Type>
+			<Comment>Subject in SSL certificate</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-issuer">
+			<Type>shortstring</Type>
+			<Comment>Issuer in SSL certificate</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-serialnumber">
+			<Type>shortstring</Type>
+			<Comment>Serial number of SSL certificate</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-validity-not-after">
+			<Type>shortstring</Type>
+			<Comment>SSL certifiate's validity end date</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-validity-not-before">
+			<Type>shortstring</Type>
+			<Comment>SSL certifiate's validity start date</Comment>
+		</Term>
+		<Term id="flow.ssl-session-id">
+			<Type>shortstring</Type>
+			<Comment>SSL session id</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-signature-algorithm">
+			<Type>shortstring</Type>
+			<Comment>Signature algorithm in SSL certificate</Comment>
+		</Term>
+		<Term id="flow.ssl-cert-public-key-algorithm">
+			<Type>shortstring</Type>
+			<Comment>Public key algorithm in SSL certificate</Comment>
+		</Term>
+	</Vocabulary>
+</CmConfig>

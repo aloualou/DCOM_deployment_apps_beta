@@ -1,0 +1,134 @@
+{
+  "app": "Stream", 
+  "category": "Infrastructure", 
+  "enabled": false, 
+  "extras": {
+    "eventType": "amqp.event"
+  }, 
+  "fields": [
+    {
+      "aggType": "value", 
+      "desc": "Major version of the protocol", 
+      "enabled": true, 
+      "name": "major_version", 
+      "term": "amqp.major-version"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Command launched", 
+      "enabled": true, 
+      "name": "method", 
+      "term": "amqp.method"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Minor version of the protocol", 
+      "enabled": true, 
+      "name": "minor_version", 
+      "term": "amqp.minor-version"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Server response time (microseconds)", 
+      "enabled": true, 
+      "name": "response_time", 
+      "term": "amqp.response-time"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The total number of bytes transferred", 
+      "enabled": true, 
+      "name": "bytes", 
+      "term": "flow.bytes"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Client IP Address", 
+      "enabled": true, 
+      "name": "src_ip", 
+      "term": "flow.c-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Client packets MAC address in hexadecimal format", 
+      "enabled": true, 
+      "name": "src_mac", 
+      "term": "flow.c-mac"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Client port number", 
+      "enabled": true, 
+      "name": "src_port", 
+      "term": "flow.c-port"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The number of bytes sent from client to server", 
+      "enabled": true, 
+      "name": "bytes_in", 
+      "term": "flow.cs-bytes"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The total number of packets sent from client to server", 
+      "enabled": false, 
+      "name": "packets_in", 
+      "term": "flow.cs-packets"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Server IP Address", 
+      "enabled": true, 
+      "name": "dest_ip", 
+      "term": "flow.s-ip"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Server packets MAC address in hexadecimal format", 
+      "enabled": true, 
+      "name": "dest_mac", 
+      "term": "flow.s-mac"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Server port number", 
+      "enabled": true, 
+      "name": "dest_port", 
+      "term": "flow.s-port"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The number of bytes sent from server to client", 
+      "enabled": true, 
+      "name": "bytes_out", 
+      "term": "flow.sc-bytes"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "The total number of packets sent from server to client", 
+      "enabled": false, 
+      "name": "packets_out", 
+      "term": "flow.sc-packets"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Number of microseconds that it took to complete a flow event, from the end user's perspective", 
+      "enabled": true, 
+      "name": "time_taken", 
+      "term": "flow.time-taken"
+    }, 
+    {
+      "aggType": "value", 
+      "desc": "Transport level protocol", 
+      "enabled": true, 
+      "name": "transport", 
+      "term": "flow.transport"
+    }
+  ], 
+  "id": "amqp", 
+  "locked": true, 
+  "name": "AMQP Protocol Events", 
+  "sourcetype": "stream:amqp", 
+  "streamType": "event"
+}

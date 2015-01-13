@@ -1,0 +1,27 @@
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<div style="overflow:hidden; margin: 5px; min-width: 850px;">
+	<div style="float:right; padding:15px; margin: 5px; background-color:#EEEEEE; border: 1px solid #A9A9A9; width: 250px; -moz-border-radius: 5px; -webkit-border-radius: 5px; border-radius:5px;">
+		<h2>Have a question, bug report, or feedback <br />about this app?</h2>
+		<p style="margin-top:10px; margin-bottom:13px; padding-bottom:10px;">
+		${_('Ask a question on <strong><a href="%s">Splunk Answers</a></strong>.') % ( make_url('http://answers.splunk.com/questions/ask?tags=app-vmware-splunk') ) }
+		</p>
+	</div>
+	<div style="float: left; overflow:hidden; ">
+		<div style="float: left; margin-right: 20px; width: 600px;">
+			The Time Health page helps administrators confirm that all machines in the solution have the same time.<br/><br/>
+			Timekeeping events are sent from vCenter server, ESX/i hosts, and Forwarder Appliances.
+			There are two timestamps on a timekeeping event: one of which is the local time on a host
+			that the event is sent from, and the other is the local time on the indexer that the event is indexed on.<br/>
+			When a host and the indexer have the same time the difference between the two timestamps should be small.<br/>
+			HostTime is a duplicate of the time, if there is a delta between the time of the event and the host time, then splunk has automatically adjusted the time.  This could mean that MAX_DAYS_AGO and MAX_DAYS_HENCE have adjusted the timestamp.  It is bad for this field to differ from the event time.
+			The difference is defined as "Acceptable" when it falls between 0 - 2 minutes and that the time has not been adjusted by splunkd.  The time is the time of the last event received.<br/>
+			The time displayed is the time of the last event.</br></br>
+			The second and third tables display the time statuses for different hosts.  It displays the last and first timestamps received from the host (Timestamp.Of.Last.Event and Timestamp.Of.First.Event, respectively), the current time, and a field called Recent.Time.  Recent.Time can mean different things depending on what version of splunk you're using.  In Splunk 4.1, Recent.Time is the most recent timestamp of the event seen from the host.  In Splunk 4.2 and 4.3, Recent.Time is the latest time for which the indexer received the host's event.  These fields are used to calculate two additional fields:</br></br>
+			Seconds.Reported.Ago - The number of seconds between Current.Time and Recent.Time.  This can be useful in
+			diagnosing whether or not a host has stopped reporting</br></br>
+			Time.Delta.In.Seconds:  This is the delta between the Recent.Time and the Timestamp.Of.Last.Event.  This can be
+			useful in diagnosing how far off the specified machine is from the indexer.  Large numbers are usually bad, as it indicates that
+			the events received from this source may not show up in searches (especially events in "the future")</br>
+		</div>
+	</div>
+</div>

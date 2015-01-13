@@ -1,0 +1,1 @@
+This directory holds the built, minified versions of main js files for pages.

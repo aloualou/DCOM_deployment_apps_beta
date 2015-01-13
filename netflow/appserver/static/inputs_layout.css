@@ -1,0 +1,32 @@
+.splunk-choice-input {
+    padding-bottom: 0px !important;
+}
+
+.fieldset .input {
+    width: auto !important;
+}
+
+#field3 input[type="text"], #field4 input[type="text"] {
+    margin-right: 0px !important;
+    margin-left: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 1em !important;
+    width: 135px !important;
+}
+
+input[type="text"] {
+    margin-right: 0px !important;
+    margin-left: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 1em !important;
+    width: 50px !important;
+}
+
+.select2-container, .splunk-timerange { 
+    margin-right: 0px !important;
+    margin-left: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 1em !important;
+    min-width: 160px !important;
+    width: 160px !important;
+}

@@ -1,0 +1,5 @@
+management_ip,if_name,if_group
+192.168.63.63,Interface #1,GROUP I
+192.168.63.63,Interface #2,GROUP J
+192.168.63.64,Interface #1,GROUP I
+192.168.63.64,Interface #2,GROUP J

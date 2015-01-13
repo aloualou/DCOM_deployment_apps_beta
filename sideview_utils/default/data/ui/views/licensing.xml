@@ -1,0 +1,79 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>licensing</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Licensing</h1>
+    ]]></param>
+  </module>
+
+
+  <module name="HTML" layoutPanel="panel_row1_col1">
+    <param name="html"><![CDATA[
+      
+      <h3>Is this the latest version?</h3>
+      <p>
+        No. As of this writing the latest version is 2.0.9 and it is available from the <a href="http://sideviewapps.com">Sideview site</a>.  Note that the licensing on Sideview Utils 2.0 is different from what you are used to in these old 1.3 versions.   Whereas 1.X was available for free under the Lesser Gnu Public License,  Sideview Utils 2.0.9 is available for free under the "Sideview Internal Use License Agreement".  To upgrade the app, go to the following URL <a href="http://sideviewapps.com/apps/sideview-utils/">http://sideviewapps.com/apps/sideview-utils/</a> and click "Download Full Version (Internal Use Only)".  After you accept the license agreement you'll be emailed a single-use link to download a tar.gz of the app. 
+      </p>
+      <p>
+        Note of course that if you cannot accept the restrictions in the Sideview Internal Use License Agreement then you cannot download the app.  If that's the case though, all is not lost. <a href="http://sideviewapps.com/contact">Contact us to get details about our OEM agreement</a> which is designed to give leeway in key areas of Splunk app development and app distribution. 
+      </p>
+
+      <h3>Say I don't upgrade to 2.0. Do I have to pay attention to licensing?</h3>
+
+      <p>
+        Yes you do. If you downloaded this app from Splunkbase then your use is under the <a href="http://www.opensource.org/licenses/lgpl-3.0.html">Gnu Lesser General Public License</a>. If you are a Sideview consulting customer then check our consulting agreement as some of the older agreements extended licenses around use and distribution of Sideview Utils.  If neither of these apply and you are interested in buying a license that allows you to develop and distribute a Splunk app built using Sideview Utils, <a href="mailto:sales@sideviewapps.com">contact us</a>. As far as using the LGPL version, in short if you do not modify this app in any way and you do not incorporate it into anything proprietary, then you can do whatever you like with it.  Make sure to read the <a href="http://www.opensource.org/licenses/lgpl-3.0.html">LGPL</a> for yourself though. 
+      </p>
+      <p>
+        Note that in general, adding or changing files in the app's "local" directory is not considered a modification but just a configuration change. However, removing the app from the Apps list by setting is_visible=false in app.conf, or taking any steps to make Sideview Utils invisible to the end user <b>is</b> considered equivalent to incorporating Sideview's modules inside your app.  Note that if you do these things various license restrictions around things like modification and incorporation would then apply.
+      </p>
+
+      <h3>What about when I want to modify it? </h3>
+      <p>
+        If you make modifications to this app you have to publicly provide the modified source code under the LGPL or GPL.  
+      </p>
+
+      <h3>What about the example XML and sample Javascript</h3>
+      <p>
+        All XML files that are included as example views plus all sample code that is explicitly included in the documentation are completely free for use in any way you see fit. These items are not licensed under the LGPL despite being contained in the app download. There are no restrictions of any kind on copying or using those examples and samples. 
+      </p>
+
+      <h3>Is the LGPL the only kind of license available</h3>
+      <p>
+        No. Since Sideview is the only contributor to Sideview Utils and the project has never incorporated any open source code, the LGPL version is actually a straight fork of the 'real' project, and Sideview is free to license that project commercially to third parties.  Yes this is quite unusual. 
+      </p>
+
+      <h3>What if I dont want my users to have to install it separately from Splunkbase. For example I want to bundle just the Sideview modules inside my proprietary app? </h3>
+      <p>
+        Sure. Contact me for a commercial license, or you can be come a Sideview customer and during the course of the consulting work that I do for you we can integrate a fork of sideview_utils into your stuff (under the license that you get from my Master Services Agreement).  <a href="mailto:sales@sideviewapps.com">contact us</a>
+      </p>
+      <p>
+        Or if that doesnt sound good you can take the LGPL version of the app from splunkbase and modify it or embed it etc. Except then you would have to distribute the entire source of your app under the LGPL as well.  
+      </p>
+      <p>
+        Summing up,  if you DONT want to either a) make the source of your app publically available, or b) buy a commercial license,  then no I'm sorry you cannot really modify or incorporate any of this.   Your app can still depend on Sideview Utils but make sure to think about the ramifications carefully and get legal advice.
+      </p>
+
+      <h3>Need more information?</h3>
+      <p>
+        You can <a href="http://www.opensource.org/licenses/lgpl-3.0.html">read the LGPL v3</a>, and by all means <a href="http://sideviewapps.com/contact">contact Sideview if you have any questions</a>.
+      </p>
+    ]]></param>
+  </module>
+
+
+  
+
+
+</view>

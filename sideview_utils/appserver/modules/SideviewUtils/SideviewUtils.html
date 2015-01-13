@@ -1,0 +1,355 @@
+<% 
+# Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved.
+%>
+
+<%
+import splunk.appserver.mrsparkle.lib.times as times
+timeRangeStanzas  = times.getTimeRanges(namespace=APP['id'])
+timesJson = []
+for t in timeRangeStanzas:
+    item = {}
+    if "is_sub_menu" in t:
+        continue
+    for k in t :
+        if k in ("label", "header_label"):
+            item[k] = _(t[k])
+        elif k in ("earliest_time", "latest_time") :
+            item[k] = t[k]
+    timesJson.append(item)
+%>
+
+<%call expr="lib.add_script_block()">
+    Splunk.Module.loadParams.${module['id']}.customTimeRanges = ${jsonify(timesJson)};
+</%call>
+<%page args="module"/>
+<%namespace name="lib" file="//lib.html" import="*"/>
+
+<!--[if IE]>
+<style type="text/css">
+div.Pulldown select {
+    height:auto;
+</style>
+<![endif]-->
+
+
+<%call expr="lib.add_script_block()">
+/**
+ * patching SearchBar so that it can follow new Sideview conventions.
+ */
+if (Splunk.Module.SearchBar) {
+    Splunk.Module.SearchBar = $.klass(Splunk.Module.SearchBar, {
+        getModifiedContext: function($super) {
+            var modCon = $super();
+            var value = this._getUserEnteredSearch();
+            value = Splunk.util.stripLeadingSearchCommand(value);
+            modCon.set("searchBar.value", value);
+            modCon.set("searchBar", value);
+            return modCon;
+        },
+        setToContextValue: function(context) {
+            var value = context.get("searchBar") || context.get("searchBar.value");
+            if (!value) {
+                var search  = context.get("search");
+                if (search.hasIntentions()) {
+                    var errorMessage = "Sideview is neither designed nor tested to work with Splunk's intentions system. An intention was detected upstream from " + this.moduleType + ". UI Behavior may be unexpected.";
+                    try {console.error(errorMessage);} 
+                    catch(e) {this.logger.error(errorMessage);}
+                    search.absorbIntentions(function(newQ) {
+                        this.setInputField(Splunk.util.stripLeadingSearchCommand(newQ));
+                    }.bind(this));
+                } else {
+                    value = search.toString();
+                }
+            }
+            if (value=="*") value="";
+            this.setInputField(value);
+            if (this.resize) this.resize._resizeSearchBar();
+        },
+        onContextChange: function() {
+            this.setToContextValue(this.getContext());
+        },
+        updateURL: function() {
+            var context = this.getContext();
+            if (context.has("sideview.onEditableStateChange")) {
+                var callback = context.get("sideview.onEditableStateChange");
+                var searchStr = this._getUserEnteredSearch();
+                searchStr = Splunk.util.stripLeadingSearchCommand(searchStr);
+                callback("searchBar", searchStr, this);
+            }
+        },
+        _onFormSubmit: function($super) {
+            this.updateURL();
+            return $super();
+        },
+        applyContext: function(context) {
+            var search = context.get("search");
+            var stopPropagation = false;
+            if (search._intentions.length == 1) {
+                var name = search._intentions[0]["name"];
+                if (name != "addterm" && name != "negateterm") return false;
+                if (name=="addterm") {
+                    search._intentions[0]["name"] = "toggleterm";
+                }
+                var thisSearchStr = Splunk.util.trim(this._getUserEnteredSearch()) || "*";
+                search.setBaseSearch(thisSearchStr);
+                context.set("search", search);
+                search.clone().absorbIntentions(function(str) {
+                    this.setInputField(Splunk.util.stripLeadingSearchCommand(str));
+                    this.updateURL();
+                    this.pushContextToChildren();
+                    
+                }.bind(this));
+                return true;
+            }
+            return false;
+        }
+    });
+}
+
+/**
+ * patching TimeRangePicker so it too will output some nice generic tokens
+ */
+if (Splunk.Module.TimeRangePicker) {
+    Splunk.Module.TimeRangePicker = $.klass(Splunk.Module.TimeRangePicker, {
+        getModifiedContext: function($super) {
+            var modCon = $super();
+            Sideview.utils.setStandardTimeRangeKeys(modCon);
+            return modCon;
+        },
+        clearURLLoader: function(context) {
+            context = context || this.getContext();
+            // only do this once 
+            if (!this.hasClearedURLLoader && context.has("sideview.onSelectionSuccess")) {
+                var callback = context.get("sideview.onSelectionSuccess");
+                callback("search.timeRange.earliest", this);
+                callback("search.timeRange.latest", this);
+                this.hasClearedURLLoader = true;
+                // this module is a mess; default and selected params are both
+                // unreliable.
+                this.initialSelection = this._activator.text();
+            }
+        },
+
+        onContextChange: function() {
+            var context = this.getContext();
+            this.setToContextValue(context);
+            this.clearURLLoader(context);
+        },
+
+        setToContextValue: function(context) {
+            var earliest = context.get("search.timeRange.earliest");
+            var latest   = context.get("search.timeRange.latest");
+            var range    = new Splunk.TimeRange(earliest,latest);
+            // needed or else 'selected' is broken because it always selects 'all time' in the first push
+            if (range.isAllTime()) return;
+
+            var earliest = range.getEarliestTimeTerms() || null;
+            var latest   = range.getLatestTimeTerms()   || null;
+            // walk through all our existing options and if there's a match, select it.
+            var moduleInstance = this;
+            var foundAMatch = false;
+            var self = this;
+            this._menu.getMenu().find('.timeRangePreset a').each(function(){
+                var thisEarliest = $(this).attr(self.EARLIEST_TIME_ATTR) || null;
+                var thisLatest   = $(this).attr(self.LATEST_TIME_ATTR)   || null;
+                var thisRange = new Splunk.TimeRange(thisEarliest, thisLatest);
+                
+                if (range.equalToRange(thisRange)) {
+                    moduleInstance._activator.text($(this).text())
+                    moduleInstance._datePickerMode = false;
+                    moduleInstance._selectedRange = range;
+                    foundAMatch = true;
+                    // this return is within an each(), so it's more like a break.
+                    return true;
+                }
+            });
+            if (foundAMatch) {
+                return;
+            }
+            else {
+                // create a new OPTION element, insert it, and select it
+                this._insertNewMenuItem(range);
+                return;
+            }
+        },
+        
+        updateURL: function() {
+            // TRP is a bit of a mess; its property is only set *during* GMC.
+            var context = this.getModifiedContext();
+            if (context.has("sideview.onEditableStateChange")) {
+                var callback = context.get("sideview.onEditableStateChange");
+                callback("search.timeRange", this._selectedRange, this);
+            }
+        },
+        _onMenuClick: function($super,evt) {
+            var retVal = $super(evt);
+            this.updateURL();
+            return retVal;
+        },
+        renderResults: function($super,xmlDoc) {
+            var retVal = $super(xmlDoc);
+            if (this._selectedRange) this.updateURL();
+            return retVal;
+        },
+
+        /* relies on the assumption that _applyCustomDateTime is only ever 
+           called in _applyCustomDateTime */
+        _applyCustomDateTime: function($super) {
+            var retVal = $super();
+            if (retVal && this._selectedRange) this.updateURL();
+            return retVal;
+        },
+        resetToDefault: function() {
+            var selected = this.initialSelection;
+            if (!selected) {
+                this._activator.text(this.ALL_TIME_LABEL);
+                return false;
+            }
+            var m = this;
+            this._menu.getMenu().find(".timeRangePreset a").each(function() {
+                var thisText = m._getRawLabel($(this).text()).toLowerCase();
+                if (thisText == selected.toLowerCase()) {
+                    m._setSelectedRangeToPreset($(this));
+                    m._activator.text($(this).text());
+                    return false;
+                }
+            });
+        }
+
+    });
+}
+
+/**
+ * Patch FlashChart, because it calls getContext onConnect, which generally 
+ * happens before the page has finished loading.  These getContext calls 
+ * cascade back upstream and cause horrible race conditions and stale cache 
+ * bugs.  The framework over the years has been given all kinds of 
+ * stale-cache-detection by Nate and myself, and then by myself again at the 
+ * Sideview Utils layer.  (See URLLoader, see pseudoPush in TextField, etc.)
+ * Yet by the numbers the biggest source of these bugs, is the dang calls to 
+ * getContext that happen within onConnect.
+ * see inline comments for more detail.
+ */
+if (Splunk.Module.FlashChart) {
+    Splunk.Module.FlashChart = $.klass(Splunk.Module.FlashChart, {
+        onConnect: function() {
+            Splunk.Legend.register(this.bridge.id());
+            Splunk.Legend.addEventListener("setLabels", this.legend_onSetLabels);
+            Splunk.Legend.addEventListener("labelIndexMapChanged", this.legend_onLabelIndexMapChanged);
+            this.bridge.addEventListener('chartClicked', this.onChartClicked.bind(this));
+            this.bridge.addEventListener('legendClicked', this.onLegendClicked.bind(this));
+            
+            this._isBridgeConnected = true;
+            this.setPresentation();
+
+            /**
+             * onConnect should not call onContextChange if the page is loading.
+             * 1) if we're connecting when the page is loaded and we have fresh 
+             *    context data, but onContextChange has never been called yet, 
+             *    then everything will be fine; the call to onContextChange 
+             *    will be made by the framework when the push gets here. 
+             * 2) if we're connecting when the contexts are fresh, but our 
+             *    onContextChange was called earlier when swf was asleep, 
+             *    then all is well - isPageLoadComplete() will
+             *    return true, and this will indeed trigger onContextChange. 
+             * 3) if the SWF has connected before the 
+             *    framework has pushed correct context data, then an 
+             *    onContextChange call here would ONLY DO HARM.
+             */
+            if (this.isPageLoadComplete()) this.onContextChange();
+
+            this.bridge.addEventListener('updated', this.onDataUpdated.bind(this));
+            this.bridge.addEventListener("openAsImage", this.onOpenAsImage.bind(this));
+            this.setBridgeProperty("enableOpenAsImage", !jQuery.browser.msie);//ie does not support uri data scheme.
+            this.setBridgeProperty("timeZone", Splunk.util.getConfigValue('SERVER_ZONEINFO'));
+            /** 
+             * this is a mess, in that I'm not sure why we need to call occ 
+             * above, then tweak some listeners and properties, then call another 
+             * explicit update().   However at the least, it is NOT safe to do so
+             * if the page is still loading. (see above.)
+             */
+            if (this.isPageLoadComplete()) this.update();
+
+            this.swfLoadMonitor.loadComplete();
+            if (this._enableDrilldown) {
+                this.setBridgeProperty("enableChartClick", true);
+                this.setBridgeProperty("enableLegendClick", true);
+            }
+        }
+    });
+}
+
+
+        
+
+
+/**
+ * Patch the SimpleResultsTable module to provide ALL of the values in the 
+ * given row when it supplies drilldown information to downstream modules. 
+ * Also patching to escape backslashes in cell values and column names.
+ */
+if (Splunk.Module.SimpleResultsTable) {
+    Splunk.Module.SimpleResultsTable = $.klass(Splunk.Module.SimpleResultsTable, {
+        getSelectionState: function($super, evt) {
+            var selection = $super(evt);
+            var context = this.getContext();
+            // if the user clicks the first column, the name2,value2 keys are
+            // nothing but trouble for downstream logic. lose em.
+            if (selection.name==selection.name2) {
+                delete selection["name2"];
+                delete selection["value2"];
+            }
+            var legacyKeys = ["name","value","name2","value2"];
+            var key, rawKey;
+            for (var i=0,len=legacyKeys.length;i<len;i++) {
+                key = legacyKeys[i];
+                rawKey = "raw" + key.charAt(0).toUpperCase() + key.slice(1);
+                if (selection.hasOwnProperty(key)) {
+                    selection[rawKey] = selection[key];
+                    selection[key] = Sideview.utils.escapeBackslashes(selection[key]);
+                }
+            }
+            var el = $(evt.target);
+            
+            var tdNodes = $(el.parents("tr")[0]).find("td:not('.pos')");
+            var moduleReference = this;
+            var compensator = (Splunk.util.normalizeBoolean(context.get("results.displayRowNumbers")))?1:0;
+            
+            var name,value,escapedName,escapedValue;
+            tdNodes.each(function(i) { 
+                name  = moduleReference.getColumnName(i+compensator,el);
+                value = $(this).text();
+                escapedName  = Sideview.utils.escapeBackslashes(name);
+                escapedValue = Sideview.utils.escapeBackslashes(value);
+                selection["cell" + i + ".name"]  = escapedName;
+                selection["cell" + i + ".value"] = escapedValue;
+                selection["cell" + i + ".rawValue"] = value;
+                selection["fields." + name] = escapedValue;
+                selection["fields." + name + ".rawValue"] = value;
+                if (name=="_time" && $(this).attr("starttime")) {
+                    selection["fields." + name + ".epochTime"] = $(this).attr("starttime");
+                }
+            });
+            
+            return selection;
+        },
+        // patches a bug whereby ctrl-click only pops up new windows 
+        // in ViewRedirector and Redirector when drilldownPrefix happens to 
+        // be 'click'.
+        getModifiedContext : function($super) {
+            var modCon = $super();
+            if (this._selection) {
+                modCon.set("click.modifierKey", this._selection.modifierKey);
+                modCon.set("results.upstreamPager", null);
+            }
+            return modCon;
+        },
+        onLoadStatusChange: function($super, statusInt) {
+            $super(statusInt);
+            if (!this.isPageLoadComplete()) {
+                this.hideDescendants(this.DRILLDOWN_VISIBILITY_KEY + "_" + this.moduleId);
+            }
+        }
+    });
+}
+</%call>

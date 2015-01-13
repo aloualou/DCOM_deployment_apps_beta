@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="dashboard.html">
+	<label>Virtual Machine Detail</label>
+	<module name="AccountBar" layoutPanel="appHeader"/>
+	<module name="AppBar" layoutPanel="navigationHeader"/>
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="viewHeader">
+	</module>
+	<module name="TimeRangePicker" layoutPanel="mainSearchControls" autoRun="True">
+		<param name="searchWhenChanged">True</param>
+		<param name="selected">Last 4 hours</param>
+		<!-- SHARED MENU SELECTION ITEMS -->
+		<module name="SOLNSearch" layoutPanel="mainSearchControls">
+			<param name="search">
+				| inputlookup FullHierarchy | `HandleNavTimerange` | eval perftype="splunk_internal" | inputlookup append=t VMInstanceList | eventstats dc(perftype) as dc_pt by meid | search (type=VirtualMachine AND dc_pt > 1) OR (type!=VirtualMachine)
+			</param>
+			<module name="SOLNNullSwapper">
+				<param name="search">|stats count | fillnull value="None_Found" Cluster,Datacenter,HostSystem,clustermeid,current,datacentermeid,dc_pt,endTime,host,hostsystemmeid,info_max_time,info_min_time,info_search_time,info_sid,instanceUuid,isvc,meid,moid,name,perftype,startTime,type,uuid,vc | eval type="VirtualCenter,HostSystem,VirtualMachine,ClusterComputeResource" | makemv delim="," type | mvexpand type | fields - count</param>
+				<module name="SOLNPostProcess">
+					<param name="search">
+						<![CDATA[
+						| search type=VirtualCenter | rex field=meid "(?<meidprefix>[^:]+)" | eval vcval="meid=\""+meidprefix+":*\"" | dedup meid | rename name as vcname| sort str(vcname)
+						]]>
+					</param>
+					<module name="SOLNDropdown">
+						<param name="displayField">vcname</param>
+						<param name="valueField">vcval</param>
+						<param name="staticItem">All, *;Unmanaged,vc=unmanaged OR NOT vc=*</param>
+						<module name="SOLNPostProcess">
+							<param name="search">
+								| search $vcname.vcval$ type=VirtualMachine Cluster!="N/A" | dedup clustermeid | eval clusterval="clustermeid=" + clustermeid | rename Cluster as clustername | sort str(clustername)  | head 200
+							</param>
+							<module name="SOLNDropdown">
+								<param name="displayField">clustername</param>
+								<param name="valueField">clusterval</param>
+								<param name="staticItem">All,clustermeid=*</param>
+								<module name="SOLNPostProcess">
+									<param name="search">
+										| search $vcname.vcval$ $clustername.clusterval$ type=VirtualMachine HostSystem=* | dedup hostsystemmeid | eval esxval="hostsystemmeid=" + hostsystemmeid | rename HostSystem as esxname | sort str(esxname) | head 200
+									</param>
+									<module name="SOLNDropdown">
+										<param name="displayField">esxname</param>
+										<param name="valueField">esxval</param>
+										<module name="SOLNPostProcess">
+											<param name="search">
+												|search type=VirtualMachine $vcname.vcval$ $clustername.clusterval$ $esxname.esxval$ | dedup meid | eval vmval=meid | rename name as vmname | sort str(vmname) | head 1000
+											</param>
+											<module name="SOLNDropdown">
+												<param name="displayField">vmname</param>
+												<param name="valueField">vmval</param>
+												<!-- END MENU SELECTION ITEMS -->
+												<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+													<param name="search">
+														index=summary_vmware source="SummaryVirtMachinePerfByMEIDInstance15Min" perftype=cpu meid=$vmname.vmval$ | timechart span=15m sum(SumRdy_ms) as SumRdy_ms by name
+													</param>
+													<module name="HiddenChartFormatter">
+														<param name="charting.chart.showMarkers">false</param>
+														<param name="chart">line</param>
+														<param name="charting.axisTitleX.text">Time</param>
+														<module name="FlashChart">
+															<param name="width">100%</param>
+															<param name="height">360px</param>
+														</module>
+													</module>
+												</module> <!-- End SOLNSearch (perf data) -->
+											</module><!-- End SOLNDropdown (Virtual Machine)-->
+										</module><!-- End SOLNPostProcess (VM) -->
+									</module><!-- End SOLNDropdown (hostsystem) -->
+								</module><!-- End SOLNPostProcess (hostsystem) -->
+							</module> <!-- End SOLNDropdown (cluster) -->
+						</module><!-- End SOLNPostProcess (cluster) -->
+					</module> <!-- End SOLNDropdown (VC)-->
+				</module><!-- END SOLNPostProcess VC -->
+			</module><!-- End Null Swapper -->
+		</module><!-- End Search -->
+	</module>	<!-- End TimeRangepicker -->
+</view>

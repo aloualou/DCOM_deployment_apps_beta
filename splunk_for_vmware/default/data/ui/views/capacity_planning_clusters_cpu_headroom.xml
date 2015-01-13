@@ -1,0 +1,207 @@
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved. -->
+<view autoCancelInterval="120" isVisible="true" onunloadCancelJobs="false" template="splunk_for_vmware:/templates/dashboard.html">
+	<label>Capacity Planning for Clusters - CPU Headroom</label>
+	<module name="AccountBar" layoutPanel="appHeader" />
+	<module name="AppBar" layoutPanel="navigationHeader" />
+	<module name="Message" layoutPanel="messaging">
+		<param name="filter"></param>
+		<param name="clearOnJobDispatch">False</param>
+		<param name="maxSize">2</param>
+	</module>
+	<module name="TitleBar" layoutPanel="viewHeader">
+		<param name="actionsMenuFilter">dashboard</param>
+	</module>
+	<module name="SOLNCommon" layoutPanel="mainSearchControls" autoRun="True">
+		<module name="TimeRangePicker">
+			<param name="default">Last 24 hours</param>
+			<param name="searchWhenChanged">True</param>
+			<module name="SOLNSearch">
+				<param name="search">
+					<![CDATA[
+					| loadjob savedsearch="admin:SA-VMW-HierarchyInventory:CurrentHierarchy" | search (type="HostSystem" AND uiparentType="ClusterComputeResource") OR type="ClusterComputeResource" | eval uiparent=if(type=="ClusterComputeResource", moid, uiparent) | eventstats dc(moid) as members by uiparent, host | search type="ClusterComputeResource" | dedup moid, host | `SetHandleInfoMaxTimeNow` | lookup TimeClusterServicesAvailability host, moid as uiparent OUTPUT p_average_clusterServices_effectivecpu_megaHertz | eval hasHosts=if(members<2,"False","True") | eval hasClusterServices=if(p_average_clusterServices_effectivecpu_megaHertz=="noClusterServices","False","True") | eval hostCount=(members-1) | fields host moid name hostCount hasHosts hasClusterServices p_average_clusterServices_effectivecpu_megaHertz
+					]]>
+				</param>
+				<module name="SOLNNullSwapper">
+					<param name="search">|stats count| eval moid="None_Found" | eval host="None_Found" | eval cluster="None_Found" | eval hasHosts="True" | eval hasClusterServices="True"</param>
+					<module name="SOLNPostProcess" layoutPanel="viewHeader">
+						<param name="search">
+							<![CDATA[
+							| search hasHosts="False" OR hasClusterServices="False" | dedup host moid | stats count as numExcluded
+							]]>
+						</param>
+						<module name="SOLNResultsLoader">
+							<module name="SOLNContent" layoutPanel="viewHeader">
+								<param name="useTemplate">False</param>
+								<param name="content">
+									<![CDATA[
+									<p>
+									Clusters excluded due to lack of services or hosts:<a href="flashtimeline/?q=%7C%20loadjob%20savedsearch%3D%22admin%3ASA-VMW-HierarchyInventory%3ACurrentHierarchy%22%20%7C%20search%20(type%3D%22HostSystem%22%20AND%20uiparentType%3D%22ClusterComputeResource%22)%20OR%20type%3D%22ClusterComputeResource%22%20%7C%20eval%20uiparent%3Dif(type%3D%3D%22ClusterComputeResource%22%2C%20moid%2C%20uiparent)%20%7C%20eventstats%20dc(moid)%20as%20members%20by%20uiparent%2C%20host%20%7C%20search%20type%3D%22ClusterComputeResource%22%20%7C%20dedup%20moid%2C%20host%20%7C%20addinfo%20%7C%20eval%20_time%3Dinfo_max_time%20%7C%20lookup%20TimeClusterServicesAvailability%20host%2C%20moid%20as%20uiparent%20OUTPUT%20p_average_clusterServices_effectivecpu_megaHertz%20%7C%20eval%20hasHosts%3Dif(members%3C2%2C%22False%22%2C%22True%22)%20%7C%20eval%20hasClusterServices%3Dif(p_average_clusterServices_effectivecpu_megaHertz%3D%3D%22noClusterServices%22%2C%22False%22%2C%22True%22)%20%7C%20eval%20hostCount%3D(members-1)%20%7C%20fields%20host%20moid%20name%20hostCount%20hasHosts%20hasClusterServices%20p_average_clusterServices_effectivecpu_megaHertz&earliest=$search.earliest$&latest=$search.latest$"> $results[0].numExcluded$ </a>
+									</p>
+									]]>
+								</param>
+							</module>
+						</module>
+					</module>
+					<module name="SOLNPostProcess">
+						<param name="search"><![CDATA[
+							| search hasHosts="True" hasClusterServices="True" | sort str(name)
+						]]></param>
+						<module name="SOLNDropdown">
+							<param name="varName">headcluster</param>
+							<param name="label">Cluster:</param>
+							<param name="displayField">name</param>
+							<param name="valueField">moid,name,host</param>
+							<module name="SubmitButton">
+								<module name="SOLNPostProcess">
+									<param name="search">
+										<![CDATA[
+										| search moid="$headcluster$" host="$name.host$" | rename hostCount as num_hosts | eval SafeEffCpu_MHz=floor(p_average_clusterServices_effectivecpu_megaHertz*((num_hosts-1)/num_hosts)) | eval p_average_clusterServices_effectivecpu_megaHertz=floor(p_average_clusterServices_effectivecpu_megaHertz) | fields SafeEffCpu_MHz p_average_clusterServices_effectivecpu_megaHertz num_hosts
+										]]>
+									</param>
+									<module name="SOLNResultsLoader">
+										<module name="SOLNSearch" layoutPanel="panel_row1_col1">
+											<param name="search">
+												<![CDATA[
+												| `tstats` avg(p_average_cpu_usagemhz_megaHertz) avg(p_maximum_cpu_usagemhz_megaHertz) avg(p_minimum_cpu_usagemhz_megaHertz) avg(p_none_cpu_usagemhz_megaHertz) dc(moid) first(ccr) first(host) from vmw_perf_cpu_virtualmachine where * instance="aggregated" ccr="$name.moid$" host=$name.host$ groupby _time span=1m | timechart minspan=1m avg(p_average_cpu_usagemhz_megaHertz) as avg_usagemhz_megaHertz, avg(p_maximum_cpu_usagemhz_megaHertz) as max_usagemhz_megaHertz, avg(p_minimum_cpu_usagemhz_megaHertz) as min_usagemhz_megaHertz, avg(p_none_cpu_usagemhz_megaHertz) as none_usagemhz_megaHertz dc(moid) as num_vms first(ccr) as moid first(host) as host | lookup TimeClusterServicesAvailability host, moid OUTPUT p_average_clusterServices_effectivecpu_megaHertz | eval AvgCpuPerVM_mhz=coalesce(avg_usagemhz_megaHertz,max_usagemhz_megaHertz,min_usagemhz_megaHertz,none_usagemhz_megaHertz) | eval TotUsg_mhz=AvgCpuPerVM_mhz*num_vms | eval AvgCpuUsg_pct=TotUsg_mhz/p_average_clusterServices_effectivecpu_megaHertz | eval name="$name.name$" |  table _time host moid name num_vms AvgCpuPerVM_mhz TotUsg_mhz AvgCpuUsg_pct
+												]]>
+											</param>
+											<module name="JobProgressIndicator"></module>
+											<module name="SOLNNullSwapper" layoutPanel="panel_row1_col1">
+												<param name="useSOLNSub">true</param>
+												<param name="search">
+													<![CDATA[
+													 | stats count | eval name="$name.name$" | eval moid="$name.moid$" | eval host="$name.host$" | eval num_vms="Unknown" | eval AvgCpuPerVM_mhz="Unknown" | eval TotUsg_mhz="Unknown" | eval AvgCpuUsg_pct="Unknown"| eval num_vms="Not Available" | eval actual_num_vms="Not Available" | eval cpu_per_vm="Not Available"| eval potential_vm_count="Not Available" |  eval additional_vms="Not Available" | `SetHandleInfoMaxTimeNow` | table _time moid name num_vms AvgCpuPerVM_mhz TotUsg_mhz  AvgCpuUsg_pct cpu_per_vm additional_vms potential_vm_count actual_num_vms
+													]]>
+												</param>
+												<module name="SOLNResultsLoader">
+												<module name="SOLNPostProcess" layoutPanel="panel_row1_col1">
+													<param name="search">
+														<![CDATA[
+														| stats max(num_vms) as num_vms avg(AvgCpuPerVM_mhz) as cpu_per_vm | eval actual_num_vms=floor(num_vms) | eval cpu_per_vm=if(cpu_per_vm<100,100,cpu_per_vm) | eval potential_vm_count=floor($results[0].SafeEffCpu_MHz$/cpu_per_vm) | eval additional_vms=potential_vm_count-actual_num_vms
+														]]>
+													</param>
+													<module name="SOLNNullSwapper">
+														<param name="search">
+															<![CDATA[ |stats count | eval num_vms="Not Available" | eval cpu_per_vm="Not Available" | eval actual_num_vms="Not Available" | eval cpu_per_vm="Not Available"| eval potential_vm_count="Not Available" |  eval additional_vms="Not Available"]]>
+														</param>
+														<module name="SOLNResultsLoader">
+															<module name="SOLNContent" layoutPanel="panel_row1_col1_header">
+																<param name="content">
+																	<![CDATA[
+																	Capacity statistics for $name.name$ $search.timerange$
+																	]]>
+																</param>
+															</module>
+															<module name="JobProgressIndicator" layoutPanel="panel_row1_col1"></module>
+															<module name="SOLNContent" layoutPanel="panel_row1_col1">
+																<param name="defaultTokenValue">Waiting for data...</param>
+																<param name="content">
+																<![CDATA[
+																<table class="splTable">
+																<tr>
+																<td>Hosts in Cluster</td>
+																<td>$results[0].num_hosts$</param>
+																</tr>
+																<tr>
+																<td>Powered on VM's</td>
+																<td>$results[0].actual_num_vms$</param>
+																</tr>
+																<tr>
+																<td>Average usage (MHz) per VM</td>
+																<td>$results[0].cpu_per_vm$</param>
+																</tr>
+																<tr>
+																<td>Total MHz available in cluster</td>
+																<td>$results[0].p_average_clusterServices_effectivecpu_megaHertz$</param>
+																</tr>
+																<tr>
+																<td>Estimated number of VM's that can be added</td>
+																<td>$results[0].additional_vms$</param>
+																</tr>
+																</tr>
+																</table>
+																]]>
+																</param>
+															</module>
+														</module>
+													</module>
+													</module>
+												</module>
+												<module name="SOLNPostProcess" layoutPanel="panel_row2_col1">
+													<param name="search">
+														<![CDATA[
+														| eval SafeUsage=$results[0].SafeEffCpu_MHz$ | eval TotalCapacity=$results[0].p_average_clusterServices_effectivecpu_megaHertz$ | timechart minspan=1m avg(TotalCapacity) as "Total Capacity" avg(SafeUsage) as "Safe Usage" avg(TotUsg_mhz) as "Current Usage"
+														]]>
+													</param>
+													<module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+														<param name="content">
+															<![CDATA[
+															Currently used MHz and Total Capacity over time $search.timerange$
+															]]>
+														</param>
+													</module>
+													<module name="JobProgressIndicator"></module>
+													<module name="HiddenChartFormatter">
+														<param name="charting.chart">line</param>
+														<param name="primaryAxisTitle.text">Time</param>
+														<param name="secondaryAxisTitle.text">CPU Usage (MHz)</param>
+														<module name="JSChart"></module>
+													</module><!-- End Module HiddenChartFormatter -->
+													<module name="ViewRedirectorLink">
+														<param name="viewTarget">flashtimeline</param>
+													</module>
+												</module> <!-- End Search Module -->
+											</module>
+										</module><!-- End Search Swapper -->
+										<module name="SOLNSearch" layoutPanel="panel_row1_col2">
+											<param name="search">
+												<![CDATA[
+												| `tstats` avg(p_average_cpu_usagemhz_megaHertz) avg(p_maximum_cpu_usagemhz_megaHertz) avg(p_minimum_cpu_usagemhz_megaHertz) avg(p_none_cpu_usagemhz_megaHertz) max(p_average_cpu_usagemhz_megaHertz) as max_avg_usagemhz_megaHertz, max(p_maximum_cpu_usagemhz_megaHertz) as max_max_usagemhz_megaHertz, max(p_minimum_cpu_usagemhz_megaHertz) as max_min_usagemhz_megaHertz, max(p_none_cpu_usagemhz_megaHertz) as max_none_usagemhz_megaHertz first(ccr) first(host) from vmw_perf_cpu_virtualmachine where * instance="aggregated" ccr="$name.moid$" host="$name.host$" groupby moid host | stats avg(p_average_cpu_usagemhz_megaHertz) as avg_avg_usagemhz_megaHertz, avg(p_maximum_cpu_usagemhz_megaHertz) as avg_max_usagemhz_megaHertz, avg(p_minimum_cpu_usagemhz_megaHertz) as avg_min_usagemhz_megaHertz, avg(p_none_cpu_usagemhz_megaHertz) as avg_none_usagemhz_megaHertz max(p_average_cpu_usagemhz_megaHertz) as max_avg_usagemhz_megaHertz, max(p_maximum_cpu_usagemhz_megaHertz) as max_max_usagemhz_megaHertz, max(p_minimum_cpu_usagemhz_megaHertz) as max_min_usagemhz_megaHertz, max(p_none_cpu_usagemhz_megaHertz) as max_none_usagemhz_megaHertz first(ccr) as ccr by moid host | eval AvgUsg_mhz=coalesce(avg_avg_usagemhz_megaHertz,avg_max_usagemhz_megaHertz,avg_min_usagemhz_megaHertz,avg_none_usagemhz_megaHertz) | eval MaxUsg_mhz=coalesce(max_avg_usagemhz_megaHertz,max_max_usagemhz_megaHertz,max_min_usagemhz_megaHertz,max_none_usagemhz_megaHertz) | `SetHandleInfoMaxTimeNow` | lookup FullHierarchy host moid OUTPUT name as VirtualMachine | rename moid as HIDE-VirtualMachine-moid host as HIDE-host | table HIDE-host HIDE-VirtualMachine-moid VirtualMachine AvgUsg_mhz MaxUsg_mhz
+												]]>
+											</param>
+											<module name="SOLNPostProcess">
+												<param name="search"></param>
+												<module name="JobProgressIndicator"></module>
+												<module name="SOLNPostProcess">
+													<param name="search">| stats count</param>
+													<module name="SOLNResultsLoader">
+														<module name="SOLNContent" layoutPanel="panel_row1_col2_header">
+															<param name="useTemplate">False</param>
+															<param name="content">
+																<![CDATA[
+																$results[0].count$ VM's powered on in $name.name$ $search.timerange$
+																]]>
+															</param>
+														</module>
+													</module>
+												</module>
+												<module name="Paginator">
+													<param name="entityName">results</param>
+													<param name="count">10</param>
+													<param name="maxPages">20</param>
+													<module name="SimpleResultsTable">
+														<param name="dataOverlayMode">heatmap</param>
+														<param name="displayRowNumbers">False</param>
+														<param name="drilldown">all</param>
+														<module name="SOLNRedirect">
+															<param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+															<param name="paramList">click.name2,click.HIDE-VirtualMachine-moid,click.VirualMachine,click.HIDE-host,search.sid</param>
+															<param name="renameList">Type,VirtualMachine-moid,VirualMachine,host,sid</param>
+														</module>
+													</module>
+													</module>
+												<module name="ViewRedirectorLink">
+													<param name="viewTarget">flashtimeline</param>
+												</module>
+											</module>
+										</module> <!-- End SearchSwapper (individual vm's)  Module -->
+									</module> <!-- End ResultsLoader (Eff Cpu) -->
+								</module><!-- End module Search -->
+							</module><!-- End module SubmitButton -->
+						</module> <!-- End module Pulldown (clustername) -->
+					</module>
+				</module> <!-- End module SOLNNullSwapper -->
+			</module> <!-- End module Search -->
+		</module> <!-- End module TimeRangePicker -->
+	</module> <!-- End module URLLoader -->
+</view>

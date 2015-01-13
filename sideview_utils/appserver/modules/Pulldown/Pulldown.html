@@ -1,0 +1,78 @@
+<% 
+# Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved.
+%>
+<%page args="module"/>
+
+<%def name="buildOption(label, value='', selected='False')">\
+    <% 
+    selectedAttr = ('selected="selected"') if selected.lower() == "true" else '' 
+    if (value==None): value=""
+    if (label==None): label=value
+
+    %>
+    <option ${selectedAttr} value="${value | h}">${label | h}</option>
+</%def>\
+
+## if the label begins and ends with $, we do $foo$ substitution, 
+## straight from the URL
+<%def name="buildLabel(module)">\
+    <%
+    staticLabel  = _(module['params'].get('label', ''))
+    # ugh the python here is terrible
+    if (staticLabel == "None" or staticLabel == u"None"): staticLabel=""
+    %>
+    % if len(staticLabel)>2 and staticLabel[0]=="$" and staticLabel[-1]=="$" :
+        <label for="${module['id']}_select">${cherrypy.request.params.get(staticLabel[1:-1],"") | h}</label>
+    % elif (len(staticLabel)>0) :
+        <label for="${module['id']}_select">${staticLabel|h}</label>
+    % endif
+</%def>\
+
+<div class="progressTop"></div>
+
+##ie doesnt do a good job with vertical-align unless 
+##we put it on both the select and the label.
+% if module["size"] != "1": 
+    <div class="multipleSelect">
+% endif
+        <%self:buildLabel module="${module}" />
+        <select id="${module['id']}_select"
+% if module["size"] != "1": 
+            multiple="multiple" size="${module['size']|h}"
+% endif 
+% if module.get("width",False): 
+            style="width:${module['width']|h}" 
+% endif
+        >
+
+
+<%
+if "staticFieldsToDisplay" not in module :
+    module["staticFieldsToDisplay"] = [{"label":"All", "value":"*"}]
+%>
+
+
+% if module["staticFieldsToDisplay"] :
+    % for field in module['staticFieldsToDisplay']:
+        % if field and field.get('value', False)!=False :
+    <%self:buildOption label="${field.get('label')}" value="${field.get('value','')}" selected="${field.get('selected', 'False')}" />
+        % else :
+    <option> Pulldown.html - VIEW CONFIGURATION ERROR - you have specified a &lt;list&gt; element with no &lt;value&gt; element</option>
+        % endif
+    % endfor
+% endif
+
+
+%if "searchFieldsToDisplay" in module :
+    <option class="dynamic" value=""
+    % if module["size"] == "1": 
+        selected="selected" 
+    % endif
+    >${_("Loading...")|h}</option>
+% endif
+
+</select>
+
+% if module["size"] != "1": 
+    </div>
+% endif

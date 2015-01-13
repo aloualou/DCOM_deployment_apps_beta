@@ -1,0 +1,106 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<view autoCancelInterval="90" isVisible="true" onunloadCancelJobs="true" template="dashboard.html" isSticky="False">
+  <label>home</label>
+  <module name="AccountBar" layoutPanel="appHeader" />
+  <module name="AppBar" layoutPanel="appHeader" />
+  <module name="SideviewUtils" layoutPanel="appHeader" />
+  
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter">*</param>
+    <param name="maxSize">2</param>
+    <param name="clearOnJobDispatch">False</param>
+  </module>
+  
+
+  <module name="HTML" layoutPanel="viewHeader">
+    <param name="html"><![CDATA[
+    <h1>Multiplex - Intro</h1>
+    ]]></param>
+  </module>
+
+  <module name="Search" layoutPanel="panel_row1_col1" autoRun="True" group="just the one static child">
+    <param name="search">index=_internal source=*metrics.log group=per_*_thruput | top group</param>
+    <param name="earliest">-15m</param>
+    <param name="latest">now</param>
+
+    <module name="JobProgressIndicator" />
+
+    <module name="Multiplexer">
+      <param name="field">group</param>
+      <module name="HTML">
+        <param name="html"><![CDATA[
+          Displaying stuff about $group$
+        ]]></param>
+      </module>
+    </module>
+
+
+
+    <module name="Multiplexer" layoutPanel="panel_row1_col2" group="one static child, two static grandchildren">
+      <param name="field">group</param>
+
+      <module name="NullModule">
+        <module name="HTML">
+          <param name="html"><![CDATA[
+            one module displaying stuff about $group$ 
+          ]]></param>
+        </module>
+        <module name="HTML">
+          <param name="html"><![CDATA[
+            Another module about $group$
+          ]]></param>
+        </module>
+      </module>
+    </module>
+
+
+    <module name="Multiplexer" layoutPanel="panel_row2_col1" group="one static child, one static grandchild. one dynamic grandchild">
+      <param name="field">group</param>
+
+      <module name="NullModule">
+        <module name="HTML">
+          <param name="html"><![CDATA[
+            one module displaying stuff about $group$
+          ]]></param>
+        </module>
+        <module name="Search">
+          <param name="search">index=_internal source=*metrics.log group="$group$" | stats sum(kb) by series | head 10</param>
+          <module name="JobProgressIndicator" />
+          <module name="SimpleResultsTable">
+          </module>
+        </module>
+      </module>
+    </module>
+  </module>
+
+  <module name="Search" layoutPanel="panel_row2_col2" group="Pagination" autoRun="True">
+    <param name="search">index=_internal source=*metrics.log group=per_sourcetype_thruput | top 20 series</param>
+    <param name="earliest">-15m</param>
+    <param name="latest">now</param>
+
+    <module name="JobProgressIndicator" />
+    
+    <module name="HTML">
+      <param name="html"><![CDATA[
+        $results.count$ children are about to be multiplexed.
+      ]]></param>
+    </module>
+    
+
+    <module name="Pager">
+      <param name="entityName">results</param>
+      <module name="Multiplexer" >
+        <param name="field">series</param>
+        <module name="HTML">
+          <param name="html"><![CDATA[
+            series is $series$
+          ]]></param>
+        </module>
+        
+      </module>
+    </module>
+
+  </module>
+
+
+</view>

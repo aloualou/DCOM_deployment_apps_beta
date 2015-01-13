@@ -1,0 +1,22 @@
+% if pages:
+<ul>
+  <li class="previous">
+  % if (previousPageOffset or previousPageOffset==0):
+    <a href="${ make_route("/module", host_app=app, module="Splunk.Module.Pager", action="render", _qs=dict( totalCount=totalCount, count=count, offset=previousPageOffset, maxPages=maxPages)) }">&laquo; ${_("prev")}</a>
+  % else:
+    <a href="#" class="disabled">&laquo; ${_("prev")}</a>
+  % endif
+  </li>
+
+  % for page in pages:
+  <li class="${"page selected" if page.get("selected") else "page"}"><a href="${ make_route("/module", host_app=app, module="Splunk.Module.Pager", action="render", _qs=dict( totalCount=totalCount, count=count, offset=page.get("offset"), maxPages=maxPages )) }">${page.get("number")}</a></li>
+  % endfor
+  <li class="next">
+  % if nextPageOffset:
+    <a href="${ make_route("/module", host_app=app, module="Splunk.Module.Pager", action="render", _qs=dict( totalCount=totalCount, count=count, offset=nextPageOffset, maxPages=maxPages )) }">${_("next")} &raquo;</a>
+  % else:
+    <a href="#" class="disabled">${_("next")} &raquo;</a>
+  % endif
+  </li>
+<ul>
+% endif

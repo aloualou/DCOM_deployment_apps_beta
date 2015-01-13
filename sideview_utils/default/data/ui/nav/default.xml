@@ -1,0 +1,104 @@
+<!-- Copyright (C) 2010-2011 Sideview LLC.  All Rights Reserved. -->
+<nav>
+    <view name="home" default="true" />
+    
+    <collection label="key techniques">
+
+      <view name="framework_intro"/>
+      <view name="search1_intro"/>
+
+      <collection label="using simple HTML with embedded dynamic values">
+        <view name="html1_static" />
+        <view name="html2_dynamic_ui_tokens" />
+        <view name="html3_dynamic_results" />
+        <view name="html4_external" />
+        <view name="html5_replacing_singlevalue" />
+      </collection>
+
+      <collection label="improved 'form search' modules">
+        <view name="pulldown1_static"/>
+        <view name="pulldown2_dynamic"/>
+        <view name="pulldown3_dynamic_templated"/>
+        <view name="pulldown4_dynamic_postprocess"/>
+        <view name="pulldown5_dynamic_noall_notoken"/>
+        <view name="pulldown6_dynamic_multipleselect"/>
+        <view name="text_field1"/>
+        <view name="checkbox1"/>
+      </collection>
+      
+      
+      <collection label="linking views together">
+        <view name="linking" />
+        <view name="linking1_pulldowns" />
+        <view name="linking2_tables" />
+      </collection>
+
+      
+      
+      
+      <collection label="enabling the back button">
+        <view name="back_button1" />
+        <view name="search" />
+      </collection>
+
+      <collection label="PostProcess opens everything up">
+        <view name="post_process1_static" />
+        <view name="post_process2_dynamic" />
+        <view name="pager2_postprocess" />
+      </collection>
+
+      <collection label="Other">
+        <view name="tools" />
+        <view name="events1_intro" />
+        <view name="comparison1_overview" />
+        <view name="detecting_sideview_utils" />
+
+      </collection>
+    </collection>
+    
+
+    <collection label="module reference">
+      <view name="search1_intro"/>
+
+      <collection label="the HTML module">
+        <view name="html1_static" />
+        <view name="html2_dynamic_ui_tokens" />
+        <view name="html3_dynamic_results" />
+        <view name="html4_external" />
+        <view name="html5_replacing_singlevalue" />
+      </collection>
+
+      <collection label="the Pulldown module">
+        <view name="pulldown1_static"/>
+        <view name="pulldown2_dynamic"/>
+        <view name="pulldown3_dynamic_templated"/>
+        <view name="pulldown4_dynamic_postprocess"/>
+        <view name="pulldown5_dynamic_noall_notoken"/>
+        <view name="pulldown6_dynamic_multipleselect"/>
+      </collection>
+      
+      <collection label="the TextField module">
+        <view name="text_field1"/>
+      </collection>
+
+      <collection label="the PostProcess module">
+        <view name="post_process1_static" />
+        <view name="post_process2_dynamic" />
+      </collection>
+
+      <collection label="the Pager module">
+        <view name="pager1"/>
+        <view name="pager2_postprocess"/>
+      </collection>
+
+      <view name="checkbox1"/>
+
+      <view name="events1_intro" />
+
+    </collection>
+    <view name="licensing"/>
+    <view name="about"/>
+    
+
+    
+</nav>

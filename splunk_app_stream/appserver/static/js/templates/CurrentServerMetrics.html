@@ -1,0 +1,33 @@
+<script id="server-details-template" type="text/template">
+    <div class="dashboard-row">
+        <div class="dashboard-cell" style="width: 100%;">
+            <div class="dashboard-panel">
+                <div class="dashboard-element">
+                    <div class="panel-head">
+                        <h3>Current Server Status</h3>
+                    </div>
+                    <table id="fields" class="table table-striped table-bordered table-hover" style="margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Running</th>
+                                <th>Date Last Updated</th>
+                                <th>Number of Streams</th>
+                                <th>Open Connections</th>
+                                <th>Busy Connections</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><%= serverMetrics.running %></td>
+                                <td><%= serverMetrics.lastUpdated %></td>
+                                <td><%= serverMetrics.numStreams %></td>
+                                <td><%= serverMetrics.openConnections %></td>
+                                <td><%= serverMetrics.busyConnections %></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>    

@@ -1,0 +1,112 @@
+<form>
+  <label>Network Metrics</label>
+  <description>Network Metrics</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label/>
+      <default>
+        <earliestTime>-60m@m</earliestTime>
+        <latestTime>now</latestTime>
+      </default>
+    </input>
+    <input type="dropdown" token="host" searchWhenChanged="true">
+      <label>Host</label>
+      <choice value="*">all</choice>
+      <populatingSearch fieldForLabel="host" fieldForValue="host">`stream_stats` | stats estdc(host) as count by host | fields host</populatingSearch>
+      <default>*</default>
+    </input>
+    <!--<input type="dropdown" token="interfaceId" searchWhenChanged="true">
+      <label>Interface Id</label>
+      <choice value="*">all</choice>
+      <populatingSearch earliest="0" latest="" fieldForLabel="Interface" fieldForValue="Interface">`stream_stats` host=* | spath output=Interface path=sniffer{}.captures{}.interface | stats estdc(Interface) by Interface | fields Interface</populatingSearch>
+      <default>*</default>
+    </input>
+    <input type="radio" token="groupby" searchWhenChanged="true">
+      <label>Group By</label>
+      <choice value="host">Host</choice>
+      <choice value="Interface">Interface</choice>
+      <default>host</default>
+    </input>-->
+  </fieldset>
+  <row>
+    <chart>
+      <title>Total Packets</title>
+      <searchString>`stream_stats` host=$host$ | spath Output=TotalPackets path=sniffer{}.captures{}.totalPackets | eventstats sum(TotalPackets) by _cd | rename sum(TotalPackets) as SumTotalPackets | streamstats current=t global=f window=2 earliest(SumTotalPackets) as prev latest(SumTotalPackets) as curr by host | eval delta=curr-prev | eval absdelta=case(delta&lt;=0, 0, delta&gt;0, delta) | timechart sum(absdelta) as delta by host</searchString>
+      <earliestTime>$time.earliest$</earliestTime>
+      <latestTime>$time.latest$</latestTime>
+      <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">collapsed</option>
+      <option name="charting.axisTitleY2.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.axisY2.enabled">false</option>
+      <option name="charting.axisY2.scale">inherit</option>
+      <option name="charting.chart">line</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+    <chart>
+      <title>Total Events</title>
+      <searchString>`stream_stats` host=$host$ | spath Output=EventsIn path=sniffer{}.eventsIn | streamstats current=t global=f window=2 earliest(EventsIn) as curr latest(EventsIn) as next by host | eval delta=next-curr | eval absdelta=case(delta&lt;=0, 0, delta&gt;0, delta) | timechart sum(absdelta) as delta by host</searchString>
+      <earliestTime>$time.earliest$</earliestTime>
+      <latestTime>$time.latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="count">10</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">collapsed</option>
+      <option name="charting.axisTitleY2.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.axisY2.enabled">false</option>
+      <option name="charting.axisY2.scale">inherit</option>
+      <option name="charting.chart">line</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>Bandwidth</title>
+      <searchString>`stream_stats` host=$host$ | spath Output=BitsPerSecond path=sniffer{}.captures{}.bitsPerSecond | mvexpand BitsPerSecond |  eval mbps=BitsPerSecond/1024/1024 | timechart avg(mbps) as Bandwidth(mbps) by host</searchString>
+      <earliestTime>$time.earliest$</earliestTime>
+      <latestTime>$time.latest$</latestTime>
+      <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleY2.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.axisY2.enabled">false</option>
+      <option name="charting.axisY2.scale">inherit</option>
+      <option name="charting.chart">line</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+      <option name="charting.axisTitleY.text">Mbps</option>
+    </chart>
+  </row>
+</form>

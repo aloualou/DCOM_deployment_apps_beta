@@ -1,0 +1,46 @@
+<form script="autodiscover_memory_overhead_info.js">
+    <label>Capacity Planning for Clusters - Memory Headroom</label>
+    <fieldset autoRun="False" submitButton="True">
+        <input type="time">
+            <default>Last 24 hours</default>
+        </input>
+        <input type="dropdown" token="cluster" searchWhenChanged="True">
+            <label>Cluster</label>
+            <populatingSearch fieldForValue="cluster_id" fieldForLabel="name">| inputlookup Entity | search type=clusterComputeResource | eval cluster_id="host=\""+host+"\" ccr=\""+moid +"\"" </populatingSearch>
+        </input>
+    </fieldset>
+    <row>
+        <html>
+            <div class="memory-overhead-info"></div>
+        </html>
+        <table>
+            <title>Powered on VMs memory usage in the cluster</title>
+            <searchString><![CDATA[
+                | `tstats` max(p_average_mem_consumed_kiloBytes) max(p_maximum_mem_consumed_kiloBytes) max(p_minimum_mem_consumed_kiloBytes) max(p_none_mem_consumed_kiloBytes)  avg(p_average_mem_consumed_kiloBytes) avg(p_maximum_mem_consumed_kiloBytes) avg(p_minimum_mem_consumed_kiloBytes) avg(p_none_mem_consumed_kiloBytes) max(p_average_mem_overhead_kiloBytes) max(p_maximum_mem_overhead_kiloBytes) max(p_minimum_mem_overhead_kiloBytes) max(p_none_mem_overhead_kiloBytes)  avg(p_average_mem_overhead_kiloBytes) avg(p_maximum_mem_overhead_kiloBytes) avg(p_minimum_mem_overhead_kiloBytes) avg(p_none_mem_overhead_kiloBytes) dc(moid) first(ccr) first(host) from vmw_perf_mem_virtualmachine where instance="aggregated" $cluster$ groupby host,moid,_time | stats max(p_average_mem_consumed_kiloBytes) as max_avg_mem_consumed_kiloBytes max(p_maximum_mem_consumed_kiloBytes) as max_max_mem_consumed_kiloBytes, max(p_minimum_mem_consumed_kiloBytes) as  max_min_mem_consumed_kiloBytes, max(p_none_mem_consumed_kiloBytes) as  max_none_mem_consumed_kiloBytes, avg(p_average_mem_consumed_kiloBytes) as avg_avg_mem_consumed_kiloBytes avg(p_maximum_mem_consumed_kiloBytes) as avg_max_mem_consumed_kiloBytes, avg(p_minimum_mem_consumed_kiloBytes) as  avg_min_mem_consumed_kiloBytes, avg(p_none_mem_consumed_kiloBytes) as  avg_none_mem_consumed_kiloBytes, max(p_average_mem_overhead_kiloBytes) as max_avg_mem_overhead_kiloBytes max(p_maximum_mem_overhead_kiloBytes) as max_max_mem_overhead_kiloBytes, max(p_minimum_mem_overhead_kiloBytes) as  max_min_mem_overhead_kiloBytes, max(p_none_mem_overhead_kiloBytes) as  max_none_mem_overhead_kiloBytes, avg(p_average_mem_overhead_kiloBytes) as avg_avg_mem_overhead_kiloBytes avg(p_maximum_mem_overhead_kiloBytes) as avg_max_mem_overhead_kiloBytes, avg(p_minimum_mem_overhead_kiloBytes) as  avg_min_mem_overhead_kiloBytes, avg(p_none_mem_overhead_kiloBytes) as  avg_none_mem_overhead_kiloBytes, first(ccr) as ccr by moid host |  eval AvgConsumedUsg_KB = coalesce(avg_avg_mem_consumed_kiloBytes, avg_avg_mem_consumed_kiloBytes, avg_avg_mem_consumed_kiloBytes, avg_avg_mem_consumed_kiloBytes) | eval MaxConsumedUsg_KB = coalesce(max_max_mem_consumed_kiloBytes, max_avg_mem_consumed_kiloBytes, max_min_mem_consumed_kiloBytes, max_none_mem_consumed_kiloBytes) | eval AvgOverheadUsg_KB = coalesce(avg_avg_mem_overhead_kiloBytes, avg_avg_mem_overhead_kiloBytes, avg_avg_mem_overhead_kiloBytes, avg_avg_mem_overhead_kiloBytes) | eval MaxOverheadUsg_KB = coalesce(max_max_mem_overhead_kiloBytes, max_avg_mem_overhead_kiloBytes, max_min_mem_overhead_kiloBytes, max_none_mem_overhead_kiloBytes) | `SetHandleInfoMaxTimeNow` | lookup FullHierarchy host moid OUTPUT name as VirtualMachine | rename moid as HIDE-VirtualMachine-moid host as HIDE-host | eval  AvgConsumedUsg_GB= `BytesToGigaBytes(AvgConsumedUsg_KB*1024)` | eval MaxConsumedUsg_GB = `BytesToGigaBytes(MaxConsumedUsg_KB*1024)` | eval  AvgOverheadUsg_GB= `BytesToGigaBytes(AvgOverheadUsg_KB*1024)` | eval MaxOverheadUsg_GB = `BytesToGigaBytes(MaxOverheadUsg_KB*1024)`  | table HIDE-host HIDE-VirtualMachine-moid VirtualMachine AvgOverheadUsg_GB MaxOverheadUsg_GB AvgConsumedUsg_GB MaxConsumedUsg_GB
+                ]]></searchString>
+            <option name="dataOverlayMode">heatmap</option>
+            <option name="fields">VirtualMachine, AvgOverheadUsg_GB, MaxOverheadUsg_GB, AvgConsumedUsg_GB, MaxConsumedUsg_GB</option>
+            <drilldown>
+                <link>
+                    <![CDATA[
+                    /app/splunk_for_vmware/vm_detail?selectedVirtualMachine=$row.HIDE-host$-$row.HIDE-VirtualMachine-moid$
+                    ]]>
+                </link>
+            </drilldown>
+        </table>
+    </row>
+    <row>
+        <chart>
+            <title>Currently used GB and Total Capacity over time</title>
+            <searchString>
+                <![CDATA[
+               |`tstats` avg(p_average_mem_overhead_kiloBytes) avg(p_maximum_mem_overhead_kiloBytes) avg(p_minimum_mem_overhead_kiloBytes) avg(p_none_mem_overhead_kiloBytes) avg(p_average_mem_consumed_kiloBytes) avg(p_maximum_mem_consumed_kiloBytes) avg(p_minimum_mem_consumed_kiloBytes) avg(p_none_mem_consumed_kiloBytes) dc(moid) first(ccr) first(host) from vmw_perf_mem_virtualmachine  where $cluster$ groupby host,moid, _time | stats avg(p_average_mem_overhead_kiloBytes) as p_average_mem_overhead_kiloBytes,avg(p_maximum_mem_overhead_kiloBytes) as  p_maximum_mem_overhead_kiloBytes, avg(p_minimum_mem_overhead_kiloBytes) as  p_minimum_mem_overhead_kiloBytes, avg(p_none_mem_overhead_kiloBytes) as p_none_mem_overhead_kiloBytes, avg(p_average_mem_consumed_kiloBytes) as p_average_mem_consumed_kiloBytes, avg(p_maximum_mem_consumed_kiloBytes) as p_maximum_mem_consumed_kiloBytes, avg(p_minimum_mem_consumed_kiloBytes) as p_minimum_mem_consumed_kiloBytes, avg(p_none_mem_consumed_kiloBytes) as p_none_mem_consumed_kiloBytes, dc(moid) as num_vms, first(ccr) as moid, first(host) as host  by  _time|eval AvgOvrhdMemPerVM_KB =coalesce(p_average_mem_overhead_kiloBytes, p_maximum_mem_overhead_kiloBytes, p_minimum_mem_overhead_kiloBytes, p_none_mem_overhead_kiloBytes)| eval AvgConsumMemPerVM_KB = coalesce(p_average_mem_consumed_kiloBytes, p_maximum_mem_consumed_kiloBytes, p_minimum_mem_consumed_kiloBytes, p_none_mem_consumed_kiloBytes)  | eval TotConsum_KB=AvgConsumMemPerVM_KB*num_vms | eval TotOverhd_KB=AvgOvrhdMemPerVM_KB*num_vms | eval TotalCurrentUsage = TotOverhd_KB+TotConsum_KB| eval TotalCapacity=$p_average_clusterServices_effectivemem_megaBytes$*1024| eval SafeUsage = $SafeEffMem_megaBytes$*1024| eval SafeUsage=`BytesToGigaBytes(SafeUsage*1024)`| eval TotalCapacity=`BytesToGigaBytes(TotalCapacity*1024)`| eval TotalCurrentUsage=`BytesToGigaBytes(TotalCurrentUsage*1024)` | timechart minspan=1m avg(TotalCapacity) as "Total Capacity" avg(SafeUsage) as "Safe Usage" avg(TotalCurrentUsage) as "Current Usage"
+               ]]>
+            </searchString>
+            <option name="charting.axisTitleX.text">time</option>
+            <option name="charting.axisTitleY.text">Memory Usage (GB)</option>
+            <option name="charting.chart">line</option>
+            <option name="charting.drilldown">none</option>
+        </chart>
+    </row>
+</form>
