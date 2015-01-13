@@ -1,0 +1,9 @@
+<%page expression_filter="h"/>
+<%inherit file="//layout/base.html" />
+<%namespace name="lib" file="//lib.html" import="*"/>
+<div class="SuccessMessage">
+  <h2>Success!</h2>
+  <p>Your VMware configuration has been saved.&nbsp;&nbsp;Click "OK" to go to the app home page.</p>
+  <a target="_parent" href="${make_url('/app/%s' % app)}" class="splButton-primary">OK</a>
+</div>
+

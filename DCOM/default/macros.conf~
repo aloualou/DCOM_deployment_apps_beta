@@ -1,0 +1,82 @@
+#
+#app Telindus DCOM
+#Version 0.1 novembre 2014
+#Simon Duchene
+#
+
+
+#Exemple : 
+
+##[netflow_index]
+##definition = index=flowintegrator sourcetype=flowintegrator
+
+##[netflow_search_traffic_rules]
+##definition = `netflow_index` (nfc_id=20004 OR nfc_id=20005 OR nfc_id=20011 OR nfc_id=20017 OR nfc_id=20063 OR nfc_id=20067 OR nfc_id=20068 OR nfc_id=20064 OR nfc_id=20065 OR nfc_id=20066)
+
+#Partie VMWARE
+[inv]
+definition = index=vmware-inv
+
+[vm_base_datastore]
+definition = `inv` sourcetype =vmware:inv:datastore| spath moid output=moid | spath changeSet.info.name output=name |spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace| eval freeSpace=freeSpace/1024/1024/1024|eval capacity=capacity/1024/1024/1024|eval occupe=capacity-freeSpace
+#a verifier
+
+[vm_evo_volum]
+definition = `inv` `vm_base_datastore` |search [search 'vm_base_datastore'|eval percentoccup=(total-libre)/total|where percentoccup > 0.70|fields name] |timechart avg(freeSpace) as "freespace", avg(capacity) as "total capacity" by name
+#a verifier
+
+[vm_datastore_suivi]
+definition = `inv` `vm_base_datastore`|chart first(freeSpace) as "espace libre", first(occupe) as occupé by name
+#a verifier
+
+[vm_sto_moyen]
+definition =`inv` vmware:inv:vm"    | spath moid  | spath changeSet.summary.runtime.powerState output=powerState   | search powerState=*on| chart avg("changeSet.summary.storage.committed
+
+[vm_active_host]
+definition = `inv` sourcetype="vmware:inv:vm"  | spath moid | spath changeSet.summary.runtime.powerState output=powerState | spath changeSet.summary.runtime.host.moid output=hmoid |search powerState=*on|stats dc(moid) by hmoid
+
+[vm_nb_hosts]
+definition = `inv` sourcetype="vmware:inv*"  | stats dc(host)
+
+[vm_nb_datastore]
+definition =`inv`  sourcetype="vmware:inv*"  | spath changeSet.storage.perDatastoreUsage{}.datastore.moid output=datastoremoid |stats dc(datastoremoid)
+
+[vm_sto_moyen_libconso]
+definition =`inv`  `vm_base_datastore`|eval percentoccup=occupe/capacity*100|stats  first(freeSpace) as "freespace in Gb", first(occupe) as "used in Gb" by name |sort - "used in Gb"
+
+[vm_vol_actu]
+definition = `inv` `vm_base_datastore`|eval percentoccup=occupe/capacity*100|stats  first(capacity) as "capacity in Gb", first(percentoccup) as "% used" by name |sort - "% used"
+
+[vm_zombieglouton]
+definition = `inv` (sourcetype=”vmware:perf:cpu” source=”VMPerf:VirtualMachine”) OR (sourcetype=”vmware:inv:vm” changeSet.name=*) | eval detect = if(p_average_cpu_usage_percent < 5.00, “zombie”, if(p_average_cpu_usage_percent > 80.00, “chatty”, “normal”)) 
+
+[vm_zg_table]
+definition = `inv` `vm_zombieglouton`|| stats first(detect) as “CPU Status” by moid
+
+[vm_zg_graph]
+definition = `inv` `vm_zombieglouton`| stats count by detect
+
+[vm_evonb_esx]
+definition =`inv`  sourcetype="vmware:inv*"  | timechart dc(host) span=1w
+
+[vm_photo_libre]
+definition = `inv` `vm_base_datastore`|stats first(freeSpace) as "espace libre" by name
+
+[vm_cpu_host]
+definition = `inv` sourcetype="vmware:inv:hostsystem" | spath moid output=moid | spath changeSet.name output=name | spath collectionVersion output=collectionVersion | spath changeSet.summary.overallStatus output=overallStatus | spath changeSet.summary.quickStats.overallCpuUsage output=overallCpuUsage | spath changeSet.summary.quickStats.overallMemoryUsage output=overallMemoryUsage | spath changeSet.summary.hardware.cpuMhz output=cpuMhz | spath changeSet.summary.hardware.memorySize output=memorySize | spath changeSet.summary.hardware.numCpuCores output=CPUCores | spath changeSet.summary.hardware.vendor output=manufacturer | spath changeSet.summary.hardware.model output=model | spath changeSet.summary.hardware.numNics output=numNics | spath changeSet.summary.hardware.cpuModel output=processorType | spath changeSet.summary.hardware.numCpuPkgs output=numCpuPkgs | spath changeSet.summary.hardware.numCpuThreads output=logicalProcessor | spath changeSet.config.hyperThread.active output=active | spath changeSet.summary.host.moid output=HostSystem | spath changeSet.parent.moid output=HostSystemParent | spath changeSet.parent.type output=HostSystemParentType |stats avg(overallCpuUsage) by name
+
+[vm_ram_host]
+definition = `inv` sourcetype="vmware:inv:hostsystem" | spath moid output=moid | spath changeSet.name output=name | spath collectionVersion output=collectionVersion | spath changeSet.summary.overallStatus output=overallStatus | spath changeSet.summary.quickStats.overallCpuUsage output=overallCpuUsage | spath changeSet.summary.quickStats.overallMemoryUsage output=overallMemoryUsage | spath changeSet.summary.hardware.cpuMhz output=cpuMhz | spath changeSet.summary.hardware.memorySize output=memorySize | spath changeSet.summary.hardware.numCpuCores output=CPUCores | spath changeSet.summary.hardware.vendor output=manufacturer | spath changeSet.summary.hardware.model output=model | spath changeSet.summary.hardware.numNics output=numNics | spath changeSet.summary.hardware.cpuModel output=processorType | spath changeSet.summary.hardware.numCpuPkgs output=numCpuPkgs | spath changeSet.summary.hardware.numCpuThreads output=logicalProcessor | spath changeSet.config.hyperThread.active output=active | spath changeSet.summary.host.moid output=HostSystem | spath changeSet.parent.moid output=HostSystemParent | spath changeSet.parent.type output=HostSystemParentType |stats avg(overallMemoryUsage) by name
+
+[vm_ram_type]
+definition = `inv` sourcetype="vmware:inv:hostsystem" | spath moid output=moid | spath changeSet.name output=name | spath collectionVersion output=collectionVersion | spath changeSet.summary.overallStatus output=overallStatus | spath changeSet.summary.quickStats.overallCpuUsage output=overallCpuUsage | spath changeSet.summary.quickStats.overallMemoryUsage output=overallMemoryUsage | spath changeSet.summary.hardware.cpuMhz output=cpuMhz | spath changeSet.summary.hardware.memorySize output=memorySize | spath changeSet.summary.hardware.numCpuCores output=CPUCores | spath changeSet.summary.hardware.vendor output=manufacturer | spath changeSet.summary.hardware.model output=model | spath changeSet.summary.hardware.numNics output=numNics | spath changeSet.summary.hardware.cpuModel output=processorType | spath changeSet.summary.hardware.numCpuPkgs output=numCpuPkgs | spath changeSet.summary.hardware.numCpuThreads output=logicalProcessor | spath changeSet.config.hyperThread.active output=active | spath changeSet.summary.host.moid output=HostSystem | spath changeSet.parent.moid output=HostSystemParent | spath changeSet.parent.type output=HostSystemParentType |stats avg(overallMemoryUsage) by model
+
+#Partie Reseau
+#Pour netflow, il faut modifier les droits d'accès sur le macros de l'app netflow.
+
+#Partie PAN
+
+[pan_index]
+definition = index=pan_logs
+
+#Partie F5

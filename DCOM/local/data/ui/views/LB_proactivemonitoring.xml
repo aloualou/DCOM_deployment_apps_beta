@@ -1,0 +1,226 @@
+<form script="single_trend.js,  table_icons_rangemap2.js, table_icons_rangemap.js, table_icons_inline.js" stylesheet="table_decorations.css,single_trend.css">
+  <label>Application Delivery - Proactive Monitoring</label>
+  <description></description>
+  <fieldset autorun="true">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Temps</label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+   <search id="Slow" ref="Slow_answer_rate2">
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+  <row>
+    <panel>
+      <title>Services State</title>
+      <table id="table1" >
+        <title>Applications in SLA violation</title>
+        <search base="Slow">
+          <query></query>
+        </search>
+        <option name="displayRowNumbers">false</option>
+        <option name="drilldown">row</option>
+        <option name="count">5</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[ F5_proactivemonitoring  ]]>
+          </link>
+        </drilldown>
+        <option name="rowNumbers">false</option>
+      </table>
+      <table id="table2">
+        <title>Average response duration</title>
+        <search>
+          <query>`F5LTMACCCESS`  | stats count by req_elapsed_time client_address node server_name url _time             | stats avg(req_elapsed_time) as "Response time" ,  sparkline avg(req_elapsed_time)  by server_name| rangemap field="avg(req_elapsed_time)"  low=0-5 elevated=6-15 default=severe | rename "avg(req_elapsed_time)" AS "Response time"|fields range, server_name, sparkline, "Response time"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="classField">range</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="displayRowNumbers">false</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="wrap">false</option>
+        <option name="count">10</option>
+        <option name="rowNumbers">false</option>
+      </table>
+      <single>
+        <title>Error</title>
+        <search>
+          <query>`F5LTMACCCESS` (http_status=4* OR http_status=5*) | timechart span=1h count |reverse</query>
+          <earliest>-4h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="afterLabel">messages in the last hour</option>
+        <option name="underLabel">Error message (404...)</option>
+        <option name="field">count</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+      <single>
+        <title>Redirection</title>
+        <search>
+          <query>`F5LTMACCCESS` http_status=3* | timechart span=1h count |reverse</query>
+          <earliest>-4h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="afterLabel">messages in the last hour</option>
+        <option name="underLabel">Redirection message (307...)</option>
+        <option name="field">count</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+      <single>
+        <title>Success</title>
+        <search>
+          <query>`F5LTMACCCESS` http_status=2* | timechart span=1h count |reverse</query>
+          <earliest>-4h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="afterLabel">messages in the last hour</option>
+        <option name="underLabel">Success message (200...)</option>
+        <option name="field">count</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>TOP 3 : Slowest applications</title>
+        <search>
+          <query>`f5_slowestserver`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>TOP 3 : Slowest Load Balancer</title>
+        <search>
+          <query>`f5_slowestnode`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Top messages stats</title>
+        <search>
+          <query>`f5_top_message`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Data size over time</title>
+        <search>
+          <query>`f5_data_size`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>

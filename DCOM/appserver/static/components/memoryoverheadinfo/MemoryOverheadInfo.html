@@ -1,0 +1,27 @@
+<h3>Memory for <%=name%> Cluster</h3>
+<table>
+	<tr>
+		<td>Hosts in Cluster</td>
+		<td><%=num_hosts%></td>
+	</tr>
+	<tr>
+		<td>Powered on VM's</td>
+		<td><%=actual_num_vms%></td>
+	</tr>
+	<tr>
+		<td>Average consumed memory usage per VM</td>
+		<td><%=mem_consumed_per_vm%></td>
+	</tr>
+	<tr>
+		<td>Average overhead memory usag per VM</td>
+		<td><%=mem_overhead_per_vm%></td>
+	</tr>
+	<tr>
+		<td>Total available in cluster</td>
+		<td><%=p_average_clusterServices_effectivemem_kiloBytes%></td>
+	</tr>
+	<tr>
+		<td>Estimated number of VM's that can be added</td>
+		<td><%=additional_vms%></td>
+	</tr>
+</table>

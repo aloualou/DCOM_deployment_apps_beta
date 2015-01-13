@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><form>
+  <label>CDP Events</label>
+  <fieldset autoRun="true">
+    <input type="time">
+      <default>Last 60 minutes</default>
+    </input>
+  </fieldset>
+  <row>
+    <table>
+      <title>Duplex mismatch by host</title>
+      <searchString>eventtype=cisco_ios-duplex_mismatch | dedup dvc,cdp_local_interface | table _time,dvc,cdp_local_interface,cdp_neighbor,dest_interface,message_text | rename cdp_local_interface AS "Local Int.",cdp_neighbor AS "CDP Neighbor",dest_interface AS "Remote Int.",message_text AS "Message" | sort dvc</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="count">50</option>
+      <option name="displayRowNumbers">true</option>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">true</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+    </table>
+  </row>
+  <row>
+    <table>
+      <searchString>eventtype="cisco_ios-native_vlan_mismatch" | dedup host,cdp_local_interface | table _time,host,cdp_local_interface,cdp_local_vlan,cdp_neighbor,cdp_remote_interface,cdp_remote_vlan | rename cdp_local_interface AS "Local Int.",cdp_local_vlan AS "Local VLAN",cdp_neighbor AS "CDP Neighbor",cdp_remote_interface AS "Remote Int.",cdp_remote_vlan AS "Remote VLAN",message_text AS "Message"</searchString>
+      <title>Native VLAN mismatch</title>
+      <option name="count">50</option>
+      <option name="displayRowNumbers">true</option>
+    </table>
+  </row>
+  <row>
+    <table>
+      <title>CDP Neighbors (Nexus)</title>
+      <search>
+        <query>eventtype="cisco_ios-cdp_neighbor_added" OR eventtype=cisco_ios-cdp_neighbor_removed | dedup host,cdp_local_interface | table host,cdp_local_interface,cdp_remote_dvc,cdp_remote_dvc_serial,cdp_remote_interface,cdp_remote_ip,cdp_remote_ip_mgmt,mnemonic | sort host,cdp_local_interface</query>
+      </search>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+      <option name="count">10</option>
+    </table>
+  </row>
+</form>

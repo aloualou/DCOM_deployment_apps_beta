@@ -1,0 +1,109 @@
+<form script="table_cell_highlighting.js" stylesheet="table_cell_highlighting.css">
+  <label>Hypervisor - Proactive monitoring</label>
+  <fieldset autoRun="False" submitButton="True">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-4h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <table id="highlight">
+        <title>VMs CPU Consumption</title>
+        <search>
+          <query>`vm_zg_table`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="list.drilldown">full</option>
+        <option name="list.wrap">1</option>
+        <option name="maxLines">5</option>
+        <option name="raw.drilldown">full</option>
+        <option name="table.drilldown">all</option>
+        <option name="table.wrap">1</option>
+        <option name="type">list</option>
+        <option name="count">10</option>
+        <option name="drilldown">cell</option>
+        <option name="charting.fieldColors">{"normal":0x0000FF,"Very High CPU Comsumption":0xFF0000,"Very Low CPU Comsumption":0xFFFF00}</option>
+      </table>
+    </panel>
+    <panel>
+      <chart>
+        <title>VMs CPU Consumption Distribution</title>
+        <search>
+          <query>`vm_zg_graph`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.fieldColors">{"normal":0x0000FF,"Very High CPU Comsumption":0xFF0000,"Very Low CPU Comsumption":0xFFFF00}</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Datastore</title>
+        <search>
+          <query>sourcetype="vmware:inv:datastore" earliest=-4h latest=now | spath moid | spath changeSet.summary.accessible output=accessible | spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace | spath changeSet.summary.uncommitted output=uncommitted | spath changeSet.summary.url output=url | spath changeSet.summary.type output=type | spath changeSet.summary.name output=name | table _time, moid, host, name, url, accessible, capacity, freeSpace, uncommitted, type | stats first(name) as name first(freeSpace) as freeSpace first(capacity) as capacity first(accessible) as accessible first(uncommitted) as uncommitted by host, moid | fillnull value=0 uncommitted | eval totalSpace=tostring(round((capacity)/(1024*1024*1024), 2)) | eval RemainingCapacity_GB=tostring(round((freeSpace)/(1024*1024*1024), 2)) | eval Committed_GB=totalSpace-RemainingCapacity_GB | eval spaceAfterUncommitedAllocation=freeSpace-uncommitted | eval provisionedAmount=capacity-spaceAfterUncommitedAllocation | eval overprovisionedPct=round(if(provisionedAmount!=0,(provisionedAmount/capacity)-1,0)*100,2) | thresholdlookup entitytype=Datastore,perftype=inv,metric=RemainingCapacity_GB,match=true| eval warnLevel=(totalSpace-threshold_warnlevel) | eval critLevel=(totalSpace-threshold_critlevel) | rename totalSpace as "Total Capacity in GB", name as Datastore, overprovisionedPct as "Overprovisioned in %", Committed_GB as "Capacity Used in GB" | eval Type="Datastore" | search Datastore=* | table Type moid host Datastore  "Capacity Used in GB"  "Total Capacity in GB" "Overprovisioned in %" critLevel warnLevel</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="fields">Datastore,"Capacity Used in GB",  "Total Capacity in GB", "Overprovisioned in %"</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+        <fields>["Datastore","Capacity Used in GB" , "Total Capacity in GB", "Overprovisioned in %"]</fields>
+      </table>
+    </panel>
+  </row>
+</form>

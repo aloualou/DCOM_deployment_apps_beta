@@ -1,0 +1,533 @@
+<!-- <view autoCancelInterval="120" isVisible="true" objectMode="SimpleForm" onunloadCancelJobs="true" template="/BBB:/templates/dashboard.html">-->
+<view autoCancelInterval="120" decomposeIntentions="false" isPersistable="true" isSticky="true" isVisible="true" nativeObjectMode="viewconf" objectMode="viewconf" onunloadCancelJobs="false" template="BBB:/templates/dashboard.html" type="module" script="BBB:autodiscover_memory_overhead_info.js">
+
+  <label>Capacity Planning for Clusters - Memory Headroom</label>
+  <module name="AccountBar" layoutPanel="appHeader"/>
+  <module name="AppBar" layoutPanel="navigationHeader"/>
+  <module name="Message" layoutPanel="messaging">
+    <param name="clearOnJobDispatch">False</param>
+    <param name="maxSize">1</param>
+    <param name="filter">*</param>
+  </module>
+  <module name="Message" layoutPanel="messaging">
+    <param name="clearOnJobDispatch">True</param>
+    <param name="maxSize">1</param>
+    <param name="filter">splunk.search.job</param>
+  </module>
+  <module name="DashboardTitleBar" layoutPanel="viewHeader"/>
+  
+  <!-- TimeRangePicker -->
+  <module name="TimeRangePicker" layoutPanel="viewHeader">
+    <param name="selected">Last 24 hours</param>
+    <param name="searchWhenChanged">False</param>
+	
+	<!-- SearchSelectLister -->
+    <module name="SearchSelectLister">
+      <param name="settingToCreate">cluster_setting</param>
+      <param name="staticFieldsToDisplay"/>
+      <param name="label">Cluster</param>
+      <param name="searchFieldsToDisplay">
+        <list>
+          <param name="value">cluster_id</param>
+          <param name="label">name</param>
+        </list>
+      </param>
+      <param name="search">| inputlookup Entity | search type=clusterComputeResource | eval cluster_id="host=\""+host+"\" ccr=\""+moid +"\"" </param>
+      <param name="searchWhenChanged">True</param>
+      <module name="ConvertToIntention">
+        <param name="settingToConvert">cluster_setting</param>
+        <param name="intention">
+          <param name="arg">
+            <param name="cluster">
+              <param name="value">$target$</param>
+              <param name="fillOnEmpty">True</param>
+            </param>
+          </param>
+          <param name="name">stringreplace</param>
+        </param>
+		
+		<!-- SubmitButton -->
+        <module name="SubmitButton" layoutPanel="viewHeader">
+          <param name="label">Search</param>
+          <param name="allowSoftSubmit">True</param>
+          <param name="visible">True</param>
+          <param name="updatePermalink">True</param>
+
+          <!-- R1, P1 -->
+          <module name="StaticContentSample" layoutPanel="panel_row1_col1">
+            <param name="text">&lt;div class="memory-overhead-info"&gt;&lt;/div&gt;</param>
+            <module name="Gimp"/>
+          </module>
+		  
+		  <!-- R1, P2 -->
+          <module name="HiddenSearch" layoutPanel="panel_row1_col2" group="Powered on VMs memory usage in the cluster" autoRun="False">
+            <param name="groupLabel">Powered on VMs memory usage in the cluster</param>
+            <param name="search">
+                | `tstats` max(p_average_mem_consumed_kiloBytes) max(p_maximum_mem_consumed_kiloBytes) max(p_minimum_mem_consumed_kiloBytes) max(p_none_mem_consumed_kiloBytes)  avg(p_average_mem_consumed_kiloBytes) avg(p_maximum_mem_consumed_kiloBytes) avg(p_minimum_mem_consumed_kiloBytes) avg(p_none_mem_consumed_kiloBytes) max(p_average_mem_overhead_kiloBytes) max(p_maximum_mem_overhead_kiloBytes) max(p_minimum_mem_overhead_kiloBytes) max(p_none_mem_overhead_kiloBytes)  avg(p_average_mem_overhead_kiloBytes) avg(p_maximum_mem_overhead_kiloBytes) avg(p_minimum_mem_overhead_kiloBytes) avg(p_none_mem_overhead_kiloBytes) dc(moid) first(ccr) first(host) from vmw_perf_mem_virtualmachine where instance="aggregated" $cluster$ groupby host,moid,_time | stats max(p_average_mem_consumed_kiloBytes) as max_avg_mem_consumed_kiloBytes max(p_maximum_mem_consumed_kiloBytes) as max_max_mem_consumed_kiloBytes, max(p_minimum_mem_consumed_kiloBytes) as  max_min_mem_consumed_kiloBytes, max(p_none_mem_consumed_kiloBytes) as  max_none_mem_consumed_kiloBytes, avg(p_average_mem_consumed_kiloBytes) as avg_avg_mem_consumed_kiloBytes avg(p_maximum_mem_consumed_kiloBytes) as avg_max_mem_consumed_kiloBytes, avg(p_minimum_mem_consumed_kiloBytes) as  avg_min_mem_consumed_kiloBytes, avg(p_none_mem_consumed_kiloBytes) as  avg_none_mem_consumed_kiloBytes, max(p_average_mem_overhead_kiloBytes) as max_avg_mem_overhead_kiloBytes max(p_maximum_mem_overhead_kiloBytes) as max_max_mem_overhead_kiloBytes, max(p_minimum_mem_overhead_kiloBytes) as  max_min_mem_overhead_kiloBytes, max(p_none_mem_overhead_kiloBytes) as  max_none_mem_overhead_kiloBytes, avg(p_average_mem_overhead_kiloBytes) as avg_avg_mem_overhead_kiloBytes avg(p_maximum_mem_overhead_kiloBytes) as avg_max_mem_overhead_kiloBytes, avg(p_minimum_mem_overhead_kiloBytes) as  avg_min_mem_overhead_kiloBytes, avg(p_none_mem_overhead_kiloBytes) as  avg_none_mem_overhead_kiloBytes, first(ccr) as ccr by moid host |  eval AvgConsumedUsg_KB = coalesce(avg_avg_mem_consumed_kiloBytes, avg_avg_mem_consumed_kiloBytes, avg_avg_mem_consumed_kiloBytes, avg_avg_mem_consumed_kiloBytes) | eval MaxConsumedUsg_KB = coalesce(max_max_mem_consumed_kiloBytes, max_avg_mem_consumed_kiloBytes, max_min_mem_consumed_kiloBytes, max_none_mem_consumed_kiloBytes) | eval AvgOverheadUsg_KB = coalesce(avg_avg_mem_overhead_kiloBytes, avg_avg_mem_overhead_kiloBytes, avg_avg_mem_overhead_kiloBytes, avg_avg_mem_overhead_kiloBytes) | eval MaxOverheadUsg_KB = coalesce(max_max_mem_overhead_kiloBytes, max_avg_mem_overhead_kiloBytes, max_min_mem_overhead_kiloBytes, max_none_mem_overhead_kiloBytes) | `SetHandleInfoMaxTimeNow` | lookup FullHierarchy host moid OUTPUT name as VirtualMachine | rename moid as HIDE-VirtualMachine-moid host as HIDE-host | eval  AvgConsumedUsg_GB= `BytesToGigaBytes(AvgConsumedUsg_KB*1024)` | eval MaxConsumedUsg_GB = `BytesToGigaBytes(MaxConsumedUsg_KB*1024)` | eval  AvgOverheadUsg_GB= `BytesToGigaBytes(AvgOverheadUsg_KB*1024)` | eval MaxOverheadUsg_GB = `BytesToGigaBytes(MaxOverheadUsg_KB*1024)`  | table HIDE-host HIDE-VirtualMachine-moid VirtualMachine AvgOverheadUsg_GB MaxOverheadUsg_GB AvgConsumedUsg_GB MaxConsumedUsg_GB
+                </param>
+            <module name="ViewstateAdapter">
+              <param name="suppressionList">
+                <item>dataOverlayMode</item>
+                <item>fields</item>
+              </param>
+              <module name="HiddenFieldPicker">
+                <param name="strictMode">True</param>
+                <module name="JobProgressIndicator"/>
+                <module name="Paginator">
+                  <param name="entityName">results</param>
+                  <param name="count">10</param>
+                  <module name="EnablePreview">
+                    <param name="enable">True</param>
+                    <param name="display">False</param>
+                    <module name="SimpleResultsTable">
+                      <param name="entityName">results</param>
+                      <param name="dataOverlayMode">heatmap</param>
+                      <param name="drilldown">all</param>
+                      <param name="allowTransformedFieldSelect">True</param>
+                      <module name="Gimp"/>
+                      <module name="SimpleDrilldown">
+                        <param name="links">
+                          <param name="*">
+                    /app/splunk_for_vmware/vm_detail?selectedVirtualMachine=$row.HIDE-host$-$row.HIDE-VirtualMachine-moid$
+                    
+                </param>
+                        </param>
+                      </module>
+                    </module>
+                    <module name="ViewRedirectorLink">
+                      <param name="viewTarget">flashtimeline</param>
+                    </module>
+                  </module>
+                </module>
+              </module>
+            </module>
+          </module><!-- R1, P2 -->
+
+					<!-- R1 C1 -->
+                    <module name="SOLNSearch" layoutPanel="panel_row2_col1">
+                      <param name="search">| `tstats` avg(p_average_cpu_usagemhz_megaHertz) avg(p_maximum_cpu_usagemhz_megaHertz) avg(p_minimum_cpu_usagemhz_megaHertz) avg(p_none_cpu_usagemhz_megaHertz) dc(moid) first(ccr) first(host) from vmw_perf_cpu_virtualmachine where * instance="aggregated" ccr="$name.moid$" host=$name.host$ groupby _time span=1m | timechart minspan=1m avg(p_average_cpu_usagemhz_megaHertz) as avg_usagemhz_megaHertz, avg(p_maximum_cpu_usagemhz_megaHertz) as max_usagemhz_megaHertz, avg(p_minimum_cpu_usagemhz_megaHertz) as min_usagemhz_megaHertz, avg(p_none_cpu_usagemhz_megaHertz) as none_usagemhz_megaHertz dc(moid) as num_vms first(ccr) as moid first(host) as host | lookup TimeClusterServicesAvailability host, moid OUTPUT p_average_clusterServices_effectivecpu_megaHertz | eval AvgCpuPerVM_mhz=coalesce(avg_usagemhz_megaHertz,max_usagemhz_megaHertz,min_usagemhz_megaHertz,none_usagemhz_megaHertz) | eval TotUsg_mhz=AvgCpuPerVM_mhz*num_vms | eval AvgCpuUsg_pct=TotUsg_mhz/p_average_clusterServices_effectivecpu_megaHertz | eval name="$name.name$" |  table _time host moid name num_vms AvgCpuPerVM_mhz TotUsg_mhz AvgCpuUsg_pct</param>
+                      <module name="JobProgressIndicator"/>
+                      <module name="SOLNNullSwapper" layoutPanel="panel_row2_col1">
+                        <param name="useSOLNSub">true</param>
+                        <param name="search">| stats count | eval name="$name.name$" | eval moid="$name.moid$" | eval host="$name.host$" | eval num_vms="Unknown" | eval AvgCpuPerVM_mhz="Unknown" | eval TotUsg_mhz="Unknown" | eval AvgCpuUsg_pct="Unknown"| eval num_vms="Not Available" | eval actual_num_vms="Not Available" | eval cpu_per_vm="Not Available"| eval potential_vm_count="Not Available" |  eval additional_vms="Not Available" | `SetHandleInfoMaxTimeNow` | table _time moid name num_vms AvgCpuPerVM_mhz TotUsg_mhz  AvgCpuUsg_pct cpu_per_vm additional_vms potential_vm_count actual_num_vms</param>
+                        <module name="SOLNResultsLoader">
+                          <module name="SOLNPostProcess" layoutPanel="panel_row2_col1">
+                            <param name="search">| stats max(num_vms) as num_vms avg(AvgCpuPerVM_mhz) as cpu_per_vm | eval actual_num_vms=floor(num_vms) | eval cpu_per_vm=if(cpu_per_vm&lt;100,100,cpu_per_vm) | eval potential_vm_count=floor($results[0].SafeEffCpu_MHz$/cpu_per_vm) | eval additional_vms=potential_vm_count-actual_num_vms</param>
+                            <module name="SOLNNullSwapper">
+                              <param name="search">|stats count | eval num_vms="Not Available" | eval cpu_per_vm="Not Available" | eval actual_num_vms="Not Available" | eval cpu_per_vm="Not Available"| eval potential_vm_count="Not Available" |  eval additional_vms="Not Available"</param>
+                              <module name="SOLNResultsLoader">
+                                <module name="SOLNContent" layoutPanel="panel_row2_col1_header">
+                                  <param name="content">Capacity statistics for $name.name$ $search.timerange$</param>
+                                </module>
+                                <module name="JobProgressIndicator" layoutPanel="panel_row2_col1"/>
+                                <module name="SOLNContent" layoutPanel="panel_row2_col1">
+                                  <param name="defaultTokenValue">Waiting for data...</param>
+                                  <param name="content">&lt;table class="splTable"&gt;
+																&lt;tr&gt;
+																&lt;td&gt;Hosts in Cluster&lt;/td&gt;
+																&lt;td&gt;$results[0].num_hosts$&lt;/param&gt;
+																&lt;/tr&gt;
+																&lt;tr&gt;
+																&lt;td&gt;Powered on VM's&lt;/td&gt;
+																&lt;td&gt;$results[0].actual_num_vms$&lt;/param&gt;
+																&lt;/tr&gt;
+																&lt;tr&gt;
+																&lt;td&gt;Average usage (MHz) per VM&lt;/td&gt;
+																&lt;td&gt;$results[0].cpu_per_vm$&lt;/param&gt;
+																&lt;/tr&gt;
+																&lt;tr&gt;
+																&lt;td&gt;Total MHz available in cluster&lt;/td&gt;
+																&lt;td&gt;$results[0].p_average_clusterServices_effectivecpu_megaHertz$&lt;/param&gt;
+																&lt;/tr&gt;
+																&lt;tr&gt;
+																&lt;td&gt;Estimated number of VM's that can be added&lt;/td&gt;
+																&lt;td&gt;$results[0].additional_vms$&lt;/param&gt;
+																&lt;/tr&gt;
+																&lt;/tr&gt;
+																&lt;/table&gt;</param>
+                                </module>
+                              </module>
+                            </module>
+                          </module>
+                        </module>
+                        <!--
+                        <module name="SOLNPostProcess" layoutPanel="panel_row3_col1">
+                          <param name="search">| eval SafeUsage=$results[0].SafeEffCpu_MHz$ | eval TotalCapacity=$results[0].p_average_clusterServices_effectivecpu_megaHertz$ | timechart minspan=1m avg(TotalCapacity) as "Total Capacity" avg(SafeUsage) as "Safe Usage" avg(TotUsg_mhz) as "Current Usage"</param>
+                          <module name="SOLNContent" layoutPanel="panel_row3_col1_header">
+                            <param name="content">Currently used MHz and Total Capacity over time $search.timerange$</param>
+                          </module>
+                          <module name="JobProgressIndicator"/>
+                          <module name="HiddenChartFormatter">
+                            <param name="secondaryAxisTitle.text">CPU Usage (MHz)</param>
+                            <param name="primaryAxisTitle.text">Time</param>
+                            <param name="charting.chart">line</param>
+                            <module name="JSChart"/>
+                          </module>
+                          <module name="ViewRedirectorLink">
+                            <param name="viewTarget">flashtimeline</param>
+                          </module>
+                        </module>
+					-->
+                      </module>
+                    </module><!-- R2 -->
+
+          <!-- R3 : VM Usage -->
+<!-- Panneau 1 : 3 gauges -->
+  <module name="SOLNIncludeD3" layoutPanel="panel_row3_col1"/>
+  <module name="SOLNCommon" layoutPanel="panel_row3_col1" autoRun="True">
+
+  <module name="SOLNContent" layoutPanel="panel_row3_col1_header">
+      <param name="content">Virtual Machine Health - Last 4 hours</param>
+   </module>
+
+  
+  <module name="HiddenSearch">
+      <param name="earliest">-4h</param>
+      <param name="latest">now</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row3_col1_grp1">
+        <param name="savedSearch">Home_P1_G1</param>
+        <module name="SOLNNullSwapper">
+          <param name="search">d_home_proactive_monitoring_gauge_null</param>
+          <param name="lookupSavedSearch">True</param>
+          <module name="JobProgressIndicator"/>
+          <module name="HiddenChartFormatter">
+            <param name="charting.chart.usePercentageValue">true</param>
+            <param name="charting.primaryAxisTitle.text">High CPU Usage</param>
+            <param name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</param>
+            <param name="charting.chart.style">shiny</param>
+            <param name="charting.chart">noelGauge</param>
+            <module name="SOLNGauge">
+              <param name="enableResize">false</param>
+              <param name="width">230px</param>
+              <param name="height">230px</param>
+              <module name="SOLNRedirect">
+                <param name="url">proactive_monitoring?form.entity_type=virtualmachine&amp;form.perf_type=cpu&amp;earliest=-4h&amp;latest=now&amp;form.metric=average_cpu_usage_percent</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+
+	<!-- Panneau 1 gauge 2/3 -->
+    <module name="HiddenSearch">
+      <param name="earliest">-4h</param>
+      <param name="latest">now</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row3_col1_grp2">
+        <param name="savedSearch">d_home_proactive_monitoring_row1_col1_gauge2</param>
+        <module name="JobProgressIndicator"/>
+        <module name="SOLNNullSwapper">
+          <param name="search">d_home_proactive_monitoring_gauge_null</param>
+          <module name="HiddenChartFormatter">
+            <param name="charting.chart.usePercentageValue">true</param>
+            <param name="charting.primaryAxisTitle.text">High Memory Usage</param>
+            <param name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</param>
+            <param name="charting.chart.style">shiny</param>
+            <param name="charting.chart">noelGauge</param>
+            <module name="SOLNGauge">
+              <param name="enableResize">false</param>
+              <param name="width">230px</param>
+              <param name="height">230px</param>
+              <module name="SOLNRedirect">
+                <param name="url">proactive_monitoring?form.entity_type=virtualmachine&amp;form.perf_type=mem&amp;earliest=-4h&amp;latest=now&amp;form.metric=average_mem_usage_percent</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+
+	<!-- Panneau 1 gauge 2/3 -->
+    <module name="HiddenSearch">
+      <param name="earliest">-4h</param>
+      <param name="latest">now</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row3_col1_grp3">
+        <param name="savedSearch">d_home_proactive_monitoring_row1_col1_gauge3</param>
+        <module name="JobProgressIndicator"/>
+        <module name="SOLNNullSwapper">
+          <param name="search">d_home_proactive_monitoring_gauge_null</param>
+          <module name="HiddenChartFormatter">
+            <param name="charting.chart.usePercentageValue">true</param>
+            <param name="charting.primaryAxisTitle.text">High CPU Sum Ready Time</param>
+            <param name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</param>
+            <param name="charting.chart.style">shiny</param>
+            <param name="charting.chart">noelGauge</param>
+            <module name="SOLNGauge">
+              <param name="enableResize">false</param>
+              <param name="width">230px</param>
+              <param name="height">230px</param>
+              <module name="SOLNRedirect">
+                <param name="url">proactive_monitoring?form.entity_type=virtualmachine&amp;form.perf_type=cpu&amp;earliest=-4h&amp;latest=now&amp;form.metric=summation_cpu_ready_millisecond</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+	
+    <module name="SOLNSavedSearchLookup" layoutPanel="panel_row3_col1_footer">
+      <param name="savedSearch">d_home_proactive_monitoring_row1_col1_footer_base</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row3_col1_footer">
+        <param name="setPostProcess">true</param>
+        <param name="savedSearch">d_home_proactive_monitoring_row1_col1_footer_TotalVMs</param>
+        <module name="SOLNNullSwapper">
+          <param name="search">| stats count | eval TotalVMs="0"</param>
+          <module name="SOLNResultsLoader">
+            <param name="displayName">VMInfo</param>
+            <module name="SOLNSavedSearchLookup" layoutPanel="panel_row3_col1_footer">
+              <param name="setPostProcess">true</param>
+              <param name="savedSearch">d_home_proactive_monitoring_row1_col1_footer_TotalMigrations</param>
+              <module name="SOLNNullSwapper">
+                <param name="search">| stats count | eval TotalMigrations="0"</param>
+                <module name="SOLNResultsLoader">
+                  <param name="displayName">VMInfo</param>
+                  <module name="SOLNContent" layoutPanel="panel_row3_col1_footer">
+                    <param name="useTemplate">false</param>
+                    <param name="style">width:100%;</param>
+                    <param name="content">&lt;script&gt;
+											$("#openTotalVM").click(function() {$(document).trigger("openContextGate",["vmgate","d_home_proactive_monitoring_row1_col1_footer_TotalVMs_drill"]);});
+											$("#openMigratedVM").click(function() {$(document).trigger("openContextGate",["vmgate","d_home_proactive_monitoring_row1_col1_footer_TotalMigrations_drill"]);});
+											&lt;/script&gt;
+											&lt;hr style="clear: both;border:0;height:1px;"&gt;&lt;/hr&gt;
+											&lt;br&gt;
+											&lt;table style='width:100%; font-family: "Helvetica nenu", Helvetica, Arial, sans-serif; font-size: 19px;'&gt;
+											&lt;tr&gt;
+											&lt;th width="15%"&gt;Total VMs:&lt;/th&gt;
+											&lt;td width="18%"&gt;&lt;a class="soln-link-button" id="openTotalVM" style='font-family: "Helvetica nenu", Helvetica, Arial, sans-serif; font-size: 19px; font-weight: 100;'&gt;$VMInfo[0].TotalVMs$&lt;/a&gt;&lt;/td&gt;
+											&lt;td width="33%"&gt;&lt;/td&gt;
+											&lt;th width="28%"&gt;Total VM Migrations:&lt;/th&gt;
+											&lt;td width="5%"&gt;&lt;a class="soln-link-button" id="openMigratedVM" style='font-family: "Helvetica nenu", Helvetica, Arial, sans-serif; font-size: 19px; font-weight: 100;'&gt;$VMInfo[0].TotalMigrations$&lt;/a&gt;&lt;/td&gt;
+											&lt;/tr&gt;
+											&lt;/table&gt;</param>
+                  </module>
+                </module>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+	  
+      <module name="SOLNContextGate">
+        <param name="key">vmgate</param>
+        <module name="SOLNSavedSearchLookup" layoutPanel="panel_row3_col1_footer">
+          <param name="setPostProcess">true</param>
+          <param name="savedSearch">$vmgate$</param>
+          <module name="Paginator" layoutPanel="panel_row3_col1_footer">
+            <param name="maxPages">20</param>
+            <param name="count">10</param>
+            <param name="entityName">results</param>
+            <module name="SimpleResultsTable">
+              <param name="drilldown">all</param>
+              <module name="SOLNRedirect">
+                <param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+                <param name="paramList">click.name2,click.HIDE-VirtualMachineMoid,click.HIDE-HostSystemMoid,click.vCenter,search.sid</param>
+                <param name="renameList">Type,VirtualMachine-moid,HostSystem-moid,host,sid</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+	
+<!-- Host System Health : 3 gauges -->
+    <module name="SOLNContent" layoutPanel="panel_row4_col1_header">
+      <param name="content">Host System Health - Last 4 hours</param>
+    </module>
+    <module name="HiddenSearch">
+      <param name="latest">now</param>
+      <param name="earliest">-4h</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row4_col1_grp1">
+        <param name="savedSearch">d_home_proactive_monitoring_row1_col2_gauge1</param>
+        <module name="JobProgressIndicator"/>
+        <module name="SOLNNullSwapper">
+          <param name="lookupSavedSearch">True</param>
+          <param name="search">d_home_proactive_monitoring_gauge_null</param>
+          <module name="HiddenChartFormatter">
+            <param name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</param>
+            <param name="charting.chart.style">shiny</param>
+            <param name="charting.chart">noelGauge</param>
+            <param name="charting.primaryAxisTitle.text">High Memory Ballooning</param>
+            <param name="charting.chart.usePercentageValue">true</param>
+            <module name="SOLNGauge">
+              <param name="height">230px</param>
+              <param name="width">230px</param>
+              <param name="enableResize">false</param>
+              <module name="SOLNRedirect">
+                <param name="url">proactive_monitoring?form.entity_type=hostsystem&amp;form.perf_type=mem&amp;earliest=-4h&amp;latest=now&amp;form.metric=average_mem_vmmemctl_kiloBytes</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+    <module name="HiddenSearch">
+      <param name="latest">now</param>
+      <param name="earliest">-4h</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row4_col1_grp2">
+        <param name="savedSearch">d_home_proactive_monitoring_row1_col2_gauge2</param>
+        <module name="SOLNNullSwapper">
+          <param name="lookupSavedSearch">True</param>
+          <param name="search">d_home_proactive_monitoring_gauge_null</param>
+          <module name="JobProgressIndicator"/>
+          <module name="HiddenChartFormatter">
+            <param name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</param>
+            <param name="charting.chart.style">shiny</param>
+            <param name="charting.chart">noelGauge</param>
+            <param name="charting.primaryAxisTitle.text">High Memory Swapping</param>
+            <param name="charting.chart.usePercentageValue">true</param>
+            <module name="SOLNGauge">
+              <param name="height">230px</param>
+              <param name="width">230px</param>
+              <param name="enableResize">false</param>
+              <module name="SOLNRedirect">
+                <param name="url">proactive_monitoring?form.entity_type=hostsystem&amp;form.perf_type=mem&amp;earliest=-4h&amp;latest=now&amp;form.metric=average_mem_llSwapUsed_kiloBytes</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+    <module name="HiddenSearch">
+      <param name="latest">now</param>
+      <param name="earliest">-4h</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row4_col1_grp3">
+        <param name="savedSearch">d_home_proactive_monitoring_row1_col2_gauge3</param>
+        <module name="JobProgressIndicator"/>
+        <module name="SOLNNullSwapper">
+          <param name="search">d_home_proactive_monitoring_gauge_null</param>
+          <module name="HiddenChartFormatter">
+            <param name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</param>
+            <param name="charting.chart.style">shiny</param>
+            <param name="charting.chart">noelGauge</param>
+            <param name="charting.primaryAxisTitle.text">High CPU Usage</param>
+            <param name="charting.chart.usePercentageValue">true</param>
+            <module name="SOLNGauge">
+              <param name="height">230px</param>
+              <param name="width">230px</param>
+              <param name="enableResize">false</param>
+              <module name="SOLNRedirect">
+                <param name="url">proactive_monitoring?form.entity_type=hostsystem&amp;form.perf_type=cpu&amp;earliest=-4h&amp;latest=now&amp;form.metric=average_cpu_usage_percent</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module>
+	
+    <module name="SOLNSavedSearchLookup" layoutPanel="panel_row4_col1_footer">
+      <param name="savedSearch">d_home_proactive_monitoring_row1_col2_footer_base</param>
+      <module name="SOLNSavedSearchLookup" layoutPanel="panel_row4_col1_footer">
+        <param name="savedSearch">d_home_proactive_monitoring_row1_col2_footer_TotalHosts</param>
+        <param name="setPostProcess">true</param>
+        <module name="SOLNNullSwapper">
+          <param name="search">| stats count | eval TotalHosts="Not Available"</param>
+          <module name="SOLNResultsLoader">
+            <param name="displayName">HostInfo</param>
+            <module name="SOLNContent" layoutPanel="panel_row1_col2_footer">
+              <param name="content">&lt;script&gt;
+								$("#openTotalHost").click(function() {$(document).trigger("openContextGate",["hostgate","d_home_proactive_monitoring_row1_col2_footer_TotalHosts_drill"]);});
+								&lt;/script&gt;
+								&lt;hr style="clear: both;border:0;height:1px;"&gt;&lt;/hr&gt;
+								&lt;br&gt;
+								&lt;table style='width:100%; font-family: "Helvetica nenu", Helvetica, Arial, sans-serif; font-size: 18px;'&gt;
+								&lt;tr&gt;
+								&lt;th width="15%"&gt;Total Hosts:&lt;/th&gt;
+								&lt;td width="18%"&gt;&lt;a class="soln-link-button" id="openTotalHost" style='font-family: "Helvetica nenu", Helvetica, Arial, sans-serif; font-size: 18px;'&gt;$HostInfo[0].TotalHosts$&lt;/a&gt;&lt;/td&gt;
+								&lt;td width="33%"&gt;&lt;/td&gt;
+								&lt;td width="33%"&gt;&lt;/td&gt;
+								&lt;/tr&gt;
+								&lt;/table&gt;</param>
+              <param name="style">width:100%;</param>
+              <param name="useTemplate">false</param>
+            </module>
+          </module>
+        </module>
+      </module>
+      <module name="SOLNContextGate">
+        <param name="key">hostgate</param>
+        <module name="SOLNSavedSearchLookup" layoutPanel="panel_row4_col1_footer">
+          <param name="savedSearch">$hostgate$</param>
+          <param name="setPostProcess">true</param>
+          <module name="Paginator" layoutPanel="panel_row4_col1_footer">
+            <param name="entityName">results</param>
+            <param name="maxPages">20</param>
+            <param name="count">10</param>
+            <module name="SimpleResultsTable">
+              <param name="drilldown">all</param>
+              <module name="SOLNRedirect">
+                <param name="renameList">Type,host,ClusterComputeResource-moid,HostSystem-moid,sid</param>
+                <param name="paramList">click.name2,click.HIDE-host,click.HIDE-ClusterComputeResource-moid,click.HIDE-HostSystem-moid,search.sid</param>
+                <param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+              </module>
+            </module>
+          </module>
+        </module>
+      </module>
+    </module><!-- Host System Health : 3 gauges -->
+          
+
+<module name="SOLNContent" layoutPanel="panel_row5_col1_header">
+      <param name="content">Datastore Information - Last 4 hours</param>
+    </module>
+    <module name="SOLNSearch" layoutPanel="panel_row5_col1">
+      <param name="search">sourcetype="vmware:inv:datastore" earliest=-4h latest=now | spath moid | spath changeSet.summary.accessible output=accessible | spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace | spath changeSet.summary.uncommitted output=uncommitted | spath changeSet.summary.url output=url | spath changeSet.summary.type output=type | spath changeSet.summary.name output=name | table _time, moid, host, name, url, accessible, capacity, freeSpace, uncommitted, type | stats first(name) as name first(freeSpace) as freeSpace first(capacity) as capacity first(accessible) as accessible first(uncommitted) as uncommitted by host, moid | fillnull value=0 uncommitted | eval totalSpace=tostring(round((capacity)/(1024*1024*1024), 2)) | eval RemainingCapacity_GB=tostring(round((freeSpace)/(1024*1024*1024), 2)) | eval Committed_GB=totalSpace-RemainingCapacity_GB | eval spaceAfterUncommitedAllocation=freeSpace-uncommitted | eval provisionedAmount=capacity-spaceAfterUncommitedAllocation | eval overprovisionedPct=round(if(provisionedAmount!=0,(provisionedAmount/capacity)-1,0)*100,2) | thresholdlookup entitytype=Datastore,perftype=inv,metric=RemainingCapacity_GB,match=true| eval warnLevel=(totalSpace-threshold_warnlevel) | eval critLevel=(totalSpace-threshold_critlevel) | rename totalSpace as Capacity_GB, name as Datastore, overprovisionedPct as Overprovisioned_pct | eval Type="Datastore" | search Datastore=* | table Type moid host Datastore Committed_GB Capacity_GB Overprovisioned_pct critLevel warnLevel | gaugetable Committed_GB warnLevel critLevel Capacity_GB</param>
+      <module name="JobProgressIndicator" layoutPanel="panel_row5_col1"/>
+      <module name="Paginator">
+        <param name="entityName">results</param>
+        <param name="maxPages">20</param>
+        <param name="count">10</param>
+        <module name="BarTable">
+          <param name="valueField">Committed_GB</param>
+          <param name="colors">#FFFFFF,#FF9C00,#D93705,#D93705</param>
+          <param name="addFields">Overprovisioned_pct</param>
+          <param name="displayField">Datastore</param>
+          <param name="icons">,/static/app/splunk_for_vmware/warning.png,/static/app/splunk_for_vmware/critical.png,/static/app/splunk_for_vmware/critical.png</param>
+          <param name="totalField">Capacity_GB</param>
+          <module name="SOLNRedirect">
+            <param name="renameList">Type,Datastore-moid,host</param>
+            <param name="paramList">click.Type,click.moid,click.host</param>
+            <param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+          </module>
+        </module>
+      </module>
+    </module>
+
+    <module name="SOLNContent" layoutPanel="panel_row5_col2_header">
+      <param name="content">Recent VMware Alarms - Last 4 hours</param>
+    </module>
+    <module name="SOLNSearch" layoutPanel="panel_row5_col2">
+      <param name="search">sourcetype="vmware:events" earliest=-4hr latest=now | spath alarm | search alarm=* | spath entity.name output=entityname | spath fullFormattedMessage output=Message | spath entity.entity.moid output=moid | spath entity.entity.type output=type | table _time, host, moid, type, entityname, Message | rename host AS HIDE-host, moid AS HIDE-moid, type AS HIDE-type</param>
+      <module name="JobProgressIndicator"/>
+      <module name="Paginator">
+        <param name="entityName">results</param>
+        <param name="maxPages">15</param>
+        <param name="count">10</param>
+        <module name="SimpleResultsTable">
+          <param name="drilldown">all</param>
+          <module name="SOLNRedirect">
+            <param name="renameList">nid,host,Type,sid</param>
+            <param name="paramList">click.HIDE-moid,click.HIDE-host,click.HIDE-type,search.sid</param>
+            <param name="url">/custom/splunk_for_vmware/vmware_redirector/splunk_for_vmware/redirect</param>
+          </module>
+        </module>
+      </module>
+    </module>    
+
+
+          </module> <!-- SOLNCommon -->          
+
+
+          
+          
+          
+          
+          
+          
+        </module><!-- SubmitButton -->
+		
+      </module>
+    </module><!-- SearchSelectLister -->
+	
+  </module><!-- TimeRangePicker -->
+  
+</view>

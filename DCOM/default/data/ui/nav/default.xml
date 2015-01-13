@@ -1,0 +1,34 @@
+
+<nav  color="#E2001A">
+	<collection label="Overview">
+		<view name="1_day_Overview" default='true'/>		
+		<a  href="Realtime_overview">Real time Overview</a>
+	  </collection>
+	  <collection label="Capacity planning">
+		<a  href="hypervisor_capacityplanning">Hypervisor</a>
+		<a  href="LB_capacityplanning">Application Delivery</a>
+		<a  href="network_capacity_planning_wan">Network</a>
+		<a  href="firewall_capacityplanning">Firewall</a>
+	  </collection> 
+	  <collection label="Perimeter">
+		<a  href="hypervisor_perimeter">Hypervisor</a>
+		<a  href="LB_perimeter">Application Delivery</a>
+		<a  href="network_perimeter">Network</a>
+		<a  href="firewall_perimeter">Firewall</a>
+	  </collection>  
+	  <collection label="Proactive Monitoring">
+		<a  href="hypervisor_proactivemonitoring">Hypervisor</a>
+		<a  href="LB_proactivemonitoring">Application Delivery</a>
+		<a  href="netflow_proactivemonitoring">Network</a>
+		<a  href="firewall_proactivemonitoring">Firewall</a>
+	  </collection>
+	 <collection label="Other">
+		<view name="search"  />
+		<view name="data_models" />
+		<view name="reports" />
+		<view name="alerts" />
+		<view name="dashboards" />
+		<a  href="About">About this App</a>
+		<view name="config" />
+	</collection>
+</nav>

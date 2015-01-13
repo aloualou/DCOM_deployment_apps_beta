@@ -1,0 +1,6 @@
+#used to put the critical app name, ip of wan interface, throughput of wan interface
+
+title,value, value2
+app_F5_overview,Facturation.telindus.intra:80
+WAN_1,10.32.132.6,20
+WAN_2,10.32.132.15,5

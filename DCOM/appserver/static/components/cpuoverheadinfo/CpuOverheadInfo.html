@@ -1,0 +1,23 @@
+<h3>CPU statistics for <%=name%> Cluster</h3>
+<table>
+	<tr>
+		<td>Hosts in Cluster</td>
+		<td><%=num_hosts2%></td>
+	</tr>
+	<tr>
+		<td>Powered on VM's</td>
+		<td><%=actual_num_vms%></td>
+	</tr>
+	<tr>
+		<td>Average usage (MHz) per VM</td>
+		<td><%=cpu_per_vm%></td>
+	</tr>
+	<tr>
+		<td>Total MHz available in cluster</td>
+		<td><%=p_average_clusterServices_effectivecpu_megaHertz%></td>
+	</tr>
+	<tr>
+		<td>Estimated number of VM's that can be added</td>
+		<td><%=additional_vms%></td>
+	</tr>
+</table>

@@ -1,0 +1,273 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js" stylesheet="inputs_layout.css">
+  <label>Capacity Planning : WAN links</label>
+  <fieldset autoRun="True">
+    <input type="time" searchWhenChanged="False">
+      <label>Time Range</label>
+      <default>Last 90 days</default>
+    </input>
+  </fieldset>
+  <search id="globalWAN1">
+    <query>|inputlookup static_config |search title=WAN_1|rename value as IP|fields IP</query>
+    <earliest>-24h@h</earliest>
+    <latest>now</latest>
+  </search>
+  <search id="globalWAN1_stats">
+    <query>index=summary_network report_name=summary_WAN_1|stats  sum(warningcount) as warningcount sum(criticalcount) as criticalcount|eval warning=warningcount*10|eval critical=criticalcount*10|eval totwarning=critical+warning</query>
+  </search>
+  <search id="globalWAN1_timechart">
+    <query>index=summary_network report_name=summary_WAN_1|timechart span=30d sum(warningcount) as warningcount sum(criticalcount) as criticalcount|eval warning=warningcount*10|eval critical=criticalcount*10|eval tot=warning+critical</query>
+  </search>
+  <search id="globalWAN2">
+    <query>|inputlookup static_config |search title=WAN_2|rename value as IP|fields IP</query>
+    <earliest>-24h@h</earliest>
+    <latest>now</latest>
+  </search>
+  <search id="globalWAN2_stats">
+    <query>index=summary_network report_name=summary_WAN_2|stats  sum(warningcount) as warningcount sum(criticalcount) as criticalcount|eval warning=warningcount*10|eval critical=criticalcount*10|eval totwarning=critical+warning</query>
+  </search>
+  <search id="globalWAN2_timechart">
+    <query>index=summary_network report_name=summary_WAN_2|timechart span=30d sum(warningcount) as warningcount sum(criticalcount) as criticalcount|eval warning=warningcount*10|eval critical=criticalcount*10|eval tot=warning+critical</query>
+  </search>
+  <row>
+    <panel>
+      <html>
+        <h2>WAN 1</h2>
+      </html>
+      <single>
+        <search base="globalWAN1"></search>
+        <option name="underLabel">WAN IP</option>
+      </single>
+      <single>
+        <search>
+          <query>|inputlookup static_config |search title=WAN_1|rename value2 as throughput|fields throughput</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="afterLabel">Mb/s</option>
+        <option name="underLabel">Line throughput</option>
+      </single>
+      <single>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_1| stats avg(used_bandwidth)</query>
+        </search>
+        <option name="afterLabel">Mb/s</option>
+        <option name="beforeLabel">The average throughput was</option>
+      </single>
+      <single>
+        <search base="globalWAN1_stats">
+          <query>eval field_in_hhmmss=tostring(totwarning, "duration")|fields field_in_hhmmss</query>
+        </search>
+        <option name="beforeLabel">The WAN link has spent</option>
+        <option name="afterLabel">above warning threshold during the period</option>
+        <option name="beforeLabel"></option>
+      </single>
+      <chart>
+        <title>WAN 1 : time  spent over threshold in %</title>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_1|timechart span=1d sum(warningcount) as warningcount sum(criticalcount) as criticalcount|eval warning=warningcount*10|eval critical=criticalcount*10|eval below_threshold=(60*60*24)-warning-critical|fields _time warning critical below_threshold</query>
+          <earliest></earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked100</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <single>
+        <search base="globalWAN1_timechart">
+          <query>delta tot as delta|eval deltapercent=if(tot==0,0,delta*100/tot)|stats max(deltapercent) as delta_percent|eval delta_percent=round(delta_percent,2)</query>
+        </search>
+        <option name="field">delta_percent</option>
+        <option name="beforeLabel"></option>
+        <option name="afterLabel">%</option>
+        <option name="underLabel">Growth of bandwidth warning over the period</option>
+      </single>
+      <single>
+        <search base="globalWAN1_timechart">
+          <query>|delta tot as delta_in_s|stats avg(delta_in_s) as avg_delta avg(tot) as tot|eval remainingtime=(((60*60*24*30*0.3)-tot)/avg_delta)|eval remainingtime=if(remainingtime&gt;0,remainingtime,"Not applicable (no warning growth)")</query>
+        </search>
+        <option name="field">remainingtime</option>
+        <option name="underLabel">Months before Wan upgrade is required</option>
+      </single>
+    </panel>
+    <panel>
+      <html>
+        <h2>WAN 2</h2>
+      </html>
+      <single>
+        <search base="globalWAN2"></search>
+        <option name="underLabel">WAN IP</option>
+      </single>
+      <single>
+        <search>
+          <query>|inputlookup static_config |search title=WAN_2|rename value2 as throughput|fields throughput</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="afterLabel">Mb/s</option>
+        <option name="underLabel">Line throughput</option>
+      </single>
+      <single>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_2| stats avg(used_bandwidth)</query>
+        </search>
+        <option name="afterLabel">Mb/s</option>
+        <option name="beforeLabel">The average throughput was</option>
+      </single>
+      <single>
+        <search base="globalWAN2_stats">
+          <query>eval field_in_hhmmss=tostring(totwarning, "duration")|fields field_in_hhmmss</query>
+        </search>
+        <option name="beforeLabel">The WAN link has spent</option>
+        <option name="afterLabel">above warning threshold during the period</option>
+        <option name="beforeLabel"></option>
+      </single>
+      <chart>
+        <title>WAN 2 : time  spent over threshold in %</title>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_2|timechart span=1d sum(warningcount) as warningcount sum(criticalcount) as criticalcount|eval warning=warningcount*10|eval critical=criticalcount*10|eval below_threshold=(60*60*24)-warning-critical|fields _time warning critical below_threshold</query>
+          <earliest></earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked100</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <single>
+        <search base="globalWAN2_timechart">
+          <query>delta tot as delta|eval deltapercent=if(tot==0,0,delta*100/tot)|stats max(deltapercent) as delta_percent|eval delta_percent=round(delta_percent,2)</query>
+        </search>
+        <option name="field">delta_percent</option>
+        <option name="beforeLabel"></option>
+        <option name="afterLabel">%</option>
+        <option name="underLabel">Growth of bandwidth warning over the period</option>
+      </single>
+      <single>
+        <search base="globalWAN2_timechart">
+          <query>|delta tot as delta_in_s|stats avg(delta_in_s) as avg_delta avg(tot) as tot|eval remainingtime=(((60*60*24*30*0.3)-tot)/avg_delta)|eval remainingtime=if(remainingtime&gt;0,remainingtime,"Not applicable (no warning growth)")</query>
+        </search>
+        <option name="field">remainingtime</option>
+        <option name="underLabel">Months before Wan upgrade is required</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>WAN 1 : max bandwidth per hour</title>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_1|timechart  avg(max_seen)|join[|inputlookup append=t static_config  |search title=WAN_1|rename value2 as WAN_link|thresholdlookup entitytype=Netflow,perftype=bandwidth,metric=WAN_link,match=true|eval warning=threshold_warnlevel*WAN_link/100|fields warning, WAN_link]</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.overlayFields">WAN_link,warning</option>
+        <option name="charting.chart.stackMode">default</option>
+      </chart>
+      <table>
+        <title>Optimize your WAN costs</title>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_1|stats max(max_seen) as max|join[|inputlookup append=t static_config  |search title=WAN_1|rename value2 as WAN_link|thresholdlookup entitytype=Netflow,perftype=bandwidth,metric=WAN_link,match=true|eval warning=threshold_warnlevel*WAN_link/100|fields warning, WAN_link]|eval max=round(max,2)|eval optimize=if(max-warning&lt;0,"You could downgrade the link to "+max+" Mb/s","No optimization seems possible, your "+WAN_link+" Mb/s link seems appropriate")|fields optimize</query>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel>
+      <chart>
+        <title>WAN 2 : max bandwidth per hour</title>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_2|timechart avg(max_seen)|join[|inputlookup append=t static_config  |search title=WAN_2|rename value2 as WAN_link|thresholdlookup entitytype=Netflow,perftype=bandwidth,metric=WAN_link,match=true|eval warning=threshold_warnlevel*WAN_link/100|fields warning, WAN_link]</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.overlayFields">WAN_link,warning</option>
+        <option name="charting.chart.stackMode">default</option>
+      </chart>
+      <table>
+        <title>Optimize your WAN costs</title>
+        <search>
+          <query>index=summary_network report_name=summary_WAN_2|stats max(max_seen) as max|join[|inputlookup append=t static_config  |search title=WAN_2|rename value2 as WAN_link|thresholdlookup entitytype=Netflow,perftype=bandwidth,metric=WAN_link,match=true|eval warning=threshold_warnlevel*WAN_link/100|fields warning, WAN_link]|eval max=round(max,2)|eval optimize=if(max-warning&lt;0,"You could downgrade the link to "+max+" Mb/s","No optimization seems possible, your "+WAN_link+" Mb/s link seems appropriate")|fields optimize</query>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+</form>

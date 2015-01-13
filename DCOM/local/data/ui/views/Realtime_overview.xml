@@ -1,0 +1,553 @@
+<form script="application.js, autodiscover_memory_overhead_info.js, autodiscover_cpu_overhead_info.js, single_trend.js, table_icons_rangemap.js, table_icons_inline.js" stylesheet="table_decorations.css, single_trend.css, application.css">
+  <row>
+    <panel>
+      <html>
+        <h2>VMware</h2>
+      </html>
+      <input type="time" token="time_vmware">
+        <default>
+          <earliestTime>rt-5m</earliestTime>
+          <latestTime>rt</latestTime>
+        </default>
+      </input>
+      <input type="dropdown" token="Host" searchWhenChanged="true">
+        <label>Cluster</label>
+        <search>
+          <query>| inputlookup Entity | search type=clusterComputeResource | eval cluster_id="host=\""+host+"\" ccr=\""+moid +"\""</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <fieldForLabel>name</fieldForLabel>
+        <fieldForValue>cluster_id</fieldForValue>
+        <default>host="apps-vcenter500.sv.splunk.com" ccr="domain-c8"</default>
+      </input>
+      <chart id="hostHighMemoryBallooning">
+        <title>High Memory Ballooning</title>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.chart.usePercentageValue">true</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</option>
+        <option name="charting.chart.showLabels">False</option>
+        <option name="height">120px</option>
+        <searchName>d_home_proactive_monitoring_row1_col2_gauge1</searchName>
+        <earliestTime>-4h</earliestTime>
+        <latestTime>now</latestTime>
+      </chart>
+      <chart id="hostHighMemorySwapping">
+        <title>High Memory Swapping</title>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.chart.usePercentageValue">true</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</option>
+        <option name="charting.chart.showLabels">False</option>
+        <option name="height">120px</option>
+        <searchName>d_home_proactive_monitoring_row1_col2_gauge2</searchName>
+        <earliestTime>-4h</earliestTime>
+        <latestTime>now</latestTime>
+      </chart>
+      <chart id="hostHighCpuUsage">
+        <title>High CPU Usage</title>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.chart.usePercentageValue">true</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</option>
+        <option name="charting.chart.showLabels">False</option>
+        <option name="height">120px</option>
+        <searchName>d_home_proactive_monitoring_row1_col2_gauge3</searchName>
+        <earliestTime>-4h</earliestTime>
+        <latestTime>now</latestTime>
+      </chart>
+      <chart id="highCpuUsage">
+        <title>High CPU</title>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.chart.usePercentageValue">true</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</option>
+        <option name="charting.chart.showLabels">False</option>
+        <option name="height">120px</option>
+        <searchName>d_home_proactive_monitoring_row1_col1_gauge1</searchName>
+        <earliestTime>-4h</earliestTime>
+        <latestTime>now</latestTime>
+      </chart>
+      <chart id="highMemoryUsage">
+        <title>High MEM</title>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.chart.usePercentageValue">true</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</option>
+        <option name="charting.chart.showLabels">False</option>
+        <option name="height">120px</option>
+        <searchName>d_home_proactive_monitoring_row1_col1_gauge2</searchName>
+        <earliestTime>-4h</earliestTime>
+        <latestTime>now</latestTime>
+      </chart>
+      <chart id="highCpuSumReady">
+        <title>CPU SUM</title>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.chart.usePercentageValue">true</option>
+        <option name="charting.chart.style">minimal</option>
+        <option name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</option>
+        <option name="charting.chart.showLabels">False</option>
+        <option name="height">120px</option>
+        <searchName>d_home_proactive_monitoring_row1_col1_gauge3</searchName>
+        <earliestTime>-4h</earliestTime>
+        <latestTime>now</latestTime>
+      </chart>
+      <html>
+        <h3>Host and VMs</h3>
+      </html>
+      <single>
+        <searchName>d_home_proactive_monitoring_row1_col2_footer_TotalHosts_merged</searchName>
+        <earliestTime>-7d</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="classField">range</option>
+        <option name="underLabel">Total Hosts</option>
+      </single>
+      <single>
+        <searchName>d_home_proactive_monitoring_row1_col1_footer_TotalVMs_merged</searchName>
+        <earliestTime>-7d</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="classField">range</option>
+        <option name="underLabel">Total VMs</option>
+      </single>
+      <single>
+        <searchName>d_home_proactive_monitoring_row1_col1_footer_TotalMigrations_merged</searchName>
+        <earliestTime>-7d</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="classField">range</option>
+        <option name="underLabel">Total VMs migrations</option>
+      </single>
+      <html>
+        <h3>Capacity Planning</h3>
+      </html>
+      <html>
+         <div class="memory-overhead-info"/>
+      </html>
+      <html>
+          <h3>Capacity Planning for Apps - CPU Headroom</h3>
+          <div class="cpu-overhead-info"/>
+        </html>
+      <html>
+        <h3>Datastore usage</h3>
+      </html>
+      <table>
+        <title>Powered on VMs memory usage in the cluster</title>
+        <searchString>sourcetype="vmware:inv:datastore" earliest=-4h latest=now | spath moid | spath changeSet.summary.accessible output=accessible | spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace | spath changeSet.summary.uncommitted output=uncommitted | spath changeSet.summary.url output=url | spath changeSet.summary.type output=type | spath changeSet.summary.name output=name | table _time, moid, host, name, url, accessible, capacity, freeSpace, uncommitted, type | stats first(name) as name first(freeSpace) as freeSpace first(capacity) as capacity first(accessible) as accessible first(uncommitted) as uncommitted by host, moid | fillnull value=0 uncommitted | eval totalSpace=tostring(round((capacity)/(1024*1024*1024), 2)) | eval RemainingCapacity_GB=tostring(round((freeSpace)/(1024*1024*1024), 2)) | eval Committed_GB=totalSpace-RemainingCapacity_GB | eval spaceAfterUncommitedAllocation=freeSpace-uncommitted | eval provisionedAmount=capacity-spaceAfterUncommitedAllocation | eval overprovisionedPct=round(if(provisionedAmount!=0,(provisionedAmount/capacity)-1,0)*100,2) | thresholdlookup entitytype=Datastore,perftype=inv,metric=RemainingCapacity_GB,match=true| eval warnLevel=(totalSpace-threshold_warnlevel) | eval critLevel=(totalSpace-threshold_critlevel) | rename totalSpace as Capacity_GB, name as Datastore, overprovisionedPct as Overprovisioned_pct | eval Type="Datastore" | search Datastore=* | table Type moid host Datastore Committed_GB Capacity_GB Overprovisioned_pct critLevel warnLevel</searchString>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="fields">Datastore, Committed_GB, Capacity_GB, Overprovisioned_pct</option>
+      </table>
+    </panel>
+    <panel>
+      <html>
+        <h2>Load Balancing</h2>
+      </html>
+      <input type="time" token="time_LB">
+        <default>
+          <earliestTime>rt-5m</earliestTime>
+          <latestTime>rt</latestTime>
+        </default>
+      </input>
+      <single>
+        <searchString>`F5LTMSYSLOG` event_code="01070638:5" OR  event_code="01070727:5" 
+          | stats count by ltm_member ltm_monitor_status ltm_pool ltm_prevstatus_time
+          | search ltm_monitor_status="down" 
+          | stats dc(ltm_member) as count
+          | rangemap field=count low=0-0 default=severe</searchString>
+        <earliestTime>$time_LB.earliest$</earliestTime>
+        <latestTime>$time_LB.latest$</latestTime>
+        <option name="classField">range</option>
+        <option name="underLabel">Membre Down</option>
+        <option name="linkView">search</option>
+      </single>
+      <single>
+        <search>
+          <query>`F5_tpsrep(server_name=*, node=*)`| bucket _time span=1h |`f5_temps_reponse_moyen`</query>
+          <earliest>$time_LB.earliest$</earliest>
+          <latest>$time_LB.latest$</latest>
+        </search>
+        <option name="afterLabel">milliseconds</option>
+        <option name="underLabel">Average Response time</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="field">req_elapsed_time</option>
+      </single>
+      <table id="table1">
+        <title>Average response duration</title>
+        <search>
+          <query>`F5LTMACCCESS`  | stats count by req_elapsed_time client_address node server_name url _time             | stats avg(req_elapsed_time) as "Response time"  by server_name| rangemap field="avg(req_elapsed_time")  low=0-5 elevated=6-15 default=severe |fields range, server_name</query>
+          <earliest>$time_LB.earliest$</earliest>
+          <latest>$time_LB.latest$</latest>
+        </search>
+        <option name="classField">range</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="displayRowNumbers">false</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="wrap">false</option>
+        <option name="count">10</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[ F5_proactivemonitoring  ]]>
+          </link>
+        </drilldown>
+        <option name="rowNumbers">false</option>
+      </table>
+      <html>
+        <h3/>
+      </html>
+    </panel>
+    <panel>
+      <html>
+        <h2>Network</h2>
+      </html>
+      <input type="time" token="time_netflow">
+        <default>
+          <earliestTime>rt-30m</earliestTime>
+          <latestTime>rt</latestTime>
+        </default>
+      </input>
+      <chart>
+        <title>WAN Link: Top Traffic by Source IP</title>
+        <search>
+          <query>`netflow_search_rule_20067`            | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group           | `fix_src_ip_mapping`           | `fix_dest_ip_mapping`           | `sampling(bytes_in)`           | `format_ip_column(src_ip, src_ip, src_host)`           | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by src_ip)`|eval "WAN link"=15</query>
+          <earliest>$time_netflow.earliest$</earliest>
+          <latest>$time_netflow.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="height">200px</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 netflow_proactivemonitoring?earliest=-60m&latest=now	
+                ]]>
+          </link>
+        </drilldown>
+        <option name="charting.axisY2.maximumNumber">20</option>
+        <option name="charting.axisY2.minimumNumber">10</option>
+        <option name="charting.chart.overlayFields">"WAN link"</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+      <chart>
+        <title>WAN Link : Top Traffic by Destination IP</title>
+        <search>
+          <query>`netflow_search_rule_20067`            | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group           | `fix_src_ip_mapping`           | `fix_dest_ip_mapping`           | `sampling(bytes_in)`           | `format_ip_column(dest_ip, dest_ip, dest_host)`           | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by dest_ip)`|eval "WAN link"=15</query>
+          <earliest>$time_netflow.earliest$</earliest>
+          <latest>$time_netflow.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="height">200px</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 netflow_proactivemonitoring?earliest=-60m&latest=now	
+                ]]>
+          </link>
+        </drilldown>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.chart.overlayFields">"WAN link"</option>
+      </chart>
+      <chart>
+        <title>Top Traffic by Port and Protocol</title>
+        <search>
+          <query>`netflow_search_rule_20067`            | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group           | lookup protocol_lookup protocol AS protocol            | `fix_src_ip_mapping`           | `fix_dest_ip_mapping`           | `sampling(bytes_in)`           | `format_port_column(dest_port_string, dest_port)`           | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by dest_port_string)`</query>
+          <earliest>$time_netflow.earliest$</earliest>
+          <latest>$time_netflow.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="height">200px</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 netflow_proactivemonitoring?earliest=-60m&latest=now	
+                ]]>
+          </link>
+        </drilldown>
+        <option name="charting.drilldown">all</option>
+      </chart>
+      <chart>
+        <title>QOS : Outbound Traffic</title>
+        <search>
+          <query>`netflow_search_rule_20065`           | eval dest_tos = if(isnull(dest_tos), 0, dest_tos)            | eval dest_decimal=floor((dest_tos)/4)            | lookup diffserv_lookup decimal AS dest_decimal OUTPUT bitmap AS dest_bitmap DSCP AS dest_dscp            | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0"))            | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group           | lookup protocol_lookup protocol AS protocol            | `sampling(bytes_in)`            | strcat dest_bitmap " (" dest_dscp ")" qos_string            | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by qos_string)`</query>
+        </search>
+        <earliest>@d</earliest>
+        <latest>now</latest>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="height">200px</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 netflow_proactivemonitoring?earliest=-60m&latest=now	
+                ]]>
+          </link>
+        </drilldown>
+        <option name="charting.drilldown">all</option>
+      </chart>
+      <chart>
+        <title>Average Response Time by DNS Server</title>
+        <search>
+          <query>`netflow_search_rule_20004`            | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group           | timechart avg(avg_time) by dest_ip useother="f"</query>
+        </search>
+        <earliest>@w0</earliest>
+        <latest>now</latest>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Response Time, msec</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="height">200px</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 netflow_proactivemonitoring?earliest=-60m&latest=now	
+                ]]>
+          </link>
+        </drilldown>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+    <panel>
+      <html>
+        <h2>Firewall</h2>
+      </html>
+      <input type="time" token="time_FW">
+        <default>
+          <earliestTime>rt-30m</earliestTime>
+          <latestTime>rt</latestTime>
+        </default>
+      </input>
+      <chart>
+        <title>Volume received/sent</title>
+        <search>
+          <query>| `pan_tstats` sum(log.bytes_sent) AS sumSent sum(log.bytes_received) AS sumReceived FROM `node(log.traffic.end)`  groupby _time span=5m | timechart span=5m values("sumReceived") AS "Bytes Received" values("sumSent") AS "Bytes Sent"</query>
+          <earliest>-60m@m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisY2.enabled">undefined</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[  firewall_capacityplanning?earliest=-60m&latest=now	  ]]>
+          </link>
+        </drilldown>
+      </chart>
+      <chart>
+        <title>Threats</title>
+        <search>
+          <query>| `pan_tstats` count FROM `node(log.threat)` `groupby(log.threat_name)`</query>
+          <earliest>-60m@m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+            ../../app/SplunkforPaloAltoNetworks/threat_detail?form.$click.name$=$click.value$&earliest=$earliest$&latest=$latest$
+	  ]]>
+          </link>
+        </drilldown>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+      </chart>
+      <single>
+        <search>
+          <query>`pan_index` | fillnull value="" |bucket _time span=15m| stats count by host sourcetype log_subtype action category _time|stats sum(count) as sum  by _time| eval sum=if(isnull(sum),0,sum)|reverse</query>
+          <earliest>$time_FW.earliest$</earliest>
+          <latest>$time_FW.latest$</latest>
+        </search>
+        <option name="classField">None</option>
+        <option name="underLabel">Total Events</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+        <option name="field">sum</option>
+        <option name="afterLabel">in 15 min</option>
+      </single>
+      <single>
+        <search>
+          <query>`pan_index` action=block* OR action=deny| fillnull value="" |bucket _time span=15m| stats count by host sourcetype log_subtype action category _time  | stats sum(count) as sum by _time| eval sum=if(isnull(sum),0,sum)|reverse</query>
+          <earliest>$time_FW.earliest$</earliest>
+          <latest>$time_FW.latest$</latest>
+        </search>
+        <option name="classField">None</option>
+        <option name="underLabel">Total Blocks</option>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+        <option name="field">sum</option>
+        <option name="afterLabel">in 15 min</option>
+      </single>
+      <chart>
+        <title>Threat by severity</title>
+        <search>
+          <query>| `pan_tstats` count FROM `node(log.threat)` `pan_groupby(_time log.severity)`          | timechart values(count) by severity</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">bottom</option>
+        <drilldown target="New window">
+          <link>
+            <![CDATA[
+            ../../app/SplunkforPaloAltoNetworks/threat_overview?earliest=-60h&latest=now
+	  ]]>
+          </link>
+        </drilldown>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+      </chart>
+    </panel>
+  </row>
+</form>

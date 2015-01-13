@@ -1,0 +1,26 @@
+## # GLOBAL CONFIG
+#[tcpout]
+#defaultGroup = loadBalancedGroup
+#disabled = 0
+##Disable the current filters from the defaults outputs.conf
+#forwardedindex.0.whitelist = 
+#forwardedindex.1.blacklist =
+#forwardedindex.2.whitelist =
+#
+##Forward data for the "myindex" index
+#forwardedindex.0.whitelist = summary_network
+#forwardedindex.1.whitelist = summary_vmware_mem
+#forwardedindex.2.whitelist = summary_vmware_cpu
+## 
+## # TARGET GROUP CONFIG
+## # Define a target group called "loadBalancedGroup"
+# [tcpout:loadBalancedGroup]
+## # Specify members of new target group
+# server=10.35.125.165:9997, 10.35.125.162:9997
+#
+#
+## # SINGLE SERVER CONFIG
+#[tcpout-server://10.35.125.165:9997]
+## 
+## # SINGLE SERVER CONFIG
+#[tcpout-server://10.35.125.162:9997]#

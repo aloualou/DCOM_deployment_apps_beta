@@ -1,0 +1,10 @@
+#highlight td.range-normal {
+    background-color: rgba(0, 0, 255, 0.3);
+}
+#highlight td.range-zombie {
+    background-color: rgba(255, 255, 0, 0.4);
+}
+#highlight td.range-chatty  {
+    background-color: rgba(255, 0, 0, 0.4);
+}
+

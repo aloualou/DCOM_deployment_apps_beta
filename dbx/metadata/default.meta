@@ -1,0 +1,68 @@
+[]
+access = read : [ dbx_user, admin ], write : [ admin ]
+
+### Manager ###
+
+[manager]
+export = system
+
+[manager/databases]
+export = system
+
+[manager/dbmon]
+export = system
+access = read : [ admin ], write : [ admin ]
+
+[manager/dblookups]
+export = system
+access = read : [ admin ], write : [ admin ]
+
+### Commands ###
+
+[commands/dbquery]
+export = system
+
+[commands/dbinput]
+export = system
+
+[commands/dbinfo]
+export = system
+
+[commands/dboutput]
+export = system
+
+[commands/dbmonpreview]
+export = none
+access = read : [ admin ], write : [ admin ]
+
+
+### Other settings ###
+
+[inputs/dbmon-*]
+
+[inputs]
+access = read : [ dbx_user, admin ], write : [ admin , dbx_user]
+
+[transforms]
+access = read : [ dbx_user, admin ], write : [ admin , dbx_user]
+
+[props]
+export = system
+
+[transforms]
+export = system
+
+[eventtypes]
+export = system
+
+[lookups]
+export = system
+
+[searchscripts]
+export = system
+
+[database]
+access = read : [ dbx_user, admin ], write : [ admin , dbx_user]
+
+[dblookup]
+access = read : [ dbx_user, admin ], write : [ admin , dbx_user]

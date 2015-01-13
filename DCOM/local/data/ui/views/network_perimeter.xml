@@ -1,0 +1,33 @@
+<form onunloadCancelJobs="True" script="drilldown.js, search_rerun.js" stylesheet="inputs_layout.css">
+  <label>Network - Perimeter</label>
+  <fieldset autoRun="True">
+    <input type="time" searchWhenChanged="False">
+      <label>Time Range</label>
+      <default>Last 60 minutes</default>
+    </input>
+  </fieldset>
+  <row>
+    <single>
+      <search>
+        <query>sourcetype=flowintegrator|stats dc(exp_ip)</query>
+      </search>
+      <option name="classField">range</option>
+      <option name="linkView">search</option>
+      <option name="drilldown">none</option>
+      <option name="afterLabel">netflow sources</option>
+    </single>
+  </row>
+  <row>
+    <table id="table_1_1">
+      <title>IP Netflow sources</title>
+      <search>
+        <query>sourcetype=flowintegrator|stats values(exp_ip) as "IP"</query>
+      </search>
+      <option name="drilldown">row</option>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="count">10</option>
+    </table>
+  </row>
+</form>

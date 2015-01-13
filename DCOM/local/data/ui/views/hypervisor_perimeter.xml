@@ -1,0 +1,198 @@
+<form>
+  <label>VMware : Perimeter</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-4h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Clusters &amp; Hosts</title>
+      <single>
+        <search>
+          <query>| loadjob savedsearch="admin:SA-VMW-HierarchyInventory:CurrentHierarchy" | search (type="HostSystem" AND uiparentType="ClusterComputeResource") OR type="ClusterComputeResource" | eval uiparent=if(type=="ClusterComputeResource", moid, uiparent) | eventstats dc(moid) as members by uiparent, host | search type="ClusterComputeResource" | dedup moid, host | `SetHandleInfoMaxTimeNow` |stats dc(name)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+        <option name="afterLabel">VMware Cluster</option>
+        <option name="beforeLabel">Currently watching after</option>
+      </single>
+      <table>
+        <title>Clusters and Hosts</title>
+        <search>
+          <query>| loadjob savedsearch="admin:SA-VMW-HierarchyInventory:CurrentHierarchy" | search (type="HostSystem" AND uiparentType="ClusterComputeResource") OR type="ClusterComputeResource" | eval uiparent=if(type=="ClusterComputeResource", moid, uiparent) | eventstats dc(moid) as members by uiparent, host | search type="ClusterComputeResource" | dedup moid, host | `SetHandleInfoMaxTimeNow` | eval hostCount=(members-1) |rename name as "Cluster Name" | rename hostCount as "Total # of Hosts"|fields  "Cluster Name", "Total # of Hosts"|fields - _time</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">undefined</option>
+        <option name="rowNumbers">undefined</option>
+        <option name="drilldown">row</option>
+      </table>
+      <table>
+        <title>Actives VMs by Host</title>
+        <search>
+          <query>| loadjob savedsearch="admin:SA-VMW-HierarchyInventory:CurrentHierarchy"|search[| loadjob savedsearch="admin:SA-VMW-HierarchyInventory:CurrentHierarchy"| search (type="HostSystem" AND uiparentType="ClusterComputeResource")  | eval uiparent= moid | fields uiparent ]|stats dc(name) as members by uiparent</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel>
+      <title>CPU and RAM</title>
+      <chart>
+        <title>CPU by Host</title>
+        <search>
+          <query>sourcetype="vmware:inv:hostsystem" | spath moid output=moid | spath changeSet.name output=name | spath collectionVersion output=collectionVersion | spath changeSet.summary.overallStatus output=overallStatus | spath changeSet.summary.quickStats.overallCpuUsage output=overallCpuUsage | spath changeSet.summary.quickStats.overallMemoryUsage output=overallMemoryUsage | spath changeSet.summary.hardware.cpuMhz output=cpuMhz | spath changeSet.summary.hardware.memorySize output=memorySize | spath changeSet.summary.hardware.numCpuCores output=CPUCores | spath changeSet.summary.hardware.vendor output=manufacturer | spath changeSet.summary.hardware.model output=model | spath changeSet.summary.hardware.numNics output=numNics | spath changeSet.summary.hardware.cpuModel output=processorType | spath changeSet.summary.hardware.numCpuPkgs output=numCpuPkgs | spath changeSet.summary.hardware.numCpuThreads output=logicalProcessor | spath changeSet.config.hyperThread.active output=active | spath changeSet.summary.host.moid output=HostSystem | spath changeSet.parent.moid output=HostSystemParent | spath changeSet.parent.type output=HostSystemParentType |stats avg(overallCpuUsage) by moid</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <chart>
+        <title>RAM by Host</title>
+        <search>
+          <query>sourcetype="vmware:inv:hostsystem" | spath moid output=moid | spath changeSet.name output=name | spath collectionVersion output=collectionVersion | spath changeSet.summary.overallStatus output=overallStatus | spath changeSet.summary.quickStats.overallCpuUsage output=overallCpuUsage | spath changeSet.summary.quickStats.overallMemoryUsage output=overallMemoryUsage | spath changeSet.summary.hardware.cpuMhz output=cpuMhz | spath changeSet.summary.hardware.memorySize output=memorySize | spath changeSet.summary.hardware.numCpuCores output=CPUCores | spath changeSet.summary.hardware.vendor output=manufacturer | spath changeSet.summary.hardware.model output=model | spath changeSet.summary.hardware.numNics output=numNics | spath changeSet.summary.hardware.cpuModel output=processorType | spath changeSet.summary.hardware.numCpuPkgs output=numCpuPkgs | spath changeSet.summary.hardware.numCpuThreads output=logicalProcessor | spath changeSet.config.hyperThread.active output=active | spath changeSet.summary.host.moid output=HostSystem | spath changeSet.parent.moid output=HostSystemParent | spath changeSet.parent.type output=HostSystemParentType |stats avg(overallMemoryUsage) by  moid</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <chart>
+        <title>RAM by server type</title>
+        <search>
+          <query>sourcetype="vmware:inv:hostsystem" | spath moid output=moid | spath changeSet.name output=name | spath collectionVersion output=collectionVersion | spath changeSet.summary.overallStatus output=overallStatus | spath changeSet.summary.quickStats.overallCpuUsage output=overallCpuUsage | spath changeSet.summary.quickStats.overallMemoryUsage output=overallMemoryUsage | spath changeSet.summary.hardware.cpuMhz output=cpuMhz | spath changeSet.summary.hardware.memorySize output=memorySize | spath changeSet.summary.hardware.numCpuCores output=CPUCores | spath changeSet.summary.hardware.vendor output=manufacturer | spath changeSet.summary.hardware.model output=model | spath changeSet.summary.hardware.numNics output=numNics | spath changeSet.summary.hardware.cpuModel output=processorType | spath changeSet.summary.hardware.numCpuPkgs output=numCpuPkgs | spath changeSet.summary.hardware.numCpuThreads output=logicalProcessor | spath changeSet.config.hyperThread.active output=active | spath changeSet.summary.host.moid output=HostSystem | spath changeSet.parent.moid output=HostSystemParent | spath changeSet.parent.type output=HostSystemParentType |stats avg(overallMemoryUsage) by model</query>
+          <earliest>-4h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Datastores</title>
+      <single>
+        <title># of Datastore</title>
+        <search>
+          <query>sourcetype="vmware:inv:datastore"  | spath moid output=moid | spath changeSet.info.name output=name | stats dc(name)</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="linkView">search</option>
+        <option name="drilldown">none</option>
+      </single>
+      <table>
+        <title>Datastore : size and free space</title>
+        <search>
+          <query>sourcetype="vmware:inv:datastore"  | spath moid output=moid | spath changeSet.info.name output=name | spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace |eval percentoccup=(capacity-freeSpace)/capacity*100| eval freeSpace=freeSpace/1024/1024/1024|eval capacity=capacity/1024/1024/1024|eval occupe=capacity-freeSpace|stats   first(percentoccup) as "% used", first(capacity) as "capacity in Gb" by name |sort - "% used"</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">cell</option>
+        <option name="count">10</option>
+      </table>
+      <chart>
+        <title>Commited storage per VM</title>
+        <search>
+          <query>sourcetype="vmware:inv:vm"    | spath moid  | spath changeSet.summary.runtime.powerState output=powerState   | search powerState=*on| chart avg("changeSet.summary.storage.committed")  as "commited storage" by moid</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>

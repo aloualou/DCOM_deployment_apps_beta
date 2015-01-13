@@ -1,0 +1,14 @@
+<!--Copyright (C) 2005-2014 Splunk Inc. All Rights Reserved.-->
+<view autoCancelInterval="90" isPersistable="true" isSticky="true" isVisible="true" objectMode="viewconf" onunloadCancelJobs="true" template="DCOM_S:/templates/dashboard.html">
+  <label>Threshold Configuration</label>
+  <module name="AccountBar" layoutPanel="appHeader"/>
+  <module name="AppBar" layoutPanel="navigationHeader"/>
+  <module name="Message" layoutPanel="messaging">
+    <param name="filter"></param>
+    <param name="clearOnJobDispatch">False</param>
+    <param name="maxSize">1</param>
+  </module>
+  <module name="SOLNAjaxInclude" layoutPanel="panel_row1_col1">
+    <param name="url">/custom/SA-Threshold/sa_threshold_conf_service/splunk_for_vmware/show</param>
+  </module>
+</view>

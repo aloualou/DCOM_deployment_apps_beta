@@ -1,0 +1,111 @@
+<form>
+  <label>TODO</label>
+  <!-- 131.1 -->
+  <row>
+    <chart>
+      <title>Evolution de la volumétrie utilisée par quartier et par Datastore</title>
+      <search>
+        <query>sourcetype = "vmware:inv:datastore"  | spath moid output=moid | spath changeSet.info.name output=name | spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace |  timechart avg(freeSpace), avg(capacity)  by name</query>
+        <earliest>-4h</earliest>
+        <latest>now</latest>
+      </search>
+      <option name="charting.chart">line</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleY2.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.axisY2.enabled">false</option>
+      <option name="charting.axisY2.scale">inherit</option>
+      <option name="charting.chart.bubbleMaximumSize">50</option>
+      <option name="charting.chart.bubbleMinimumSize">10</option>
+      <option name="charting.chart.bubbleSizeBy">area</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+  </row>
+  <!-- 131.5 -->
+  <row>
+    <panel>
+      <chart>
+        <title>Suivi de l'espace disque</title>
+        <searchString>sourcetype =vmware:inv* spath moid output=moid | spath changeSet.info.name output=name |spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace| spath changeSet.summary.storage.committed output=committed |eval freeSpace=freeSpace/1024/1024/1024|eval capacity=capacity/1024/1024/1024|eval occupe=capacity-freeSpace|chart first(freeSpace) as "espace libre", first(occupe) as occupé by name</searchString>
+        <earliestTime>1402869600</earliestTime>
+        <latestTime>1404165600</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked100</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <html>(131.6)</html>
+  </row>
+  <row>
+    <html>(131.7)</html>
+  </row>
+  <row>
+    <html>(131.8)</html>
+  </row>
+  <!-- 131.11 -->
+  <row>
+    <panel>
+      <chart>
+        <title>Etat de l'espace disponible par datastore</title>
+        <searchString>sourcetype = "vmware:inv:datastore"| spath moid output=moid | spath changeSet.info.name output=name |spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace |eval freespace=freeSpace/1024/1024/1024|eval capacity=capacity/1024/1024/1024|chart avg(freespace), avg(capacity)  by name</searchString>
+        <earliestTime>-4h</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked100</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <html>(131.12)</html>
+  </row>
+  <row>
+    <html>131.14</html>
+  </row>
+  <row>
+    <html>131.15</html>
+  </row>
+</form>

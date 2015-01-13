@@ -1,0 +1,172 @@
+<form>
+  <label>Event Analysis</label>
+  <description>Event Analysis</description>
+  <fieldset submitButton="true" autoRun="true">
+    <input type="time" token="field1" searchWhenChanged="false">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="text" token="host" searchWhenChanged="false">
+      <default>*</default>
+    </input>
+    <input type="multiselect" token="severity_selection" searchWhenChanged="false">
+      <label>Severity</label>
+      <search>
+        <query>| inputlookup cisco_ios_severity</query>
+      </search>
+      <delimiter> OR </delimiter>
+      <default>0 - emergency,1 - alert,2 - critical,3 - error,4 - warning,5 - notification,6 - informational,7 - debugging</default>
+      <valuePrefix>severity_id_and_name="</valuePrefix>
+      <fieldForLabel>severity_id_and_name</fieldForLabel>
+      <fieldForValue>severity_id_and_name</fieldForValue>
+      <valueSuffix>"</valueSuffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <html>
+      <section>
+      <h3>This event analysis is based on the following fields in the Cisco IOS events</h3>
+      <ul>
+        <li>Facility (<q>facility</q>)</li>
+        <li>Severity (<q>severity_id</q>)</li>
+        <li>Mnemonic (<q>mnemonic</q>)</li>
+      </ul>
+      <p>A lookup is performed based on the aforementioned fields.</p>
+      </section>
+    </html>
+    </panel>
+    <panel>
+      <html>
+      <section>
+        <h3>Devices supported in the lookup file</h3>
+      <ul>
+        <li>Nexus 7000, MDS 9000</li>
+        <li>Catalyst 2960, 3750 etc</li>
+        <li>Catalyst 4500</li>
+        <li>Catalyst 6500</li>
+        <li>Cisco WLAN Controller</li>
+      </ul>
+      </section>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Message breakdown</title>
+        <search>
+          <query>| pivot Cisco_IOS_Event Cisco_IOS_Event count(Cisco_IOS_Event) AS "Events" dc(host) AS "Unique devices" SPLITROW vendor_message_text AS "Message text" SPLITROW vendor_explanation AS Explanation SPLITROW vendor_recommended_action AS "Recommended action" SPLITROW severity_id_and_name AS severity_id_and_name FILTER host is $host$ TOP 500 count(Cisco_IOS_Event) ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 0 SHOWOTHER 1 | search $severity_selection$</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.drilldown">cell</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.0001</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+        <option name="drilldown">row</option>
+        <drilldown>
+          <link field="Message text">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search vendor_message_text="$row.Message text$"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="Explanation">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search vendor_explanation="$row.Explanation$"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="Recommended action">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search vendor_recommended_action="$row.Recommended action$"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Hosts by severity</title>
+        <search>
+          <query>| pivot Cisco_IOS_Event Cisco_IOS_Event count(Cisco_IOS_Event) AS "Count of Cisco IOS Event" SPLITROW host AS host SPLITCOL severity_id_and_name FILTER host is "$host$" SORT 500 host ROWSUMMARY 0 COLSUMMARY 0 NUMCOLS 100 SHOWOTHER 1 | sort -"0 - emergency", -"1 - alert", -"2 - critical", -"3 - error", -"4 - warning", -"5 - notification", -"6 - informational", -"7 - debugging" | table host "0 - emergency" "1 - alert" "2 - critical" "3 - error" "4 - warning" "5 - notification" "6 - informational" "7 - debugging"</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">heatmap</option>
+        <option name="drilldown">row</option>
+        <option name="count">10</option>
+        <drilldown>
+          <link field="host">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="0 - emergency">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="0 - emergency"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="1 - alert">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="1 - alert"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="2 - critical">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="2 - critical"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="3 - error">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="3 - error"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="4 - warning">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="4 - warning"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="5 - notification">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="5 - notification"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="6 - informational">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="6 - informational"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+          <link field="7 - debugging">
+            <![CDATA[
+                        /app/cisco_ios/search?q=search host=$row.host$ severity_id_and_name="7 - debugging"&earliest=$earliest$&latest=$latest$
+                ]]>
+          </link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

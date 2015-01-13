@@ -1,0 +1,183 @@
+<form script="single_trend.js" stylesheet="single_trend.css">
+  <label>Application Delivery - Capacity Planning</label>
+  <description></description>
+  <fieldset autorun="true">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Temps</label>
+      <default>
+        <earliest>-2h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="multiselect" token="node" searchWhenChanged="false">
+      <label>Node</label>
+      <choice value="*">All</choice>
+      <search>
+        <query>`F5LTMACCCESS`|stats values(node) as node</query>
+        <earliest>rt-2h</earliest>
+        <latest>rtnow</latest>
+      </search>
+      <default>*</default>
+      <fieldForLabel>Node</fieldForLabel>
+      <fieldForValue>node</fieldForValue>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <delimiter> OR </delimiter>
+    </input>
+    <input type="multiselect" token="server_name" searchWhenChanged="true">
+      <label>Target server</label>
+      <choice value="*">All</choice>
+      <search>
+        <query>`F5LTMACCCESS`|stats values(server_name) as name</query>
+        <earliest>rt-2h</earliest>
+        <latest>rtnow</latest>
+      </search>
+      <default>*</default>
+      <fieldForLabel>Target server</fieldForLabel>
+      <fieldForValue>name</fieldForValue>
+      <prefix>(</prefix>
+      <suffix>)</suffix>
+      <delimiter> OR </delimiter>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Temps de réponse</title>
+      <single>
+        <search>
+          <query>`F5_tpsrep(server_name=$server_name$, node=$node$)`| bucket _time span=1h |`f5_temps_reponse_moyen`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="afterLabel">milliseconds</option>
+        <option name="underLabel">Average Response time</option>
+        <option name="drilldown">none</option>
+        <option name="linkView">search</option>
+        <option name="field">req_elapsed_time</option>
+      </single>
+      <single>
+        <search>
+          <query>`F5_tpsrep(server_name=$server_name$, node=$node$)`| bucket _time span=1h |`f5_temps_reponse_max`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="afterLabel">milliseconds</option>
+        <option name="underLabel">maximum Response time</option>
+        <option name="field">req_elapsed_time</option>
+        <option name="linkView">search</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Response time by service (Average and max)</title>
+      <chart>
+        <search>
+          <query>`F5_tpsrep`|stats avg(req_elapsed_time) as avg, last(req_elapsed_time) as current by server_name</query>
+          <earliest>-3m@m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <drilldown>
+          <set token="showTable">true</set>
+          <set token="selected_server">$row.sourcetype$</set>
+          <set token="server_query">server_name="$row.sourcetype$"</set>
+          <set token="table1.click.name">$click.name$</set>
+          <set token="table1.click.name2">$click.name2$</set>
+          <set token="table1.click.value">$click.value$</set>
+          <set token="table1.click.value2">$click.value2$</set>
+          <set token="table1.row.sourcetype">$row.sourcetype$</set>
+          <set token="table1.earliest">$earliest$</set>
+          <set token="table1.latest">$latest$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart depends="$showTable$,$selected_server$">
+        <title>Response time for app $table1.click.value|s$</title>
+        <search>
+          <query>`F5_tpsrep(server_name=$table1.click.value|s$, node=$node$)`|`f5_evolution_tps_rep`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>SLA violation in Percent of request</title>
+        <search>
+          <query>`F5LTMACCCESS`  |bucket span=10m _time | thresholdlookup entitytype=Loadbalancer,perftype=http,metric=resptime,match=true|  eval req=req_elapsed_time-threshold_warnlevel|stats count(eval(req&gt;0)) as Warning count as Total   by server_name _time|eval tx_warn=Warning/Total*100|timechart values(tx_warn) by server_name</query>
+          <earliest>-60m@m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+</form>

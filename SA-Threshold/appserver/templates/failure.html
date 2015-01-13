@@ -1,0 +1,9 @@
+<%page expression_filter="h"/>
+<%inherit file="//layout/base.html" />
+<%namespace name="lib" file="//lib.html" import="*"/>
+<div class="SuccessMessage">
+  <h2>Failure!</h2>
+  <p>Your VMware configuration could not be saved.&nbsp;&nbsp;Click "OK" to go back to the configuration page.</p>
+  <a target="_parent" href="${make_url('/app/%s/setup' % app)}" class="splButton-primary">OK</a>
+</div>
+

@@ -1,0 +1,68 @@
+<form script="single_trend.js" stylesheet="single_trend.css">
+  <label>Application Delivery - Perimeter</label>
+  <description></description>
+  <fieldset autorun="true">
+    <input type="time" token="time" searchWhenChanged="true">
+      <label>Temps</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title># of Servers</title>
+        <searchString>`F5_nbserveur`</searchString>
+        <earliestTime>-2d</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="drilldown">none</option>
+        <option name="field">count</option>
+      </single>
+      <single>
+        <title># of F5 node</title>
+        <search>
+          <query>`F5_nbnode`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="field">count</option>
+        <option name="linkView">search</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Server name</title>
+        <search>
+          <query>`F5_nomserveur`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="drilldown">cell</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>F5 Node Name</title>
+        <search>
+          <query>`F5_nomnode`</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="wrap">undefined</option>
+        <option name="rowNumbers">undefined</option>
+        <option name="drilldown">row</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,372 @@
+[app/ui]
+version = 6.1.3
+modtime = 1414490732.925731000
+
+[app/launcher]
+version = 6.1.3
+modtime = 1414490732.931590000
+
+[]
+access = read : [ * ], write : [ admin, power ]
+export = none
+version = 6.1.3
+modtime = 1414490715.354671000
+
+[app/package/check_for_updates]
+version = 6.1.3
+modtime = 1414490732.933988000
+
+[nav/default]
+version = 6.1.3
+modtime = 1414510481.218690000
+
+[views/home]
+version = 6.2.0
+modtime = 1416330025.075585000
+
+[views/m11_capa_vmware]
+version = 6.2.0
+modtime = 1416828295.080277000
+
+[views/m21_peri_vmware]
+version = 6.2.0
+modtime = 1416827971.124895000
+
+[views/m31_monit_vmware]
+version = 6.2.0
+modtime = 1416829084.299355000
+
+[views/home3]
+version = 6.1.3
+modtime = 1415111021.034092000
+
+[views/home4]
+access = write : [ * ]
+export = none
+owner = admin
+version = 6.1.3
+modtime = 1415205451.854348000
+
+[app/install/install_source_checksum]
+version = 6.2.0
+modtime = 1415273997.013389000
+
+[views/F5_proactivemonitoring]
+version = 6.2.0
+modtime = 1416328549.372870000
+
+[views/m14_capa_firewall]
+version = 6.2.0
+modtime = 1415780383.124494000
+
+[views/m24_peri_firewall]
+version = 6.2.0
+modtime = 1415781059.067463000
+
+[views/m34_monit_firewall]
+version = 6.2.0
+modtime = 1415801091.970288000
+
+[views/F5_capacityplanning]
+version = 6.2.0
+modtime = 1415816083.730357000
+
+[views/Overview]
+version = 6.2.0
+modtime = 1416564104.567223000
+
+[savedsearches/F5_responsetime]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416350737.532339000
+
+[savedsearches/web_downtime]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416351136.442399000
+
+[savedsearches/F5_resp-table]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416501430.599941000
+
+[savedsearches/d_home_proactive_monitoring_row1_col2_gauge1]
+version = 6.2.0
+modtime = 1416351751.582431000
+
+[views/m11_capa_vmware2]
+version = 6.2.0
+modtime = 1416405655.728091000
+
+[views/testdatastore]
+owner = admin
+version = 6.2.0
+modtime = 1416559604.700578000
+
+[savedsearches/Datastore_overview]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416822386.881767000
+
+[views/netflow_proactivemonitoring]
+version = 6.2.0
+modtime = 1417533856.201735000
+
+[views/1_day_Overview]
+version = 6.2.0
+modtime = 1418383859.164322000
+
+[savedsearches/WAN_link_alert]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416927040.830708000
+
+[views/m13_capa_reseau]
+version = 6.2.0
+modtime = 1416927559.738165000
+
+[views/network_capacity_planning]
+version = 6.2.0
+modtime = 1418820751.248943000
+
+[savedsearches/F5_resp_table_single]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416949113.830732000
+
+[savedsearches/LB_SLA_per_app]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416954337.503302000
+
+[views/LB_capacityplanning]
+version = 6.2.0
+modtime = 1417536034.768218000
+
+[savedsearches/Slow_answer_rate]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1417530340.991558000
+
+[savedsearches/Slow_answer_rate_sumup]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1417530361.752066000
+
+[savedsearches/Average%20Response%20Time%20by%20DNS%20Server-1j]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1416957959.207499000
+
+[savedsearches/WAN%20Link%20%3A%20Top%20Traffic%20by%20Destination%20IP-1j]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1417127383.152202000
+
+[savedsearches/Top%20Traffic%20by%20Port%20and%20Protocol-1j]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1417127407.635299000
+
+[savedsearches/WAN%20Link%3A%20Top%20Traffic%20by%20Source%20IP-1jour]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1417127429.294999000
+
+[savedsearches/1app_responsetime]
+version = 6.2.0
+modtime = 1417529060.461597000
+
+[views/hypervisor_capacityplanning]
+version = 6.2.0
+modtime = 1418902143.761757000
+
+[savedsearches/WAN_link2_alert]
+version = 6.2.0
+modtime = 1417529290.821715000
+
+[savedsearches/WAN_link1_alert]
+version = 6.2.0
+modtime = 1417529292.475856000
+
+[savedsearches/QOS%20%3A%20Outbound%20Traffic-1j]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1417529446.993175000
+
+[views/firewall_capacityplanning]
+version = 6.2.0
+modtime = 1417531184.504433000
+
+[views/LB_perimeter]
+version = 6.2.0
+modtime = 1417531690.342715000
+
+[views/network_perimeter]
+version = 6.2.0
+modtime = 1417532263.067946000
+
+[views/firewall_perimeter]
+version = 6.2.0
+modtime = 1417532376.514503000
+
+[views/hypervisor_proactivemonitoring]
+version = 6.2.0
+modtime = 1417533125.836807000
+
+[views/LB_proactivemonitoring]
+version = 6.2.0
+modtime = 1418909264.141182000
+
+[views/firewall_proactivemonitoring]
+version = 6.2.0
+modtime = 1417534029.659351000
+
+[savedsearches/netflow_var_WAN1]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418317070.281881000
+
+[indexes/summary_network]
+owner = admin
+version = 6.2.0
+modtime = 1418293790.123203000
+
+[savedsearches/netflow_var_WAN2]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418317072.546402000
+
+[savedsearches/netflow_var_avgtp]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418318141.367993000
+
+[savedsearches/var_vmware_cpu]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418328346.829355000
+
+[savedsearches/var_vmware_mem]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418328357.603063000
+
+[savedsearches/summary_wan_1]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418316931.741382000
+
+[savedsearches/summary_wan_2]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418317118.614056000
+
+[savedsearches/summary_netflow_avg_throughput]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418318200.374545000
+
+[savedsearches/summary_MEM_1d]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418852284.783178000
+
+[savedsearches/summary_CPU_1d]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418851893.786194000
+
+[savedsearches/summary_WAN_2]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418397877.879645000
+
+[savedsearches/summary_WAN_1]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 6.2.0
+modtime = 1418398137.698451000
+
+[indexes/flowintegrator]
+owner = admin
+version = 6.2.0
+modtime = 1415056314.937761000
+
+[indexes/cisco_ucs]
+owner = admin
+version = 6.2.0
+modtime = 1415100469.263833000
+
+
+
+[indexes/ios]
+owner = admin
+version = 6.2.0
+modtime = 1415281356.185675000
+
+
+[indexes/summary_vmware_cpu]
+owner = admin
+version = 6.2.0
+modtime = 1418311066.531127000
+
+[indexes/summary_vmware_mem]
+owner = admin
+version = 6.2.0
+modtime = 1418314098.037211000
+
+[views/network_capacity_planning_wan]
+version = 6.2.0
+modtime = 1418850038.804319000
+
+

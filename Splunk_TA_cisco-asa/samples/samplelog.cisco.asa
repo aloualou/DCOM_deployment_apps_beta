@@ -1,0 +1,102 @@
+Mar 15 12:00:22 XXX.XXX.XXX.XXX %ASA-4-400013 IPS:2003 ICMP redirect from XXX.XXX.XXX.XXX to XXX.XXX.XXX.XXX on interface dmz
+Mar 15 12:00:24 XXX.XXX.XXX.XXX %ASA-6-302013: Built outbound TCP connection 9 for outside:XXX.XXX.XXX.XXX/22 (XXX.XXX.XXX.XXX/22) to inside:XXX.XXX.XXX.XXX/53496 (XXX.XXX.XXX.XXX/53496)
+Mar 15 12:01:24 XXX.XXX.XXX.XXX %ASA-6-109025: Authorization denied (acl=acmetechinbound) for user 'UUUUUUUU' from XXX.XXX.XXX.XXX/64857 to XXX.XXX.XXX.XXX/53 on interface Outside using UDP
+Mar 15 12:01:24 XXX.XXX.XXX.XXX %ASA-6-302013: Built inbound TCP connection 518029 for Outside:XXX.XXX.XXX.XXX/1123 (XXX.XXX.XXX.XXX/1123) to Inside:XXX.XXX.XXX.XXX/8443 (XXX.XXX.XXX.XXX/8443) (UUUUUUUU)
+Mar 15 12:01:24 XXX.XXX.XXX.XXX %ASA-6-302014: Teardown TCP connection 518028 for Outside:XXX.XXX.XXX.XXX/1122 to Inside:XXX.XXX.XXX.XXX/8443 duration 0:00:03 bytes 1449 TCP FINs (UUUUUUUU)
+Mar 15 12:01:24 XXX.XXX.XXX.XXX %ASA-6-109025: Authorization denied (acl=acmetechoutbound) for user 'UUUUUUUU' from XXX.XXX.XXX.XXX/1118 to XXX.XXX.XXX.XXX/80 on interface Outside using TCP
+Mar 15 12:01:21 XXX.XXX.XXX.XXX %ASA-6-302014: Teardown TCP connection 518026 for Outside:XXX.XXX.XXX.XXX/1120 to Inside:XXX.XXX.XXX.XXX/8443 duration 0:00:03 bytes 932 TCP FINs (UUUUUUUU)
+Mar 15 12:00:37 XXX.XXX.XXX.XXX %ASA-6-302016: Teardown UDP connection 517966 for Inside:XXX.XXX.XXX.XXX/30357 to NP Identity Ifc:XXX.XXX.XXX.XXX/161 duration 0:02:01 bytes 1055
+Mar 15 12:00:05 XXX.XXX.XXX.XXX %ASA-3-713119: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, PHASE 1 COMPLETED
+Mar 15 12:00:05 XXX.XXX.XXX.XXX %ASA-5-713075: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, Overriding Initiator's IPSec rekeying duration from 2147483 to 28800 seconds
+Mar 15 12:00:05 XXX.XXX.XXX.XXX %ASA-6-602303: IPSEC: An outbound remote access SA (SPI= 0x99DAB075) between XXX.XXX.XXX.XXX and XXX.XXX.XXX.XXX (user= UUUUUUUU) has been created.
+Mar 15 12:00:05 XXX.XXX.XXX.XXX %ASA-5-713049: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, Security negotiation complete for User (UUUUUUUU) Responder, Inbound SPI = 0xae9ee6c6, Outbound SPI = 0x99dab075
+Mar 15 12:00:05 XXX.XXX.XXX.XXX %ASA-6-713905: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, Starting P2 Rekey timer to expire in 27360 seconds
+Mar 15 12:00:05 XXX.XXX.XXX.XXX %ASA-5-713120: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, PHASE 2 COMPLETED (msgid=78fb43eb)
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-6-113012: AAA user authentication Successful : local database : user = UUUUUUUU
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-6-113003: AAA group policy for user UUUUUUUU is being set to Acme_techoutbound
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-6-113011: AAA retrieved user specific group policy (Acme_techoutbound) for user = UUUUUUUU
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-6-113009: AAA retrieved default group policy (Acme_techoutbound) for user = UUUUUUUU
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-6-113008: AAA transaction status ACCEPT : user = UUUUUUUU
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-5-713130: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, Received unsupported transaction mode attribute: 5
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-6-713184: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, Client Type: WinNT Client Application Version: XXX.XXX.XXX.XXX0
+Mar 15 12:00:04 XXX.XXX.XXX.XXX %ASA-6-713228: Group = Acme_techoutbound, Username = UUUUUUUU, IP = XXX.XXX.XXX.XXX, Assigned private IP address XXX.XXX.XXX.XXX to remote user
+Mar 15 11:59:59 XXX.XXX.XXX.XXX %ASA-6-302015: Built inbound UDP connection 517976 for Outside:XXX.XXX.XXX.XXX/1097 (XXX.XXX.XXX.XXX/1097) to NP Identity Ifc:XXX.XXX.XXX.XXX/500 (XXX.XXX.XXX.XXX/500)
+Mar 15 11:59:59 XXX.XXX.XXX.XXX %ASA-6-713172: Group = Acme_techoutbound, IP = XXX.XXX.XXX.XXX, Automatic NAT Detection Status: Remote end IS behind a NAT device This end is NOT behind a NAT device
+Mar 15 11:59:54 XXX.XXX.XXX.XXX %ASA-6-302014: Teardown TCP connection 517973 for Outside:XXX.XXX.XXX.XXX/2676 to Inside:XXX.XXX.XXX.XXX/80 duration 0:00:00 bytes 5125 TCP Reset-O (acmetechinbound)
+Mar 15 11:59:36 XXX.XXX.XXX.XXX %ASA-6-302016: Teardown UDP connection 517953 for Outside:XXX.XXX.XXX.XXX/51232 to Inside:XXX.XXX.XXX.XXX/7501 duration 0:02:01 bytes 36 (UUUUUUUU)
+Mar 15 11:58:19 XXX.XXX.XXX.XXX %ASA-6-302014: Teardown TCP connection 517934 for Outside:XXX.XXX.XXX.XXX/1561 to Inside:XXX.XXX.XXX.XXX/8443 duration 0:05:02 bytes 297 Tunnel has been torn down (UUUUUUUU)
+Mar 15 11:58:19 XXX.XXX.XXX.XXX %ASA-3-201008: Disallowing new connections.
+Mar 15 11:57:13 XXX.XXX.XXX.XXX %ASA-6-302020: Built ICMP connection for faddr XXX.XXX.XXX.XXX/35949 gaddr XXX.XXX.XXX.XXX/0 laddr XXX.XXX.XXX.XXX/0
+Mar 15 11:55:16 XXX.XXX.XXX.XXX %ASA-6-302016: Teardown UDP connection 517931 for Outside:XXX.XXX.XXX.XXX/53560 to Inside:XXX.XXX.XXX.XXX/53 duration 0:02:07 bytes 245
+Mar 15 11:54:49 XXX.XXX.XXX.XXX %ASA-6-109025: Authorization denied (acl=acmetechinbound) for user 'UUUUUUUU' from XXX.XXX.XXX.XXX/56190 to XXX.XXX.XXX.XXX/53 on interface Outside using UDP 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302020: Built inbound ICMP connection for faddr XXX.XXX.XXX.XXX/1(LOCAL\UUUUUUUU) gaddr XXX.XXX.XXX.XXX/0 laddr XXX.XXX.XXX.XXX/0 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721370 for outside:XXX.XXX.XXX.XXX/60712(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 223 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721369 for outside:XXX.XXX.XXX.XXX/54110(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 295 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721368 for outside:XXX.XXX.XXX.XXX/61770(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 173 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721367 for outside:XXX.XXX.XXX.XXX/52607(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 126 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302015: Built inbound UDP connection 215721390 for outside:XXX.XXX.XXX.XXX/50903 (XXX.XXX.XXX.XXX/50903)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 (XXX.XXX.XXX.XXX/53) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-106100: access-list access-epn2-dmz2-in permitted udp epn2-dmz2/XXX.XXX.XXX.XXX(54877) -> epn2-win/XXX.XXX.XXX.XXX(53) hit-cnt 1 first hit [0xf0c8454b, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-106100: access-list fwepn4 denied tcp epn4-win/XXX.XXX.XXX.XXX(55267) -> outside/XXX.XXX.XXX.XXX(21) hit-cnt 1 first hit [0xbc993276, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-4-106103: access-list fmVPN-1300 denied udp for user 'UUUUUUUU' outside/XXX.XXX.XXX.XXX(137) -> inside1/XXX.XXX.XXX.XXX(137) hit-cnt 1 first hit [0x286364c7, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721389 for outside:XXX.XXX.XXX.XXX/64763 (XXX.XXX.XXX.XXX/64763)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721388 for outside:XXX.XXX.XXX.XXX/61288 (XXX.XXX.XXX.XXX/61288)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721387 for outside:XXX.XXX.XXX.XXX/61287 (XXX.XXX.XXX.XXX/61287)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302014: Teardown TCP connection 215721384 for outside:XXX.XXX.XXX.XXX/57770(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/443 duration 0:00:00 bytes 2123 TCP FINs (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302015: Built inbound UDP connection 215721386 for outside:XXX.XXX.XXX.XXX/57562 (XXX.XXX.XXX.XXX/57562)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 (XXX.XXX.XXX.XXX/53) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302015: Built inbound UDP connection 215721385 for outside:XXX.XXX.XXX.XXX/50263 (XXX.XXX.XXX.XXX/50263)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 (XXX.XXX.XXX.XXX/53) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721384 for outside:XXX.XXX.XXX.XXX/57770 (XXX.XXX.XXX.XXX/57770)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/443 (XXX.XXX.XXX.XXX/443) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-4-733100: [ Scanning] drop rate-2 exceeded. Current burst rate is 0 per second, max configured rate is 8; Current average rate is 16 per second, max configured rate is 4; Cumulative total count is 58913
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-106100: access-list fwepn2 denied udp epn2-dmz2/XXX.XXX.XXX.XXX(59681) -> outside/XXX.XXX.XXX.XXX(53) hit-cnt 1 first hit [0x314e2ef1, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721362 for outside:XXX.XXX.XXX.XXX/53044(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 212 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-106100: access-list access-epn2-dmz2-in permitted udp epn2-dmz2/XXX.XXX.XXX.XXX(56775) -> outside/XXX.XXX.XXX.XXX(53) hit-cnt 1 first hit [0x2cac285e, 0xe3d8664b]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-106100: access-list access-epn2-dmz2-in permitted udp epn2-dmz2/XXX.XXX.XXX.XXX(61845) -> outside/XXX.XXX.XXX.XXX(53) hit-cnt 1 first hit [0x2cac285e, 0xe3d8664b]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-106100: access-list access-epn2-dmz2-in permitted udp epn2-dmz2/XXX.XXX.XXX.XXX(58736) -> epn2-win/XXX.XXX.XXX.XXX(53) hit-cnt 1 first hit [0xf0c8454b, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302015: Built inbound UDP connection 239723894 for outside:XXX.XXX.XXX.XXX/59348 (XXX.XXX.XXX.XXX/59348)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/8612 (XXX.XXX.XXX.XXX/8612) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721359 for outside:XXX.XXX.XXX.XXX/55678(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 291 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721358 for outside:XXX.XXX.XXX.XXX/60593(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 145 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721357 for outside:XXX.XXX.XXX.XXX/62779(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 177 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-106100: access-list access-epn2-dmz2-in permitted udp epn2-dmz2/XXX.XXX.XXX.XXX(47153) -> epn2-win/XXX.XXX.XXX.XXX(53) hit-cnt 1 first hit [0xf0c8454b, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721353 for outside:XXX.XXX.XXX.XXX/54967(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 212 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-4-106103: access-list fmVPN-1300 denied udp for user 'UUUUUUUU' outside/XXX.XXX.XXX.XXX(137) -> inside1/XXX.XXX.XXX.XXX(137) hit-cnt 1 first hit [0x286364c7, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721351 for outside:XXX.XXX.XXX.XXX/55188(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 188 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302014: Teardown TCP connection 215721231 for outside:XXX.XXX.XXX.XXX/64848(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/515 duration 0:00:04 bytes 167 TCP FINs (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-4-106103: access-list fmVPN-1300 denied tcp for user 'UUUUUUUU' outside/XXX.XXX.XXX.XXX(57473) -> inside1/XXX.XXX.XXX.XXX(445) hit-cnt 1 first hit [0x172229cc, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302014: Teardown TCP connection 215721379 for outside:XXX.XXX.XXX.XXX/64852(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/56324 duration 0:00:00 bytes 4814 TCP Reset-O (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302015: Built inbound UDP connection 215721382 for outside:XXX.XXX.XXX.XXX/56893 (XXX.XXX.XXX.XXX/56893)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 (XXX.XXX.XXX.XXX/53) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-110002: Failed to locate egress interface for UDP from outside:XXX.XXX.XXX.XXX/546 to XXX.XXX.XXX.XXX/547 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-4-106103: access-list fmVPN-1300 denied udp for user 'UUUUUUUU' outside/XXX.XXX.XXX.XXX(137) -> inside1/XXX.XXX.XXX.XXX(137) hit-cnt 1 first hit [0x286364c7, 0x0]
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721345 for outside:XXX.XXX.XXX.XXX/61044(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 165 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 239723892 for outside:XXX.XXX.XXX.XXX/63823 (XXX.XXX.XXX.XXX/63823)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/8192 (XXX.XXX.XXX.XXX/8192) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721380 for outside:XXX.XXX.XXX.XXX/61286 (XXX.XXX.XXX.XXX/61286)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721346 for outside:XXX.XXX.XXX.XXX/62730(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 214 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721343 for outside:XXX.XXX.XXX.XXX/58156(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 535 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721379 for outside:XXX.XXX.XXX.XXX/64852 (XXX.XXX.XXX.XXX/64852)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/56324 (XXX.XXX.XXX.XXX/56324) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302014: Teardown TCP connection 215721365 for outside:XXX.XXX.XXX.XXX/62151 to identity:XXX.XXX.XXX.XXX/443 duration 0:00:00 bytes 5092 TCP FINs 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721378 for outside:XXX.XXX.XXX.XXX/61285 (XXX.XXX.XXX.XXX/61285)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302013: Built inbound TCP connection 215721377 for outside:XXX.XXX.XXX.XXX/61284 (XXX.XXX.XXX.XXX/61284)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302016: Teardown UDP connection 215721344 for outside:XXX.XXX.XXX.XXX/64273(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 98 (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-302015: Built inbound UDP connection 215721376 for outside:XXX.XXX.XXX.XXX/62926 (XXX.XXX.XXX.XXX/62926)(LOCAL\UUUUUUUU) to inside1:XXX.XXX.XXX.XXX/53 (XXX.XXX.XXX.XXX/53) (UUUUUUUU) 
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-6-725007: SSL session with client outside:XXX.XXX.XXX.XXX/62151 terminated. 
+Mar 15 12:01:25 XXX.XXX.XXX.XXX %ASA-6-109025: Authorization denied (acl=acmetechinbound) for user 'UUUUUUUU' from XXX.XXX.XXX.XXX/137 to XXX.XXX.XXX.XXX/137 on interface Outside using UDP
+Apr 19 11:24:32 HHHHHHHH Apr 19 2013 11:24:32: %ASA-4-106023: Deny icmp src outside:XXX.XXX.XXX.XXX dst epn3-dmzx:XXX.XXX.XXX.XXX (type 8, code 0) by access-group "epn3-dmzx-out" [0x0, 0x0]
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-7-710006: IGMP request discarded from XXX.XXX.XXX.XXX to outside:XXX.XXX.XXX.XXX
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-302014: Teardown TCP connection 1671358240 for outside:XXX.XXX.XXX.XXX/51428 to inside:XXX.XXX.XXX.XXX/80 duration 0:00:00 bytes 16772 TCP FINs (YYYYYYYYYY@ACMETECH.COM) 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-302013: Built inbound TCP connection 1671358331 for outside:XXX.XXX.XXX.XXX/62160 (YYYYYYYYYY@ACMETECH.COM) 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-7-609002: Teardown local-host inside:XXX.XXX.XXX.XXX duration 0:00:00 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-302014: Teardown TCP connection 1671358237 for outside:XXX.XXX.XXX.XXX/51192 to inside:XXX.XXX.XXX.XXX/443 duration 0:00:00 bytes 8238 TCP Reset-O (YYYYYYYYYY@ACMETECH.COM) 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-302016: Teardown UDP connection 1490425518 for outside:XXX.XXX.XXX.XXX/56821 to inside:XXX.XXX.XXX.XXX/53 duration 0:00:00 bytes 108 (YYYYYYYYYY@ACMETECH.COM) 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-106012: Deny IP from XXX.XXX.XXX.XXX to XXX.XXX.XXX.XXX, IP options: "Router Alert" 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-7-710006: IGMP request discarded from XXX.XXX.XXX.XXX to outside:XXX.XXX.XXX.XXX 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-7-609001: Built local-host inside:XXX.XXX.XXX.XXX 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-302013: Built inbound TCP connection 1671358337 for outside:XXX.XXX.XXX.XXX/1129 (XXX.XXX.XXX.XXX/1129) to inside:XXX.XXX.XXX.XXX/10003 (XXX.XXX.XXX.XXX/10003) (UUUUUUUU) 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-725007: SSL session with client outside:XXX.XXX.XXX.XXX/18191 terminated. 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/60899 to outside:XXX.XXX.XXX.XXX/5355 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-302014: Teardown TCP connection 1671349288 for outside:XXX.XXX.XXX.XXX/18191 to identity:XXX.XXX.XXX.XXX/443 duration 0:01:06 bytes 7040 TCP Reset-I 
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-6-109025: Authorization denied (acl=acmetechinbound) for user 'UUUUUUUU' from XXX.XXX.XXX.XXX/55424 to XXX.XXX.XXX.XXX/53 on interface Outside using UDP
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-4-400032 IPS:4051 UDP Snork attack from XXX.XXX.XXX.XXX to XXX.XXX.XXX.XXX on interface outside
+Mar  5 16:01:03 HHHHHHHH Mar 05 2013 16:01:03 HHHHHHHH : %ASA-4-400013 IPS:2003 ICMP redirect from XXX.XXX.XXX.XXX to XXX.XXX.XXX.XXX on interface dmz 
+Mar 5 16:01:03 HHHHHHHH :Mar 05 16:01:03 UTC: %ASA-session-6-305012: Teardown dynamic TCP translation from outside:XXX.XXX.XXX.XXX/59184(ACME\UUUUUUUU) to outside:XXX.XXX.XXX.XXX/59184 duration 0:01:01
+May 21 20:58:59 XXX.XXX.XXX.XXX May 21 2014 20:56:56: %FWSM-4-313004: Denied ICMP type=11, from laddr XXX.XXX.XXX.XXX on interface ACME_Corp to XXX.XXX.XXX.XXX: no matching session
+Feb 10 2014 10:02:51: %ASA-6-338301: Intercepted DNS reply for name HHHHHHHH from CALO-Backbone:XXX.XXX.XXX.XXX/53 to CyberRange-Dev-Red:XXX.XXX.XXX.XXX/54046, matched blacklist
+Feb 10 2014 10:02:51: %ASA-5-338302: Address XXX.XXX.XXX.XXX discovered for domain HHHHHHHH from blacklist. Adding rule
+Feb 10 2014 10:02:51: %ASA-4-338002: Dynamic Filter monitored blacklisted TCP traffic from CyberRange-Dev-Red:XXX.XXX.XXX.XXX/56290 (XXX.XXX.XXX.XXX/56290) to CALO-Backbone:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80), destination XXX.XXX.XXX.XXX resolved from dynamic list: XXX.XXX.XXX.XXX, threat-level: very-high, category: Malware

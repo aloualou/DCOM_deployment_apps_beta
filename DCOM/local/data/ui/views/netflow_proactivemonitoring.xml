@@ -1,0 +1,297 @@
+<form onunloadCancelJobs="True" script="search_rerun.js" stylesheet="inputs_layout.css">
+  <label>Network - Proactive monitoring</label>
+  <fieldset autoRun="True">
+    <input type="dropdown" token="exp_group" searchWhenChanged="False">
+      <label>Device group</label>
+      <default>*</default>
+      <choice value="*">All devices</choice>
+      <populatingSearch fieldForLabel="exp_group" fieldForValue="exp_group">| `populate_exporter_group_list`</populatingSearch>
+    </input>
+    <input type="dropdown" token="exp_ip" searchWhenChanged="False">
+      <label>Device</label>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <populatingSearch fieldForLabel="name" fieldForValue="exp_ip" earliest="-1y" latest="now">`populate_exporter_list($exp_group$)`</populatingSearch>
+    </input>
+    <input type="time" searchWhenChanged="false">
+      <label>Time Range</label>
+      <default>
+        <earliest>-4h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <html>
+    <h2>Hosts Pairs, Talkers and Listeners</h2>
+  </html>
+      <chart>
+        <title>Top host pairs - Device group - $exp_group$ | Device - $exp_ip$</title>
+        <searchTemplate>`netflow_search_rule_20064` earliest=$earliest$ latest=$latest$ 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes)`
+                | `fix_src_ip_mapping`
+                | `fix_dest_ip_mapping`
+                | `format_ip_column(src_ip, src_ip, src_host)`
+                | `format_ip_column(dest_ip, dest_ip, dest_host)`
+                | strcat src_ip " - " dest_ip host_pair 
+                | `per_second_chart(megabits, bytes*8/1000000, sum(megabits) by host_pair)`</searchTemplate>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.legend.placement">bottom</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 /app/netflow/top_host_pairs
+                ]]>
+          </link>
+        </drilldown>
+      </chart>
+      <chart>
+        <title>Top talkers - Device group - $exp_group$ | Device - $exp_ip$</title>
+        <searchTemplate>`netflow_search_rule_20067` earliest=$earliest$ latest=$latest$ 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes_in)`  
+                | `fix_src_ip_mapping`
+                | `format_ip_column(src_ip, src_ip, src_host)`
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by src_ip)`</searchTemplate>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.legend.placement">bottom</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 /app/netflow/simple_top_talkers
+                ]]>
+          </link>
+        </drilldown>
+      </chart>
+      <chart>
+        <title>Top listeners - Device group - $exp_group$ | Device - $exp_ip$</title>
+        <searchTemplate>`netflow_search_rule_20067` earliest=$earliest$ latest=$latest$ 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(bytes_in)`  
+                | `fix_dest_ip_mapping`
+                | `format_ip_column(dest_ip, dest_ip, dest_host)`
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by dest_ip)`</searchTemplate>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.legend.placement">bottom</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+              /app/netflow/simple_top_listeners
+                ]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <html>
+    		<h2>DNS</h2>
+ 		 </html>
+      <chart>
+        <title>Average Response Time by DNS Server</title>
+        <search>
+          <query>`netflow_search_rule_20004`                  | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group                 | search exp_group="$exp_group$" exp_ip="$exp_ip$"                  | timechart avg(avg_time) by dest_ip useother="f"</query>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Response Time, msec</option>
+        <option name="charting.legend.placement">top</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+        <option name="height">200px</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+               /app/netflow/dns_monitor
+                ]]>
+          </link>
+        </drilldown>
+      </chart>
+      <chart>
+        <title>Top 10 DNS Users</title>
+        <searchTemplate>`netflow_search_rule_20005` 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$" 
+                | `sampling(flow_count)`
+                | chart sum(flow_count) by src_ip
+                | sort - sum(flow_count)
+                | head 10</searchTemplate>
+        <option name="charting.chart">bar</option>
+        <option name="charting.axisTitleX.text">Users</option>
+        <option name="charting.axisTitleY.text">Connections</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="height">200px</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+				/app/netflow/dns_monitor
+                ]]>
+          </link>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <html>
+    		<h2>QOS</h2>
+ 		 </html>
+      <chart>
+        <title>Inbound Traffic</title>
+        <searchTemplate>`netflow_search_rule_20065`
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal OUTPUT bitmap AS src_bitmap DSCP AS src_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group 
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | lookup protocol_lookup protocol AS protocol 
+                | `sampling(bytes_in)` 
+                | strcat src_bitmap " (" src_dscp ")" qos_string 
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by qos_string)`</searchTemplate>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="height">200px</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 /app/netflow/traffic_by_qos
+                ]]>
+          </link>
+        </drilldown>
+      </chart>
+      <table id="table_1_1">
+        <searchTemplate>`netflow_search_rule_20065`
+                | eval src_tos = if(isnull(src_tos), tos, src_tos) 
+                | eval src_decimal=floor((src_tos)/4)
+                | lookup diffserv_lookup decimal AS src_decimal OUTPUT bitmap AS src_bitmap DSCP AS src_dscp 
+                | eval src_bitmap = if(src_bitmap = "000000", 0, ltrim(src_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group 
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | lookup protocol_lookup protocol AS protocol 
+                | strcat src_bitmap " (" src_dscp ")" qos_string 
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)` 
+                | stats sum(bytes_in) AS TrafficAmount 
+                        sum(packets_in) AS PacketsAmount 
+                        sum(flow_count) AS Connections 
+                        by exp_ip qos_string 
+                | sort 0 - TrafficAmount 
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)`
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name qos_string Traffic Packets Connections
+                | rename exp_ip_name as "Device" 
+                | rename qos_string as "Source Diff. Services" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"</searchTemplate>
+        <option name="count">10</option>
+        <option name="showPager">true</option>
+        <option name="drilldown">row</option>
+      </table>
+      <chart>
+        <title>Outbound Traffic</title>
+        <searchTemplate>`netflow_search_rule_20065`
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval dest_decimal=floor((dest_tos)/4) 
+                | lookup diffserv_lookup decimal AS dest_decimal OUTPUT bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | lookup protocol_lookup protocol AS protocol 
+                | `sampling(bytes_in)` 
+                | strcat dest_bitmap " (" dest_dscp ")" qos_string 
+                | `per_second_chart(megabits, bytes_in*8/1000000, sum(megabits) by qos_string)`</searchTemplate>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.text">Mbps</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="height">200px</option>
+        <drilldown target="new windows">
+          <link>
+            <![CDATA[
+                 /app/netflow/traffic_by_qos
+                ]]>
+          </link>
+        </drilldown>
+      </chart>
+      <table id="table_1_2">
+        <searchTemplate>`netflow_search_rule_20065`
+                | eval dest_tos = if(isnull(dest_tos), 0, dest_tos) 
+                | eval dest_decimal=floor((dest_tos)/4) 
+                | lookup diffserv_lookup decimal AS dest_decimal OUTPUT bitmap AS dest_bitmap DSCP AS dest_dscp 
+                | eval dest_bitmap = if(dest_bitmap = "000000", 0, ltrim(dest_bitmap, "0")) 
+                | lookup exporters_devices_lookup exp_ip OUTPUT device_group AS exp_group
+                | search exp_group="$exp_group$" exp_ip="$exp_ip$"
+                | lookup protocol_lookup protocol AS protocol 
+                | strcat dest_bitmap " (" dest_dscp ")" qos_string
+                | `sampling(bytes_in)` 
+                | `sampling(packets_in)` 
+                | `sampling(flow_count)`
+                | stats sum(bytes_in) AS TrafficAmount 
+                        sum(packets_in) AS PacketsAmount 
+                        sum(flow_count) AS Connections 
+                        by exp_ip qos_string 
+                | sort 0 - TrafficAmount 
+                | head 100 
+                | `average_speed(TrafficSpeed, TrafficAmount*8)` 
+                | `average_speed(PacketsSpeed, PacketsAmount)` 
+                | `format_traffic_column(Traffic, TrafficAmount, TrafficSpeed)`
+                | `format_packets_column(Packets, PacketsAmount, PacketsSpeed)`
+                | `get_exporter_name(exp_ip_name)`
+                | table exp_ip_name qos_string Traffic Packets Connections
+                | rename exp_ip_name as "Device" 
+                | rename qos_string as "Destination Diff. Services" 
+                | rename Traffic as "Average Traffic Rate (Total Traffic)"
+                | rename Packets as "Average Packet Rate (Total Packets)"</searchTemplate>
+        <option name="count">10</option>
+        <option name="showPager">true</option>
+        <option name="drilldown">row</option>
+      </table>
+    </panel>
+  </row>
+</form>

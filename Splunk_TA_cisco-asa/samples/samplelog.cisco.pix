@@ -1,0 +1,94 @@
+Sep 7 06:20:15 pix-inside %PIX-4-400013 IDS:2003 ICMP redirect from XXX.XXX.XXX to XXX.XXX.XXX on interface dmz
+Sep 7 06:25:17 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/68 to outside:XXX.XXX.XXX.XXX/67
+Sep 7 06:25:23 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:23 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:23 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:24 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:24 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:24 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:25 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:25 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:25 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/137
+Sep 7 06:25:28 pix-inside %PIX-7-609001: Built local-host db:XXX.XXX.XXX.XXX
+Sep 7 06:25:28 pix-inside %PIX-6-302013: Built inbound TCP connection 141968 for db:XXX.XXX.XXX.XXX/60749 (XXX.XXX.XXX.XXX/60749) to NP Identity Ifc: XXX.XXX.XXX.XXX/22 (XXX.XXX.XXX.XXX/22)
+Sep 7 06:25:28 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/60749 to db:XXX.XXX.XXX.XXX/ssh
+Sep 7 06:26:20 pix-inside %PIX-5-304001: XXX.XXX.XXX.XXX Accessed URL XXX.XXX.XXX.XXX:/Home/index.cfm
+Sep 7 06:26:20 pix-inside %PIX-5-304001: XXX.XXX.XXX.XXX Accessed URL XXX.XXX.XXX.XXX:/aboutus/volunteers.cfm
+Sep 7 06:26:49 pix-inside %PIX-4-106023: Deny udp src outside:XXX.XXX.XXX.XXX/58939 dst dmz:XXX.XXX.XXX.XXX/1026 by access-group "acl_outside" [0x0, 0x0]
+Sep 7 06:26:49 pix-inside %PIX-4-106023: Deny udp src outside: XXX.XXX.XXX.XXX/58940 dst dmz:XXX.XXX.XXX.XXX/1027 by access-group "acl_outside" [0x0, 0x0]
+Sep 7 06:31:26 pix-inside %PIX-7-711002: Task ran for 330 msec, Process= ssh_init, PC = fddd93, Traceback =   0x00FF1E6B  0x00FE1890 0x00FE0D3C  0x00FD326A  0x00FC0BFC 0x00FDBB8E  0x00FDBA4D  0x00FCD846  0x00FBF09C  0x001C76AE 0x00A01512  0x009CF6B5  0x00BDB9CE  0x00BDA502
+Sep 7 06:31:32 pix-inside %PIX-6-315011: SSH session from XXX.XXX.XXX.XXX on interface db for user "UUUUUUUU" disconnected by SSH server, reason: "TCP connection closed" (0x03)
+Jan 28 02:04:30 pix-inside %PIX-3-106010: Deny inbound tcp src outside:XXX.XXX.XXX.XXX/1262 dst inside :XXX.XXX.XXX.XXX/80
+Jan 28 02:01:08 pix-inside %PIX-3-106010: Deny inbound udp src outside:XXX.XXX.XXX.XXX/1321 dst inside :XXX.XXX.XXX.XXX/1434
+Jan 28 06:17:47 pix-inside %PIX-3-106010: Deny inbound icmp src outside:XXX.XXX.XXX.XXX dst inside :XXX.XXX.XXX.XXX (type 8, code 0)
+Jan 28 00:21:50 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/1233 dst outside:XXX.XXX.XXX.XXX/80
+Jan 28 00:01:38 pix-inside %PIX-4-106023: Deny tcp src outside:XXX.XXX.XXX.XXX/1381 dst inside :XXX.XXX.XXX.XXX/445 by access-group "ACL-FROM-OUTSIDE"
+Jan 28 00:01:38 pix-inside %PIX-4-106023: Deny udp src outside:XXX.XXX.XXX.XXX/1025 dst inside :XXX.XXX.XXX.XXX/137 by access-group "ACL-FROM-OUTSIDE"
+Jan 28 00:41:42 pix-inside %PIX-4-106023: Deny icmp src outside:XXX.XXX.XXX.XXX dst inside :XXX.XXX.XXX.XXX (type 8, code 0) by access-group "ACL-FROM-OUTSIDE"
+Jan 28 01:48:01 pix-inside %PIX-4-106023: Deny protocol 4 src outside:XXX.XXX.XXX.XXX dst inside :XXX.XXX.XXX.XXX by access-group "ACL-FROM-OUTSIDE"
+Jan 28 02:03:33 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/13269 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:36 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/13528 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:37 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/14154 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:38 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/19067 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:49 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/21532 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:51 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/27167 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:52 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/29488 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:56 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/32597 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:03:57 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/40654 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:07 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/48798 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:10 pix-inside %PIX-7-710001: TCP access requested from XXX.XXX.XXX.XXX/7180 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:11 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/13269 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:12 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/13528 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:13 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/14154 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:14 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/19067 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:15 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/21532 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:16 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/27167 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:17 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/29488 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:18 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/32597 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:19 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/40654 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:20 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/48798 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:21 pix-inside %PIX-7-710002: TCP access permitted from XXX.XXX.XXX.XXX/7180 to outside:XXX.XXX.XXX.XXX/ssh
+Jan 28 02:04:22 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/68 to outside:XXX.XXX.XXX.XXX/bootps
+Jan 28 02:04:23 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to inside :XXX.XXX.XXX.XXX/netbios-ns
+Jan 28 02:04:24 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/138 to inside :XXX.XXX.XXX.XXX/netbios-dgm
+Jan 28 02:04:25 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/3935 to inside :XXX.XXX.XXX.XXX/1900
+Jan 28 02:04:26 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/netbios-ns
+Jan 28 02:04:27 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/netbios-ns
+Jan 28 02:04:28 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/netbios-ns
+Jan 28 02:04:29 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/138 to outside:XXX.XXX.XXX.XXX/netbios-dgm
+Jan 28 02:04:30 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/68 to outside:XXX.XXX.XXX.XXX/bootps
+Jan 28 02:04:31 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/netbios-ns
+Jan 28 02:04:32 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/138 to outside:XXX.XXX.XXX.XXX/netbios-dgm
+Jan 28 02:04:33 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/68 to outside:XXX.XXX.XXX.XXX/bootps
+Jan 28 02:04:34 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/netbios-ns
+Jan 28 02:04:35 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/138 to outside:XXX.XXX.XXX.XXX/netbios-dgm
+Jan 28 02:04:36 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/68 to outside:XXX.XXX.XXX.XXX/bootps
+Jan 28 02:04:37 pix-inside %PIX-7-710005: UDP request discarded from XXX.XXX.XXX.XXX/137 to outside:XXX.XXX.XXX.XXX/netbios-ns
+Jan 28 02:04:38 pix-inside %PIX-6-315011: SSH session from XXX.XXX.XXX.XXX on interface outside for user "UUUUUUUU" disconnected by SSH server, reason: "TCP connection closed" (0x03)
+Jan 28 02:04:39 pix-inside %PIX-6-604101: DHCP client interface outside: Allocated ip = XXX.XXX.XXX.XXX, mask = XXX.XXX.XXX.XXX, gw = XXX.XXX.XXX.XXX
+Jan 28 02:04:40 pix-inside %PIX-6-604101: DHCP client interface outside: Allocated ip = XXX.XXX.XXX.XXX, mask = XXX.XXX.XXX.XXX, gw = XXX.XXX.XXX.XXX
+Jan 28 02:04:41 pix-inside %PIX-6-604103: DHCP daemon interface inside : address granted 000c.29e4.ebc3 (XXX.XXX.XXX.XXX)
+Jan 28 02:04:42 pix-inside %PIX-6-604103: DHCP daemon interface inside : address granted 000c.29e4.ebc3 (XXX.XXX.XXX.XXX)
+Jan 28 02:04:43 pix-inside %PIX-6-604103: DHCP daemon interface inside : address granted 0100.0d9d.8283.ec(XXX.XXX.XXX.XXX)
+Jan 28 02:04:44 pix-inside %PIX-6-605004: Login denied from XXX.XXX.XXX.XXX/13269 to outside:XXX.XXX.XXX.XXX/ssh for user "UUUUUUUU"
+Jan 28 02:04:45 pix-inside %PIX-6-605004: Login denied from XXX.XXX.XXX.XXX/13528 to outside:XXX.XXX.XXX.XXX/ssh for user "UUUUUUUU"
+Jan 28 02:04:46 pix-inside %PIX-6-605004: Login denied from XXX.XXX.XXX.XXX/14154 to outside:XXX.XXX.XXX.XXX/ssh for user "UUUUUUUU"
+Jan 28 02:04:47 pix-inside %PIX-3-305006: portmap translation creation failed for tcp src inside :XXX.XXX.XXX.XXX/2893 dst outside:XXX.XXX.XXX.XXX/3128
+Jan 28 02:04:48 pix-inside %PIX-3-305006: portmap translation creation failed for tcp src inside :XXX.XXX.XXX.XXX/2892 dst outside:XXX.XXX.XXX.XXX/3128
+Jan 28 02:04:49 pix-inside %PIX-3-201008: The PIX is disallowing new connections.
+Jan 28 02:04:50 pix-inside %PIX-3-106011: Deny inbound (No xlate) udp src outside:XXX.XXX.XXX.XXX/137 dst outside:XXX.XXX.XXX.XXX/137
+Jan 28 02:04:51 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/80 dst outside:XXX.XXX.XXX.XXX/1823
+Jan 28 02:04:52 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/80 dst outside:XXX.XXX.XXX.XXX/1717
+Jan 28 02:04:53 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/80 dst outside:XXX.XXX.XXX.XXX/1716
+Jan 28 02:04:54 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/80 dst outside:XXX.XXX.XXX.XXX/1721
+Jan 28 02:04:55 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/80 dst outside:XXX.XXX.XXX.XXX/1720
+Jan 28 02:04:56 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src inside :XXX.XXX.XXX.XXX/80 dst inside :XXX.XXX.XXX.XXX/2285
+Jan 28 02:04:57 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src inside :XXX.XXX.XXX.XXX/80 dst inside :XXX.XXX.XXX.XXX/2285
+Jan 28 02:04:58 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/3959 dst outside:XXX.XXX.XXX.XXX/139
+Jan 28 02:04:59 pix-inside %PIX-3-106011: Deny inbound (No xlate) tcp src outside:XXX.XXX.XXX.XXX/3959 dst outside:XXX.XXX.XXX.XXX/139
+Jan 28 02:05:10 pix-inside %PIX-3-106011: Deny inbound (No xlate) udp src outside:XXX.XXX.XXX.XXX/137 dst outside:XXX.XXX.XXX.XXX/137
+Jan 28 02:05:21 pix-inside %PIX-3-106010: Deny inbound tcp src outside:XXX.XXX.XXX.XXX/2620 dst dmz:XXX.XXX.XXX.XXX/135
+Jan 28 02:05:42 pix-inside %PIX-3-106010: Deny inbound tcp src outside:XXX.XXX.XXX.XXX/2620 dst dmz:XXX.XXX.XXX.XXX/145
+Feb 10 2014 10:02:51: %ASA-6-338301: Intercepted DNS reply for name HHHHHHHH from CALO-Backbone:XXX.XXX.XXX.XXX/53 to CyberRange-Dev-Red:XXX.XXX.XXX.XXX/54046, matched blacklist
+Feb 10 2014 10:02:51: %ASA-5-338302: Address XXX.XXX.XXX.XXX discovered for domain HHHHHHHH from blacklist. Adding rule
+Feb 10 2014 10:02:51: %ASA-4-338002: Dynamic Filter monitored blacklisted TCP traffic from CyberRange-Dev-Red:XXX.XXX.XXX.XXX/56290 (XXX.XXX.XXX.XXX/56290) to CALO-Backbone:XXX.XXX.XXX.XXX/80 (XXX.XXX.XXX.XXX/80), destination XXX.XXX.XXX.XXX resolved from dynamic list: XXX.XXX.XXX.XXX, threat-level: very-high, category: Malware

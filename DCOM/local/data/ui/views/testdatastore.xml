@@ -1,0 +1,15 @@
+<dashboard  script=" table_icons_rangemap2.js" stylesheet="table_decorations.css">
+
+  <label>testdatastore</label>
+  <row>
+    <panel>
+      <table id="table2">
+        <search>
+          <query>sourcetype="vmware:inv:datastore"  | spath moid | spath changeSet.summary.accessible output=accessible | spath changeSet.summary.capacity output=capacity | spath changeSet.summary.freeSpace output=freeSpace | spath changeSet.summary.uncommitted output=uncommitted | spath changeSet.summary.url output=url | spath changeSet.summary.type output=type | spath changeSet.summary.name output=name | table _time, moid, host, name, url, accessible, capacity, freeSpace, uncommitted, type | stats first(name) as name first(freeSpace) as freeSpace first(capacity) as capacity first(accessible) as accessible first(uncommitted) as uncommitted by host, moid | fillnull value=0 uncommitted | eval totalSpace=tostring(round((capacity)/(1024*1024*1024), 2)) | eval RemainingCapacity_GB=tostring(round((freeSpace)/(1024*1024*1024), 2)) | eval Committed_GB=totalSpace-RemainingCapacity_GB | eval spaceAfterUncommitedAllocation=freeSpace-uncommitted | eval provisionedAmount=capacity-spaceAfterUncommitedAllocation | eval overprovisionedPct=round(if(provisionedAmount!=0,(provisionedAmount/capacity)-1,0)*100,2) | thresholdlookup entitytype=Datastore,perftype=inv,metric=RemainingCapacity_GB,match=true| eval warnLevel=(totalSpace-threshold_warnlevel) | eval critLevel=(totalSpace-threshold_critlevel) | rename totalSpace as Capacity_GB, name as Datastore, overprovisionedPct as Overprovisioned_pct | eval Type="Datastore" | search Datastore=* |eval State=case(critLevel-Committed_GB&lt;0,"2",warnLevel-Committed_GB&lt;0,"1",1=1,"0") | rangemap field=State  low=0-0 elevated=1-1 default=severe|eval State=range| table State  Datastore host</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+</dashboard>

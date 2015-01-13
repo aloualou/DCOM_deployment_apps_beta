@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<title>Proactive Monitoring | Splunk</title>
+	<link rel="shortcut icon" href="{{SPLUNKWEB_URL_PREFIX}}/static/img/favicon.ico" />
+	<link rel="stylesheet" type="text/css" href="{{SPLUNKWEB_URL_PREFIX}}/static/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="{{SPLUNKWEB_URL_PREFIX}}/static/css/pages/dashboard-simple-bootstrap.min.css" />
+	<!-- APP/PAGE CSS --> 
+	<link rel="stylesheet" type="text/css" media="all" href="{{SPLUNKWEB_URL_PREFIX}}/static/app/splunk_for_vmware/components/proactivemonitoring/contrib/noel-icons/style.css" />
+	<!--<link rel="stylesheet" type="text/css" media="all" href="{{SPLUNKWEB_URL_PREFIX}}/static/app/splunk_for_vmware/dashboard.css" />-->
+	<!--[if IE 7]><link rel="stylesheet" href="{{SPLUNKWEB_URL_PREFIX}}/static/css/sprites-ie7.css" /><![endif]-->
+</head>
+<body class="simplexml preload">
+
+<!-- 
+BEGIN LAYOUT
+This section contains the layout for the dashboard. Splunk uses proprietary
+styles in <div> tags, similar to Bootstrap's grid system. 
+-->
+
+<div class="header">
+	<div id="placeholder-splunk-bar">
+		<a href="{{SPLUNKWEB_URL_PREFIX}}/app/launcher/home" class="brand" title="splunk &gt; listen to your data">splunk<strong>&gt;</strong></a>
+	</div>
+	<div id="placeholder-app-bar"></div>
+</div>
+<div class="dashboard-body container-fluid main-section-body" data-role="main">
+	<div class="dashboard-header clearfix">
+		<h2>Proactive Monitoring</h2>
+		<p class="description">Performs top-down performance assessment of all vSphere environments</p>
+	</div>
+	<div class="fieldset">
+		<div class="element input-dropdown" id="field1">
+			<label>Entity</label>
+		</div>
+		<div class="element input-dropdown" id="field2">
+			<label>Performance Type</label>
+		</div>
+		<div class="element input-dropdown" id="field3">
+			<label>Metric</label>
+		</div>
+		<div class="input input-timerangepicker" id="field4">
+			<label>&nbsp;</label>
+		</div>
+		<div class="input form-submit" id="search_btn">
+			<button class="btn btn-primary submit">Search</button>
+		</div>
+		<div id="search_processing_indicator" class="pm-perf-message-container">
+			
+		</div>
+	</div>
+	<div class="dashboard-row dashboard-row1">
+		<div class="dashboard-cell" style="width: 100%;">
+			<div class="dashboard-panel clearfix">
+				<div class="panel-element-row">
+					<div class="dashboard-element" id="element1" style="width: 100%">
+						<div class="panel-body" style="padding:0px;overflow:visible;">
+							<div class="proactive-monitoring-container"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="footer"></div>
+<!-- END LAYOUT -->
+
+<!-- REQUIRE, CONFIG, AND i18n -->
+<script src="{{SPLUNKWEB_URL_PREFIX}}/config?autoload=1"></script>
+<script src="{{SPLUNKWEB_URL_PREFIX}}/static/js/contrib/require.js"></script>
+<script src="{{SPLUNKWEB_URL_PREFIX}}/static/js/i18n.js"></script>
+<script src="{{SPLUNKWEB_URL_PREFIX}}/i18ncatalog?autoload=1"></script>
+<script src="{{SPLUNKWEB_URL_PREFIX}}/static/js/profiles/shared.js"></script>
+<script type="text/javascript">
+require.config({
+	baseUrl: "{{SPLUNKWEB_URL_PREFIX}}/static/js",
+	paths: {
+		"pm": "{{SPLUNKWEB_URL_PREFIX}}/static/app/splunk_for_vmware/components/proactivemonitoring"
+	}
+});
+</script>
+<!-- END REQUIRE, CONFIG, AND i18n -->
+
+<!-- PRODUCTION PAGE JS -->
+<script src="{{SPLUNKWEB_URL_PREFIX}}/static/app/splunk_for_vmware/pages/built/proactive_monitoring.built.js"></script>
+<!-- END PRODUCTION JS -->
+
+<!-- DEV PAGE JS 
+<script src="{{SPLUNKWEB_URL_PREFIX}}/static/js/contrib/require_dev_config.js"></script>
+<script src="{{SPLUNKWEB_URL_PREFIX}}/static/app/splunk_for_vmware/pages/proactive_monitoring.js"></script>
+END DEV PAGE JS-->
+
+</body>
+</html>

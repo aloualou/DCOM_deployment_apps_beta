@@ -1,0 +1,10 @@
+<%page expression_filter="h"/>
+<%inherit file="//layout/base.html" />
+<%namespace name="lib" file="//lib.html" import="*"/>
+
+<div class="SuccessMessage">
+  <h2>Authorization Failure!</h2>
+  <p>Your VMware configuration could not be saved because you do not have the appropriate permissions to configure the app.&nbsp;&nbsp;Click "OK" to go to the app home page.</p>
+  <a target="_parent" href="${make_url('/app/%s' % app)}" class="splButton-primary">OK</a>
+</div>
+

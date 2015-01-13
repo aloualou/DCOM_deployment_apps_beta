@@ -1,0 +1,566 @@
+<%page expression_filter="h"/>
+
+<%
+import sys
+from splunk.appserver.mrsparkle.lib.util import make_splunkhome_path
+sys.path.append(make_splunkhome_path(['etc', 'apps', 'SA-Threshold', 'appserver', 'controllers' ]))
+
+from sa_threshold_conf_service import isValidAdmin
+	
+# Get cherry key
+session_key = cherrypy.session.get('sessionKey')
+
+# Get cherry username
+user = cherrypy.session['user']['name']
+
+# Get capabilities
+validadmin = isValidAdmin(user, session_key)
+
+%>
+
+<%inherit file="//layout/base.html" />
+<%namespace name="lib" file="//lib.html" import="*"/>
+<%namespace name="helpers" file="//view/_helpers.html" import="*"/>
+
+<%def name="head()">
+	<% parent.head() %>
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="Mon, 22 Jul 2002 11:12:01 GMT">
+</%def>
+
+<%def name="css()">
+    <%coreCSSFiles = [
+        "/static/app/SA-Threshold/css/sa_threshold.css",
+        "/static/css/view.css", 
+        "/static/css/skins/default/default.css" 
+    ] %>
+    <%lib:stylesheet_tags files="${coreCSSFiles}" />
+</%def>
+
+% if validadmin:
+<%def name="gen_input_row(threshold, error_key=None)">
+	<%
+		name = threshold.name
+		disabled = threshold.disabled
+		entitytype = threshold.entitytype
+		perftype = threshold.perftype
+		metric = threshold.metric
+		if (threshold.comparator == ">") :
+			comparator = "greater than"
+		elif (threshold.comparator == ">="):
+			comparator = "greater than or equal to"
+		elif (threshold.comparator == "<"):
+			comparator = "less than"
+		elif (threshold.comparator == "<="):
+			comparator = "less than or equal to"
+		else:
+			comparator = "greater than"
+		warning = threshold.warning
+		critical = threshold.critical
+		description = threshold.description
+	%>
+	
+	<tr class="threshold-row" id="${name}-row">
+		<td class="checkbox-td">
+			<input type="checkbox" value="${name}" class="threshold-checkbox" />
+		</td>
+		<td class="threshold-td data-td">
+			<input type="hidden" value="${name}" class="threshold-name"/>
+			<select  class="threshold-disabled data-entry" style="display:none;" disabled>
+				<option ${'selected=selected' if not threshold.disabled else ''} value="False">Enabled</option>
+				<option ${'selected=selected' if threshold.disabled else ''} value="True">Disabled</option>
+			</select>
+			<div class="threshold-disabled-display">${'Enabled' if not threshold.disabled else 'Disabled'}</div>
+		</td>
+		<td class="threshold-td data-td">
+			<select  class="threshold-entitytype data-entry" style="display:none;" disabled>
+				<option ${'selected=selected' if entitytype=='HostSystem' else ''} value="HostSystem">HostSystem</option>
+				<option ${'selected=selected' if entitytype=='VirtualMachine' else ''} value="VirtualMachine">VirtualMachine</option>
+				<option ${'selected=selected' if entitytype=='Datastore' else ''} value="Datastore">Datastore</option>
+			</select>
+			<div class="threshold-entitytype-display">${entitytype}</div>
+		</td>
+		<td class="threshold-td data-td">
+			<input type="text" value="${perftype}" class="threshold-perftype data-entry" style="display:none;" disabled/>
+			<div class="threshold-perftype-display">${perftype}</div>
+		</td>
+		<td class="threshold-td data-td">
+			<input type="text" value="${metric}" class="threshold-metric data-entry" style="display:none;" disabled/>
+			<div class="threshold-metric-display">${metric}</div>
+		</td>
+		<td class="threshold-td data-td">
+			<select  class="threshold-comparator data-entry" style="display:none;" disabled>
+				<option ${'selected=selected' if comparator=='greater than' else ''} value='greater than'>greater than</option>
+				<option ${'selected=selected' if comparator=='greater than or equal to' else ''} value='greater than or equal to'>greater than or equal to</option>
+				<option ${'selected=selected' if comparator=='less than' else ''} value='less than'>less than</option>
+				<option ${'selected=selected' if comparator=='less than or equal to' else ''} value='less than or equal to'>less than or equal to</option>
+			</select>
+			<div class="threshold-comparator-display">${comparator}</div>
+		</td>
+		<td class="threshold-td data-td">
+			<input type="text" value="${warning}" class="threshold-warning data-entry" style="display:none;" disabled/>
+			<div class="threshold-warning-display">${warning}</div>
+		</td>
+		<td class="threshold-td data-td">
+			<input type="text" value="${critical}" class="threshold-critical data-entry" style="display:none;" disabled/>
+			<div class="threshold-critical-display">${critical}</div>
+		</td>
+		<td class="threshold-td data-td">
+			<input type="text" value="${description}" class="threshold-description data-entry" style="display:none;" disabled/>
+			<div class="threshold-description-display">${description}</div>
+		</td>
+		<td id="${name}-buttons" class="threshold-buttons" style="display:none;">
+			<button id="${name}-save" class="splButton-primary threshold-button-save">Save</button>
+			<button id="${name}-cancel" class="splButton-secondary threshold-button-cancel">Cancel</button>
+		</td>
+	</tr>
+</%def>
+<%
+    error_key = None
+%>
+
+	${csrf_hidden_input()}
+
+	<div class="about">
+		<p>
+			Click on a row to edit it, click new to create a new entry. Nothing is saved to the server unless you press the save button for a row.
+		</p>
+	</div>
+	<br/>
+	<br/>
+	<div class="table_container">
+		<h3 id="table_header">Configured Thresholds</h3>
+		<button class="splButton-primary threshold-button-new" style="float:left;clear:both;">New</button>
+		<br/>
+		<br/>
+		<hr/>
+		<div class="scrollbox">
+			<table id="threshold_table" class="InputTable">
+				<tr>
+					<th class="CheckboxHeader"></th>
+					<th class="Header">Disabled</th>
+					<th class="Header">EntityType</th>
+					<th class="Header">PerfType</th>
+					<th class="Header">Metric</th>
+					<th class="Header">Comparator</th>
+					<th class="Header">Warning Threshold</th>
+					<th class="Header">Critical Threshold</th>
+					<th class="Header">Description</th>
+					<th class="ButtonsHeader"></th>
+				</tr>
+				% for threshold in thresholds:
+					${gen_input_row(threshold, error_key=error_key)}
+				% endfor
+			</table>
+		</div>
+		<br/>
+		<hr/>
+		<br/>
+		<button class="splButton-primary threshold-button-new">New</button>
+		<button class="splButton-primary threshold-button-delete selected-dependent" style="display:none;">Delete Selected</button>
+		<button class="splButton-secondary threshold-button-cancel-delete" style="display:none;" >Cancel Delete</button>
+		<button class="splButton-primary threshold-button-enable-selected selected-dependent" style="display:none;">Enable Selected</button>
+		<button class="splButton-secondary threshold-button-disable-selected selected-dependent" style="display:none;">Disable Selected</button>
+	</div>
+	
+	
+	
+	<script type="text/javascript">
+	
+	//Handle the  ui for editing and creating new thresholds
+	// IE9 and IE10 fix
+    if(!window.console) {
+    	var console = {
+        	log : function(){},
+        	warn : function(){},
+        	error : function(){}
+        }
+     }	
+	$.ajaxSetup({ cache: false });
+	
+	function convertDisabled(s) {
+		//helper function that takes string of True,Disabled,False,Enabled and returns the equivalent
+		//i.e. True returns Disabled, Enabled returns False etc
+		var word_map = {
+			"True" : "Disabled",
+			"False" : "Enabled",
+			"Enabled" : "False",
+			"Disabled" : "True"
+		};
+		
+		return word_map[s];
+	}
+	
+	function convertComparatorValue(s) {
+		//helper function that takes string of comparator and returns the equivalent
+		//value to be stored in conf file, NOT FOR UI PURPOSES
+		var word_map = {
+			"greater than" : ">",
+			"greater than or equal to" : ">=",
+			"less than" : "<",
+			"less than or equal to" : "<="
+		};
+		
+		return word_map[s];
+	}
+	
+	function assignAltToTable() {
+		$("tr", $("#threshold_table")).each(function(ii) {
+			if ((ii % 2) === 0 ) {
+				$(this).removeClass("alt");
+			}
+			else {
+				$(this).addClass("alt");
+			}
+		});
+	}
+	
+	function disableInputs(context) {
+		//helper for disabling all the inputs
+		$("input.data-entry", context).prop("disabled", true);
+		$("select.data-entry", context).prop("disabled", true);
+		$("input.data-entry", context).hide();
+		$("select.data-entry", context).hide();
+		$("div", context).show();
+		$(".threshold-buttons", context).hide();
+	}
+	function enableInputs(context) {
+		//helper for enabling all the inputs
+		$("input.data-entry", context).prop("disabled", false);
+		$("select.data-entry", context).prop("disabled", false);
+		$("input.data-entry", context).show();
+		$("select.data-entry", context).show();
+		$("div", context).hide();
+		$(".threshold-buttons", context).show();
+	}
+	
+	function handleRowClick() {
+		//Make a row active if appropriate
+		var row = $(this).parent();
+		if (!row.hasClass("active")) {
+			row.addClass("active");
+			enableInputs(row);
+		}
+	}
+	
+	function handleSaveButtonClick() {
+		//This does the saving of a threshold object to the server
+		var threshold_row = $(this).parent().parent();
+		disableInputs(threshold_row);
+		threshold_row.removeClass("active");
+		//collect params for save
+		var params ={};
+		params["name"] = $("input.threshold-name",threshold_row).val();
+		params["disabled"] = $("select.threshold-disabled",threshold_row).val();
+		params["perftype"] = $("input.threshold-perftype",threshold_row).val();
+		params["entitytype"] = $("select.threshold-entitytype",threshold_row).val();
+		params["metric"] = $("input.threshold-metric",threshold_row).val();
+		params["comparator"] = convertComparatorValue($("select.threshold-comparator",threshold_row).val());
+		params["warning"] = $("input.threshold-warning",threshold_row).val();
+		params["critical"] = $("input.threshold-critical",threshold_row).val();
+		params["description"] = $("input.threshold-description",threshold_row).val();
+		
+		//Save values to the divs first
+		$("div.threshold-disabled-display",threshold_row).html(convertDisabled(params["disabled"]));
+		$("div.threshold-perftype-display",threshold_row).html(params["perftype"]);
+		$("div.threshold-entitytype-display",threshold_row).html(params["entitytype"]);
+		$("div.threshold-metric-display",threshold_row).html(params["metric"]);
+		$("div.threshold-comparator-display",threshold_row).html($("select.threshold-comparator",threshold_row).val());
+		$("div.threshold-warning-display",threshold_row).html(params["warning"]);
+		$("div.threshold-critical-display",threshold_row).html(params["critical"]);
+		$("div.threshold-description-display",threshold_row).html(params["description"]);
+		
+		serverSaveThreshold(params);
+	}
+	
+	function handleCancelButtonClick() {
+		//this essentially does the same thing as save ui wise, but doesn't save the data,
+		//it resets the inputs to old values
+		threshold_row = $(this).parent().parent();
+		disableInputs(threshold_row);
+		threshold_row.removeClass("active");
+		
+		//Convert inputs back to div values
+		$("select.threshold-disabled",threshold_row).val(convertDisabled($("div.threshold-disabled-display",threshold_row).html()));
+		$("input.threshold-perftype",threshold_row).val($("div.threshold-perftype-display",threshold_row).html());
+		$("select.threshold-entitytype",threshold_row).val($("div.threshold-entitytype-display",threshold_row).html());
+		$("input.threshold-metric",threshold_row).val($("div.threshold-metric-display",threshold_row).html());
+		$("select.threshold-comparator",threshold_row).val($("div.threshold-comparator-display",threshold_row).html());
+		$("input.threshold-warning",threshold_row).val($("div.threshold-warning-display",threshold_row).html());
+		$("input.threshold-critical",threshold_row).val($("div.threshold-critical-display",threshold_row).html());
+		$("input.threshold-description",threshold_row).val($("div.threshold-description-display",threshold_row).html());
+
+	}
+	
+	function handleNewButtonClick() {
+		//This will add a new row to the table which will allow a new threshold to be added
+		var rowHtml = ['<tr class="threshold-row" id="%NAME%-row">',
+				'<td class="checkbox-td">',
+					'<input type="checkbox" value="%NAME%" class="threshold-checkbox" />',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<input type="hidden" value="%NAME%" class="threshold-name"/>',
+					'<select  class="threshold-disabled data-entry" style="display:none;" disabled>',
+						'<option selected="selected" value="False">Enabled</option>',
+						'<option value="True">Disabled</option>',
+					'</select>',
+					'<div class="threshold-disabled-display">Enabled</div>',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<select  class="threshold-entitytype data-entry" style="display:none;" disabled>',
+						'<option value="HostSystem">HostSystem</option>',
+						'<option selected="selected"value="VirtualMachine">VirtualMachine</option>',
+						'<option value="Datastore">Datastore</option>',
+					'</select>',
+					'<div class="threshold-entitytype-display">VirtualMachine</div>',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<input type="text" value="" class="threshold-perftype data-entry" style="display:none;" disabled/>',
+					'<div class="threshold-perftype-display"></div>',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<input type="text" value="" class="threshold-metric data-entry" style="display:none;" disabled/>',
+					'<div class="threshold-metric-display"></div>',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<select  class="threshold-comparator data-entry" style="display:none;" disabled>',
+						'<option selected="selected" value="greater than">greater than</option>',
+						'<option value="greater than or equal to">greater than or equal to</option>',
+						'<option value="less than">less than</option>',
+						'<option value="less than or equal to">less than or equal to</option>',
+					'</select>',
+					'<div class="threshold-comparator-display">greater than</div>',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<input type="text" value="75" class="threshold-warning data-entry" style="display:none;" disabled/>',
+					'<div class="threshold-warning-display">75</div>',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<input type="text" value="95" class="threshold-critical data-entry" style="display:none;" disabled/>',
+					'<div class="threshold-critical-display">95</div>',
+				'</td>',
+				'<td class="threshold-td data-td">',
+					'<input type="text" value="" class="threshold-description data-entry" style="display:none;" disabled/>',
+					'<div class="threshold-description-display"></div>',
+				'</td>',
+				'<td id="%NAME%-buttons" class="threshold-buttons" style="display:none;">',
+					'<button id="%NAME%-save" class="splButton-primary threshold-button-save">Save</button>',
+					'<button id="%NAME%-cancel" class="splButton-secondary threshold-button-cancel">Cancel</button>',
+				'</td>',
+			'</tr>'].join('');
+		
+		//Replace in new name id for row
+		var nameId = Date.now() + "_" + Math.round(Math.random()*100);
+		rowHtml = rowHtml.replace(/%NAME%/g, nameId);
+		
+		//Add in row
+		$("#threshold_table").append(rowHtml);
+		var new_row= $("tr", $("#threshold_table")).last();
+		
+		//Bind event handlers to appropriate objects
+		$(".threshold-td", new_row).click(handleRowClick);
+		$(".threshold-button-cancel", new_row).click(handleCancelButtonClick);
+		$(".threshold-button-save", new_row).click(handleSaveButtonClick);
+		$(".threshold-checkbox", new_row).click(handleCheckboxClick);
+		
+		//Set row to editable mode
+		if (!new_row.hasClass("active")) {
+			new_row.addClass("active");
+			enableInputs(new_row);
+		}
+		assignAltToTable();
+	}
+	
+	function handleCancelDeleteButtonClick() {
+		//Cancel delete during confirmation
+		button = $(".threshold-button-delete");
+		if (button.hasClass("confirmation")) {
+			//Clean up
+			button.removeClass("confirmation");
+			button.html("Delete Selected");
+			$(".threshold-button-cancel-delete").hide();
+		}
+	}
+	
+	function handleDeleteButtonClick() {
+		//This will delete all of the checked rows from ui and server
+		button = $(this);
+		//Confirmation handled here
+		if (!button.hasClass("confirmation")) {
+			button.addClass("confirmation");
+			button.html("Click again to confirm...");
+			$(".threshold-button-cancel-delete").show();
+			return;
+		} 
+		else {
+			//Get the deletion set and delete them
+			$(".threshold-checkbox:checked").each( function(ii) {
+				//Delete the threshold from the server
+				serverDeleteThreshold($(this).val());
+				//Climb up to row and delete it!
+				$(this).parent().parent().remove();
+			});
+			//Clean up
+			button.removeClass("confirmation");
+			button.html("Delete Selected");
+			$(".threshold-button-cancel-delete").hide();
+			assignAltToTable();
+		}
+	}
+	
+	function handleEnableButtonClick() {
+		//Enable all the selected thresholds
+		$(".threshold-checkbox:checked").each( function(ii) {
+			//Enable the threshold on the server
+			serverEnableThreshold($(this).val());
+			//UI work
+			$("select.threshold-disabled", $(this).parent().parent()).val("False");
+			$("div.threshold-disabled-display", $(this).parent().parent()).html("Enabled");
+		});
+	}
+	
+	function handleDisableButtonClick() {
+		//Disable all the selected thresholds
+		$(".threshold-checkbox:checked").each( function(ii) {
+			//Disable the threshold on the server
+			serverDisableThreshold($(this).val());
+			//UI work
+			$("select.threshold-disabled", $(this).parent().parent()).val("True");
+			$("div.threshold-disabled-display", $(this).parent().parent()).html("Disabled");
+		});
+	}
+	
+	function handleCheckboxClick() {
+		//Make the selected buttons appear/disappear appropriately
+		if ($(".threshold-checkbox:checked").length === 0) {
+			$(".selected-dependent").hide();
+			button = $(".threshold-button-delete");
+			if (button.hasClass("confirmation")) {
+				//Clean up
+				button.removeClass("confirmation");
+				button.html("Delete Selected");
+				$(".threshold-button-cancel-delete").hide();
+			}
+		}
+		else {
+			$(".selected-dependent").show();
+		}
+	}
+	
+	//SERVER INTERACTION FUNCTIONS
+	function serverEnableThreshold(nameId) {
+		//Enable the threshold with given nameId on the server
+		var params = {
+			'name' : nameId
+		};
+		var uri = Splunk.util.make_url('custom', 'SA-Threshold' , 'sa_threshold_conf_service', '${app}', 'enable');
+		//Transmit values to server, the key item here (almost literally) is to remember to add the X-Splunk-Form-Key
+		$.ajax({
+			type: "POST",
+			url:uri,
+			data:params,
+			datatype:'json',
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('X-Splunk-Form-Key', $('input[name=splunk_form_key]').val());
+			},
+			success: function() {
+				console.log("[SA-Threshold] Delete Success");
+			},
+			error: function(jqXHR,textStatus,errorThrown) {
+				console.log("[SA-Threshold] Delete Failure");
+			}  
+		});
+	}
+	
+	function serverDisableThreshold(nameId) {
+		//Disable the threshold with given nameId on the server
+		var params = {
+			'name' : nameId
+		};
+		var uri = Splunk.util.make_url('custom', 'SA-Threshold' , 'sa_threshold_conf_service', '${app}', 'disable');
+		//Transmit values to server, the key item here (almost literally) is to remember to add the X-Splunk-Form-Key
+		$.ajax({
+			type: "POST",
+			url:uri,
+			data:params,
+			datatype:'json',
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('X-Splunk-Form-Key', $('input[name=splunk_form_key]').val());
+			},
+			success: function() {
+				console.log("[SA-Threshold] Delete Success");
+			},
+			error: function(jqXHR,textStatus,errorThrown) {
+				console.log("[SA-Threshold] Delete Failure");
+			}  
+		});
+	}
+	
+	function serverDeleteThreshold(nameId) {
+		//Delete the threshold with the name/id passed
+		var params = {
+			'name' : nameId
+		};
+		var uri = Splunk.util.make_url('custom', 'SA-Threshold' , 'sa_threshold_conf_service', '${app}', 'delete');
+		//Transmit values to server, the key item here (almost literally) is to remember to add the X-Splunk-Form-Key
+		$.ajax({
+			type: "POST",
+			url:uri,
+			data:params,
+			datatype:'json',
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('X-Splunk-Form-Key', $('input[name=splunk_form_key]').val());
+			},
+			success: function() {
+				console.log("[SA-Threshold] Delete Success");
+			},
+			error: function(jqXHR,textStatus,errorThrown) {
+				console.log("[SA-Threshold] Delete Failure");
+			}  
+		});
+	}
+	
+	function serverSaveThreshold(params) {
+		//Save the given threshold object to the server
+		var uri = Splunk.util.make_url('custom', 'SA-Threshold' , 'sa_threshold_conf_service', '${app}', 'save');
+		//Transmit values to server, the key item here (almost literally) is to remember to add the X-Splunk-Form-Key
+		$.ajax({
+			type: "POST",
+			url:uri,
+			data:params,
+			datatype:'json',
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('X-Splunk-Form-Key', $('input[name=splunk_form_key]').val());
+			},
+			success: function() {
+				console.log("[SA-Threshold] Save Success");
+			},
+			error: function(jqXHR,textStatus,errorThrown) {
+				console.log("[SA-Threshold] Save Failure");
+			}  
+		});
+		
+	}
+	
+	//Bind handlers to the initally rendered stuff
+	assignAltToTable();
+	$(".threshold-td", $(".threshold-row")).click(handleRowClick);
+	$(".threshold-button-cancel").click(handleCancelButtonClick);
+	$(".threshold-button-save").click(handleSaveButtonClick);
+	$(".threshold-button-new").click(handleNewButtonClick);
+	$(".threshold-button-delete").click(handleDeleteButtonClick);
+	$(".threshold-button-cancel-delete").click(handleCancelDeleteButtonClick);
+	$(".threshold-button-enable-selected").click(handleEnableButtonClick);
+	$(".threshold-button-disable-selected").click(handleDisableButtonClick);
+	$(".threshold-checkbox").click(handleCheckboxClick);
+	
+	
+	</script>
+% else:
+	<h1>
+		Insufficient Access
+	</h1>
+	<p>
+		You are trying to modify a page that you do not have access to, please contact your splunk administrator for more assistance.
+	</p>
+% endif

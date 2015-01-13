@@ -1,0 +1,30 @@
+===NetFlow Logic Add-on for Enterprise Security===
+
+   Author: NetFlow Logic
+
+   Version/Date: 1.0.0 07/19/2014
+
+   Supported product(s): NetFlow Integrator 2.3
+
+   Source type(s): flowintegrator
+
+   Input requirements: If they are applicable, then the following rules should be enabled in NetFlow Integrator :
+
+	10020/20020 ( Top Policy Violators for Cisco ASA )
+	10032/20032 ( Hosts with Most Policy Violations for Palo Alto Networks )
+	10050/20050 ( Botnet Command and Control Traffic Monitor )
+	10051/20051 ( APT1 Monitor )
+	10052/20052 ( Peer by Reputation Monitor )
+	10067/20067 ( Top Traffic Monitor)
+
+   ===Using this Technology Add-on===
+
+   Configuration: Automatic
+
+   Ports for automatic configuration: udp:10514
+
+   In case the also “NetFlow for Splunk App” is installed, the netflow data is routed by default to index=flowintegrator.
+   The admin role must be configured to look also at the index where netflow data is stored.
+   This can be achieved by changing the admin role with adding the additional index to the list of “Indexes searched by default”.
+
+   Warning : When adding indexes to the default search indexes do not include any summary indexes, as this can cause a search and summary index loop.

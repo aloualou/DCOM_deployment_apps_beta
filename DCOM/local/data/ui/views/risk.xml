@@ -1,0 +1,46 @@
+<form script="application.js,  table_icons_rangemap2.js, autodiscover_memory_overhead_info_home.js, autodiscover_cpu_overhead_info.js, single_trend.js, table_icons_rangemap.js, table_icons_inline.js" stylesheet="table_decorations.css, single_trend.css, application.css">
+  <row>
+    <panel>
+	<search id="globalSearch1" ref="risk_wan_link1_global">
+        <earliest>-90d</earliest>
+        <latest>now</latest>
+      </search>
+	  <!-- il faut encore fair le thresholdlookup, puis ensuite faire le single qui calcule nbmoisrestant=(y-x)/delta, avec Y=nb heure d'action (1/3*20j*24h), et X=nombre d'heure de depassement le dernier mois en date)
+	  -->
+	 <chart>
+        <title>risk on WAN 1</title>
+        <search base="globalSearch1">
+         
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.axisY2.enabled">undefined</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">none</option>
+        <drilldown target="new windows">
+          <link>
+           >
+          </link>
+        </drilldown>
+      </chart>
+	
+	
+	</panel>
+  </row>
+</form>

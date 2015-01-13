@@ -1,0 +1,189 @@
+<form script="autodiscover_memory_overhead_info.js, table_icons_rangemap.js, autodiscover_cpu_overhead_info.js" stylesheet="table_decorations.css">
+  <label>VMWare - Capacity planning - DCOM</label>
+  <fieldset autoRun="False" submitButton="True">
+    <input type="time" searchWhenChanged="true">
+      <label></label>
+      <default>
+        <earliest>-7d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="cluster" searchWhenChanged="true">
+      <label>Cluster</label>
+      <search>
+        <query>| inputlookup Entity | search type=clusterComputeResource | eval cluster_id="host=\""+host+"\" ccr=\""+moid +"\""</query>
+      </search>
+      <fieldForLabel>name</fieldForLabel>
+      <fieldForValue>cluster_id</fieldForValue>
+      <default>host="apps-vcenter500.telindus.com" ccr="domain-c8"</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>VMs : CPU and memory</title>
+      <html>
+          <div class="memory-overhead-info"/>
+      </html>
+      <html>
+          <div class="cpu-overhead-info"/>
+        </html>
+    </panel>
+    <panel>
+      <title>Datastore</title>
+      <chart>
+        <title>Evolution de la volumetrie utilisée pour les datastores dont le taux d’occupation est supérieur à 70%</title>
+        <search>
+          <query>`vm_evo_volum`</query>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <chart>
+        <title>Disk space per datastore</title>
+        <search>
+          <query>`vm_datastore_suivi`</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked100</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+      </chart>
+      <table id="table1">
+        <title>Disk Space</title>
+        <search>
+          <query>`vm_dts_global`</query>
+        </search>
+        <option name="wrap">undefined</option>
+        <option name="rowNumbers">undefined</option>
+        <option name="drilldown">row</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html><h2>Memory : Risk and optimization</h2></html>
+      <chart>
+        <title>Memory usage growth in GB/week</title>
+        <search>
+          <query>index=summary_vmware_mem report_name=summary_MEM_1d|bucket _time span=1h|stats  avg(avg_TotalCurrentUsage) max(max_TotalCurrentUsage) avg(TotalCapacity)  avg(SafeUsage) as SafeUsage first(num_vms) as num_vms first(moid) as moid first(hostCount) as hostCount first(name) as name  by  _time,orig_host|delta "avg(avg_TotalCurrentUsage)" as delta|delta "max(max_TotalCurrentUsage)" as delta_max|bucket _time span=7d|stats  avg("avg(avg_TotalCurrentUsage)") as Usage first(SafeUsage) as SafeUsage avg(delta) as "average growth" avg(delta_max) as "high mem growth" by _time, orig_host</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">linear</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">80</option>
+        <option name="charting.chart.bubbleMinimumSize">3</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">"average growth","high mem growth"</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">no</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <table>
+        <title>Memory : remaining time in weeks</title>
+        <search>
+          <query>index=summary_vmware_mem report_name=summary_MEM_1d|bucket _time span=1h|stats  avg(avg_TotalCurrentUsage) max(max_TotalCurrentUsage) avg(TotalCapacity)  avg(SafeUsage) as SafeUsage first(num_vms) as num_vms first(moid) as moid first(hostCount) as hostCount first(name) as name  by  _time,orig_host |delta "avg(avg_TotalCurrentUsage)" as delta|delta "max(max_TotalCurrentUsage)" as delta_max|bucket _time span=7d|stats  avg("avg(avg_TotalCurrentUsage)")  as avg_usage first(SafeUsage) as SafeUsage avg(delta) as "average growth" avg(delta_max) as "high mem growth" by _time,orig_host|reverse|stats max("average growth") as growth  first(SafeUsage) as safe first(avg_usage) as now by orig_host|eval remaining_time_in_w=if(safe&gt;now,(safe-now)/growth." weeks","0 time left : already above threshold")|eval room_left=if(safe&gt;now,(safe-now)." GB","0 GB left : already above threshold")|rename orig_host as cluster|fields cluster remaining_time_in_w room_left</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <html><h2>CPU : Risk and optimization</h2></html>
+      <chart>
+        <title>CPU : usage and growth</title>
+        <search>
+          <query>index=summary_vmware_cpu report_name=summary_CPU_1d|bucket _time  span=1h|stats first(SafeEffCpu_MHz) first(p_average_clusterServices_effectivecpu_megaHertz)  avg(TotUsg_avg_mhz) max(max_TotUsg_avg_mhz) first(num_vms) first(moid)  first(hostCount) first(name) first(uiparent) by _time, orig_host|delta "avg(TotUsg_avg_mhz)" as delta|delta "max(max_TotUsg_avg_mhz)" as delta_max|bucket _time span=7d|stats  avg("avg(TotUsg_avg_mhz)")  as avg_usage first(first(SafeEffCpu_MHz)) as SafeUsage avg(delta) as "average growth" avg(delta_max) as "high mem growth" by _time,orig_host</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">1</option>
+        <option name="charting.axisY2.scale">linear</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">80</option>
+        <option name="charting.chart.bubbleMinimumSize">3</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.overlayFields">"average growth","high mem growth"</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">no</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <table>
+        <title>CPU : remaining time per cluster</title>
+        <search>
+          <query>index=summary_vmware_cpu report_name=summary_CPU_1d|bucket _time  span=1h|stats first(SafeEffCpu_MHz) first(p_average_clusterServices_effectivecpu_megaHertz)  avg(TotUsg_avg_mhz) max(max_TotUsg_avg_mhz) first(num_vms) first(moid)  first(hostCount) first(name) first(uiparent) by _time, orig_host|delta "avg(TotUsg_avg_mhz)" as delta|delta "max(max_TotUsg_avg_mhz)" as delta_max|bucket _time span=7d|stats  avg("avg(TotUsg_avg_mhz)")  as avg_usage first(first(SafeEffCpu_MHz)) as SafeUsage avg(delta) as "average growth" avg(delta_max) as "high mem growth" by _time,orig_host|reverse|stats max("average growth") as growth  first(SafeUsage) as safe first(avg_usage) as now by orig_host|eval remaining_time_in_w=if(safe&gt;now,(safe-now)/growth." weeks","0 time left : already above threshold")|eval room_left=if(safe&gt;now,(safe-now)." Mhz","0 Mhz left : already above threshold")|rename orig_host as cluster|fields cluster remaining_time_in_w room_left</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+ 
+ 
+</form>

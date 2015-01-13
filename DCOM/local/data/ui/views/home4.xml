@@ -1,0 +1,47 @@
+<form script="splunk_for_vmware:autodiscover_memory_overhead_info.js">
+    <label>Home</label>
+    <fieldset autoRun="False" submitButton="True">
+        <input type="time">
+            <default>Last 24 hours</default>
+        </input>
+        <input type="dropdown" token="cluster" searchWhenChanged="True">
+            <label>Cluster</label>
+            <populatingSearch fieldForValue="cluster_id" fieldForLabel="name">| inputlookup Entity | search type=clusterComputeResource | eval cluster_id="host=\""+host+"\" ccr=\""+moid +"\"" </populatingSearch>
+        </input>
+    </fieldset>
+  
+  	<!-- Ligne 1 -->
+    <row>
+        <html>
+          <h2>(VMware : Capacity Planning for Clusters - Memory Headroom)</h2>
+          <div class="memory-overhead-info"></div>
+        </html>
+    </row>
+  
+    <!-- Ligne 2 -->
+    <row>
+        <html>
+          <h2>TODO (VMware : Capacity Planning for Clusters - CPU Headroom)</h2>
+        </html>
+    </row>
+
+    <!-- Ligne 3 -->
+    <row>
+      <chart>
+        <title>High CPU Usage (VMware home) </title>
+        <searchName>home_vmware_g1</searchName>
+        <option name="charting.chart">radialGauge</option>
+        <option name="charting.primaryAxisTitle.text">High CPU Usage</option>
+        <option name="charting.chart.usePercentageValue">true</option>
+        <option name="charting.gaugeColors">[0x79c442, 0xffd800,0xd93705,0xd93705]</option>
+        <option name="width">200</option>
+        <option name="height">200</option>
+      </chart>
+      <single>
+        <searchString>| stats count AS TotalHosts</searchString>
+        <option name="beforeLabel">Total VMs</option>
+        <option name="classField">None</option>
+      </single>
+    </row>
+  
+</form>
